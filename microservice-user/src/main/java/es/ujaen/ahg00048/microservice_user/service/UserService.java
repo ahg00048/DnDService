@@ -15,6 +15,7 @@ public class UserService {
 
     public final User admin = new User("random@gmail.com", "admin", "secret");
 
+
     public UserService() {
 
     }
