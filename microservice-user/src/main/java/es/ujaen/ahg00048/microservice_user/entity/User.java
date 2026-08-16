@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +16,13 @@ import java.util.List;
 
 @Getter
 @Setter
+@Document
 public class User {
+    @Id
     @Email
     private String email;
     @NotBlank
+    @Size(min = 6, max = 16)
     private String name;
     @NotBlank
     @Size(min = 8)

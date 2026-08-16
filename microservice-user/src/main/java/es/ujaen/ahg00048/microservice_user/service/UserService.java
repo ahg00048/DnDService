@@ -1,6 +1,7 @@
 package es.ujaen.ahg00048.microservice_user.service;
 
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +17,7 @@ public class UserService {
     public final User admin = new User("random@gmail.com", "admin", "secret");
 
 
-    public UserService() {
-
-    }
+    public UserService() {}
 
 
     public User login(String email, String password) throws UserAuthenticationException, UserRegistrationException {
