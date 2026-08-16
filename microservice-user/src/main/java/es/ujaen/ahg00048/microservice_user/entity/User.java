@@ -16,7 +16,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@Document
+@Document("users")
 public class User {
     @Id
     @Email

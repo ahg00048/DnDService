@@ -1,21 +1,33 @@
 package es.ujaen.ahg00048.microservice_user.service;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 
 import es.ujaen.ahg00048.microservice_user.entity.User;
 import es.ujaen.ahg00048.microservice_user.exception.*;
+import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
+
+@SpringBootTest(classes = es.ujaen.ahg00048.microservice_user.app.MicroserviceUserApplication.class)
+@ActiveProfiles("test")
 public class UserServiceTest {
     @Autowired
     private UserService _service;
 
+    @Autowired
+    MongoTemplate _mongoTemplate;
+
+    @BeforeEach
+    public void cleanUp() {
+        _mongoTemplate.getDb().drop();
+    }
+
     @Test
-    @DirtiesContext
     public void registerTest() {
         User user = new User("valid@gmail.com", "name1", "secret");
 
@@ -25,7 +37,6 @@ public class UserServiceTest {
     }
 
     @Test
-    @DirtiesContext
     public void loginTest() {
         User user = new User("valid@gmail.com", "name1", "secret");
         final String userEmail = user.getEmail();
@@ -41,7 +52,6 @@ public class UserServiceTest {
     }
 
     @Test
-    @DirtiesContext
     public void removalTest() {
         final User user1 = new User("valid@gmail.com", "name1", "secret");
         final User user2 = new User("valid2@gmail.com", "name1", "secret");
@@ -61,5 +71,20 @@ public class UserServiceTest {
         Assertions.assertDoesNotThrow(() -> _service.removeUser(_service.admin, user2Email)); // Admin removing other account
 
         Assertions.assertThrows(UserRegistrationException.class, () -> _service.removeUser(_service.admin, user1Email)); // User not registered
+    }
+
+    @Test
+    public void obtainAllUsers() {
+        final User user1 = new User("valid@gmail.com", "name1", "secret");
+        final User user2 = new User("valid2@gmail.com", "name1", "secret");
+
+        Assertions.assertEquals(0, _service.getUsers(_service.admin).size()); // There are no users
+
+        Assertions.assertThrows(UserAuthorizationException.class, () -> _service.getUsers(user1)); // Only admin can obtain the rest of users
+
+        _service.addUser(user1);
+        _service.addUser(user2);
+
+        Assertions.assertEquals(2, _service.getUsers(_service.admin).size()); // Obtain the two users
     }
 }

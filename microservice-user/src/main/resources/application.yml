@@ -1,0 +1,3 @@
+spring:
+  mongodb:
+    database: "dndservice_db_user"
