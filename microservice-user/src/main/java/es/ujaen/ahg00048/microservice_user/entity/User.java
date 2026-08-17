@@ -28,6 +28,7 @@ public class User {
     @Size(min = 8)
     private String password;
 
+    // Possibly inverse the direction of relation - image/charSheet has user id
     private final List<String> images = new ArrayList<>(); // store image ids
     private final List<String> characterSheets = new ArrayList<>();  // store characterSheets ids
 

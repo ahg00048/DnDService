@@ -79,14 +79,11 @@ public class UserService {
         if (!user.get().getEmail().equals(email) && !user.get().equals(_admin))
             throw new UserAuthorizationException();
 
-        _usersRep.delete(user.get());
+        _usersRep.deleteById(email);
     }
 
     public void changePassword(@Valid User caller, String newPassword) throws UserRegistrationException, UserBadOperation {
         User user = _usersRep.findById(caller.getEmail()).orElseThrow(UserRegistrationException::new);
-
-        if (false)          // validate password !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            throw new UserBadOperation();
 
         user.setPassword(newPassword);
         _usersRep.save(user);

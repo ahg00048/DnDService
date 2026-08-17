@@ -29,7 +29,7 @@ public class UserController {
     private UserMapper _mapper;
 
     @PostMapping
-    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userD) {
+    public ResponseEntity<Void> addUser(@RequestBody UserDTO userD) {
         try {
            _service.addUser(_mapper.newEntity(userD));
            return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -76,15 +76,12 @@ public class UserController {
         }
     }
 
-    // ????????????????????????????????????????????????? NOT YET
     @PutMapping("/{id}")
     public ResponseEntity<Void> modifyUser(@PathVariable String id, @RequestParam(required = true, value = "newPassword") String newPassword) {
         try {
             User user = _service.getUser(id);
-
+            _service.changePassword(user, newPassword);
             return ResponseEntity.ok().build();
-        } catch (UserAuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } catch (UserRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
