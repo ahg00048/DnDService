@@ -3,6 +3,8 @@ package es.ujaen.ahg00048.microservice_user.service;
 import es.ujaen.ahg00048.microservice_user.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -13,9 +15,11 @@ import java.util.Optional;
 
 import es.ujaen.ahg00048.microservice_user.entity.User;
 import es.ujaen.ahg00048.microservice_user.exception.*;
+import org.springframework.validation.annotation.Validated;
 
 
 @Service
+@Validated
 @NoArgsConstructor
 public class UserService {
     @Autowired
@@ -26,12 +30,13 @@ public class UserService {
 
     private User _admin;
 
+
     @PostConstruct
     public void initialize() {
-        _admin = new User(_env.getProperty("admin.email"), "admin", _env.getProperty("admin.pwd"));
+        _admin = new User(_env.getProperty("admin.email"), "adminnn", _env.getProperty("admin.pwd"));
     }
 
-    public User getUser(String email) throws UserRegistrationException {
+    public User getUser(@NotBlank @Email String email) throws UserRegistrationException {
         if (email.equals(_admin.getEmail()))
             return _admin;
 
@@ -45,7 +50,7 @@ public class UserService {
         return _usersRep.findAll();
     }
 
-    public User login(String email, String password) throws UserAuthenticationException, UserRegistrationException {
+    public User login(@NotBlank @Email String email, @NotBlank String password) throws UserAuthenticationException, UserRegistrationException {
         User user = null;
         if (email.equals(_admin.getEmail()) && password.equals(_admin.getPassword()))
             user = _admin;
@@ -65,7 +70,7 @@ public class UserService {
         _usersRep.insert(newUser);
     }
 
-    public void removeUser(@Valid User caller, String email) throws UserRegistrationException, UserAuthorizationException {
+    public void removeUser(@Valid User caller, @NotBlank @Email String email) throws UserRegistrationException, UserAuthorizationException {
         Optional<User> user = _usersRep.findById(caller.getEmail());
         if (user.isEmpty())
             if (!caller.equals(_admin))
@@ -82,7 +87,7 @@ public class UserService {
         _usersRep.deleteById(email);
     }
 
-    public void changePassword(@Valid User caller, String newPassword) throws UserRegistrationException, UserBadOperation {
+    public void changePassword(@Valid User caller, @NotBlank String newPassword) throws UserRegistrationException, UserBadOperation {
         User user = _usersRep.findById(caller.getEmail()).orElseThrow(UserRegistrationException::new);
 
         user.setPassword(newPassword);

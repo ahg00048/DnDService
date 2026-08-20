@@ -32,7 +32,7 @@ public class UserServiceTest {
 
     @Test
     public void registerTest() {
-        User user = new User("valid@gmail.com", "name1", "secret");
+        User user = new User("valid@gmail.com", "name1ee", "secretee");
 
         Assertions.assertDoesNotThrow(() -> _service.addUser(user)); // Register valid user
 
@@ -41,7 +41,7 @@ public class UserServiceTest {
 
     @Test
     public void loginTest() {
-        User user = new User("valid@gmail.com", "name1", "secret");
+        User user = new User("valid@gmail.com", "name1ee", "secretee");
         final String userEmail = user.getEmail();
         final String userPassword = user.getPassword();
 
@@ -57,8 +57,8 @@ public class UserServiceTest {
 
     @Test
     public void removalTest() {
-        final User user1 = new User("valid@gmail.com", "name1", "secret");
-        final User user2 = new User("valid2@gmail.com", "name1", "secret");
+        final User user1 = new User("valid@gmail.com", "name1ee", "secretee");
+        final User user2 = new User("valid2@gmail.com", "name1ee", "secretee");
         final User admin = _service.login(_env.getProperty("admin.email"), _env.getProperty("admin.pwd"));
 
         final String user1Email = user1.getEmail();
@@ -82,8 +82,8 @@ public class UserServiceTest {
 
     @Test
     public void obtainAllUsers() {
-        final User user1 = new User("valid@gmail.com", "name1", "secret");
-        final User user2 = new User("valid2@gmail.com", "name1", "secret");
+        final User user1 = new User("valid@gmail.com", "name1ee", "secretee");
+        final User user2 = new User("valid2@gmail.com", "name1ee", "secretee");
         final User admin = _service.login(_env.getProperty("admin.email"), _env.getProperty("admin.pwd"));
 
         Assertions.assertEquals(0, _service.getUsers(admin).size()); // There are no users

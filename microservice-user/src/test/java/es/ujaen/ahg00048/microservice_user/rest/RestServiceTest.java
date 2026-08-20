@@ -1,26 +1,20 @@
 package es.ujaen.ahg00048.microservice_user.rest;
 
-import es.ujaen.ahg00048.microservice_user.rest.DTO.UserDTO;
 import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.client.RestTestClient;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.ArrayList;
 import java.util.List;
+
+import es.ujaen.ahg00048.microservice_user.rest.DTO.UserDTO;
 
 
 @SpringBootTest(classes = es.ujaen.ahg00048.microservice_user.app.MicroserviceUserApplication.class,
@@ -52,14 +46,14 @@ public class RestServiceTest {
     public void loginTest()
     {
         String email = "email@gmail.com";
-        String password = "secret";
+        String password = "secretee";
 
         _restClient.get()   // Login of unregistered user
                 .uri("api/users/" + email + "?password=" + password)
                 .exchange()
                 .expectStatus().isNotFound();
 
-        UserDTO userD = new UserDTO(email, "name", password);
+        UserDTO userD = new UserDTO(email, "nameee", password);
 
         _restClient.post() // Add user
                 .uri("api/users")
@@ -79,7 +73,7 @@ public class RestServiceTest {
 
         _restClient.post() // Add user already registered
                 .uri("api/users")
-                .body(new UserDTO(email, "name", password))
+                .body(new UserDTO(email, "nameee", password))
                 .exchange()
                 .expectStatus().isEqualTo(409);
     }

@@ -10,9 +10,6 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.List;
-
 
 @Getter
 @Setter
@@ -28,14 +25,16 @@ public class User {
     @Size(min = 8)
     private String password;
 
-    // Possibly inverse the direction of relation - image/charSheet has user id
-    private final List<String> images = new ArrayList<>(); // store image ids
-    private final List<String> characterSheets = new ArrayList<>();  // store characterSheets ids
-
 
     public User(String email, String name, String password) {
         this.email = email;
         this.name = name;
         this.password = password;
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        return email.equals(((User) obj).getEmail());
     }
 }

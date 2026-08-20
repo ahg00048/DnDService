@@ -8,7 +8,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 @SpringBootApplication
 @ComponentScan({"es.ujaen.ahg00048.microservice_user.service",
-		"es.ujaen.ahg00048.microservice_user.rest"})
+		"es.ujaen.ahg00048.microservice_user.rest",
+		"es.ujaen.ahg00048.microservice_user.security"})
 @EnableMongoRepositories("es.ujaen.ahg00048.microservice_user.repository")
 public class MicroserviceUserApplication {
 	public static void main(String[] args) {
