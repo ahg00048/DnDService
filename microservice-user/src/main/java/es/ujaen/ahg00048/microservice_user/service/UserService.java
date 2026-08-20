@@ -1,6 +1,5 @@
 package es.ujaen.ahg00048.microservice_user.service;
 
-import es.ujaen.ahg00048.microservice_user.customQualifers.Password;
 import es.ujaen.ahg00048.microservice_user.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;

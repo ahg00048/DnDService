@@ -1,6 +1,6 @@
-package es.ujaen.ahg00048.microservice_user.customQualifers.validators;
+package es.ujaen.ahg00048.microservice_user.qualifiers.validators;
 
-import es.ujaen.ahg00048.microservice_user.customQualifers.Password;
+import es.ujaen.ahg00048.microservice_user.qualifiers.Password;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

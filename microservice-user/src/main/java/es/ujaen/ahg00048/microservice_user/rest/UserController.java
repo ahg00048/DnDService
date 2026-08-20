@@ -1,14 +1,12 @@
 package es.ujaen.ahg00048.microservice_user.rest;
 
-import es.ujaen.ahg00048.microservice_user.customQualifers.Password;
+import es.ujaen.ahg00048.microservice_user.qualifiers.Password;
 import es.ujaen.ahg00048.microservice_user.entity.User;
-import es.ujaen.ahg00048.microservice_user.exception.UserAuthenticationException;
 import es.ujaen.ahg00048.microservice_user.exception.UserAuthorizationException;
 import es.ujaen.ahg00048.microservice_user.exception.UserRegistrationException;
 import es.ujaen.ahg00048.microservice_user.rest.DTO.JwtResponseDTO;
 import es.ujaen.ahg00048.microservice_user.rest.DTO.UserDTO;
 import es.ujaen.ahg00048.microservice_user.rest.mapper.UserMapper;
-import es.ujaen.ahg00048.microservice_user.security.CredentialsService;
 import es.ujaen.ahg00048.microservice_user.security.jwt.JwtService;
 import es.ujaen.ahg00048.microservice_user.service.UserService;
 import jakarta.validation.ConstraintViolationException;

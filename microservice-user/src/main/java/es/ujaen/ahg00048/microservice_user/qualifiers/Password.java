@@ -1,6 +1,6 @@
-package es.ujaen.ahg00048.microservice_user.customQualifers;
+package es.ujaen.ahg00048.microservice_user.qualifiers;
 
-import es.ujaen.ahg00048.microservice_user.customQualifers.validators.PasswordValidator;
+import es.ujaen.ahg00048.microservice_user.qualifiers.validators.PasswordValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import org.springframework.beans.factory.annotation.Qualifier;
