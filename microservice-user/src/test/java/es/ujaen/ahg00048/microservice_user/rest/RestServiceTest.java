@@ -1,5 +1,6 @@
 package es.ujaen.ahg00048.microservice_user.rest;
 
+import es.ujaen.ahg00048.microservice_user.rest.DTO.JwtResponseDTO;
 import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class RestServiceTest {
     public void loginTest()
     {
         String email = "email@gmail.com";
-        String password = "secretee";
+        String password = "seC8et$z";
 
         _restClient.get()   // Login of unregistered user
                 .uri("api/users/" + email + "?password=" + password)
@@ -66,10 +67,12 @@ public class RestServiceTest {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        userD = _restClient.get() // Correct login
+        JwtResponseDTO resp = _restClient.get() // Correct login
                 .uri("api/users/" + email + "?password=" + password)
                 .exchange()
-                .expectBody(UserDTO.class).returnResult().getResponseBody();
+                .expectBody(JwtResponseDTO.class).returnResult().getResponseBody();
+
+        userD = resp.user();
 
         _restClient.post() // Add user already registered
                 .uri("api/users")
@@ -83,9 +86,10 @@ public class RestServiceTest {
     public void removeUserTest()
     {
         String adminEmail = _env.getProperty("admin.email");
+        String adminPwd = _env.getProperty("admin.pwd");
 
-        UserDTO userD1 = new UserDTO("email1@gmail.com", "name1", "secret");
-        UserDTO userD2 = new UserDTO("email2@gmail.com", "name2", "secret");
+        UserDTO userD1 = new UserDTO("email1@gmail.com", "name1ee", "seC8et$z");
+        UserDTO userD2 = new UserDTO("email2@gmail.com", "name2ee", "seC8et$z");
 
         _restClient.post() // Add user
                 .uri("api/users")
@@ -99,8 +103,30 @@ public class RestServiceTest {
                 .exchange()
                 .expectStatus().isCreated();
 
+        JwtResponseDTO user1Resp = _restClient.get()
+                .uri("api/users/" + userD1.email() + "?password=" + userD1.password())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(JwtResponseDTO.class)
+                .returnResult().getResponseBody();
+
+        JwtResponseDTO user2Resp = _restClient.get()
+                .uri("api/users/" + userD2.email() + "?password=" + userD2.password())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(JwtResponseDTO.class)
+                .returnResult().getResponseBody();
+
+        JwtResponseDTO adminResp = _restClient.get()
+                .uri("api/users/" + adminEmail + "?password=" + adminPwd)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(JwtResponseDTO.class)
+                .returnResult().getResponseBody();
+
         List<UserDTO> users = _restClient.get() // get users with admin
                 .uri("api/users?id=" + adminEmail)
+                .header("Authorization", "Bearer " + adminResp.access_token())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(new ParameterizedTypeReference<List<UserDTO>>() {})
@@ -109,21 +135,25 @@ public class RestServiceTest {
 
         _restClient.delete() // user trying removing other user
                 .uri("api/users/" + userD1.email() + "?userToRemove=" + userD2.email())
+                .header("Authorization", "Bearer " + user1Resp.access_token())
                 .exchange()
                 .expectStatus().isForbidden();
 
         _restClient.delete() // user removes his account
                 .uri("api/users/" + userD1.email() + "?userToRemove=" + userD1.email())
+                .header("Authorization", "Bearer " + user1Resp.access_token())
                 .exchange()
                 .expectStatus().isOk();
 
         _restClient.delete() // admin removing other user
                 .uri("api/users/" + adminEmail + "?userToRemove=" + userD2.email())
+                .header("Authorization", "Bearer " + adminResp.access_token())
                 .exchange()
                 .expectStatus().isOk();
 
         _restClient.delete() // admin removing other user unregistered
                 .uri("api/users/" + adminEmail + "?userToRemove=" + userD2.email())
+                .header("Authorization", "Bearer " + adminResp.access_token())
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -132,10 +162,19 @@ public class RestServiceTest {
     @DirtiesContext
     public void getUsersTest()
     {
-        String email = _env.getProperty("admin.email");
+        String adminEmail = _env.getProperty("admin.email");
+        String adminPwd = _env.getProperty("admin.pwd");
+
+        JwtResponseDTO adminResp = _restClient.get()
+                .uri("api/users/" + adminEmail + "?password=" + adminPwd)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(JwtResponseDTO.class)
+                .returnResult().getResponseBody();
 
         List<UserDTO> users = _restClient.get() // get users with admin
-                .uri("api/users?id=" + email)
+                .uri("api/users?id=" + adminEmail)
+                .header("Authorization", "Bearer " + adminResp.access_token())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(new ParameterizedTypeReference<List<UserDTO>>() {})
@@ -144,7 +183,7 @@ public class RestServiceTest {
 
         Assertions.assertEquals(0, users.size());
 
-        UserDTO userD = new UserDTO("email@gmail.com", "name", "secret");
+        UserDTO userD = new UserDTO("email@gmail.com", "nameee", "seC8et$z");
 
         _restClient.post() // Add user
                 .uri("api/users")
@@ -153,7 +192,8 @@ public class RestServiceTest {
                 .expectStatus().isCreated();
 
         users =  _restClient.get() // get users with admin
-                .uri("api/users?id=" + email)
+                .uri("api/users?id=" + adminEmail)
+                .header("Authorization", "Bearer " + adminResp.access_token())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(new ParameterizedTypeReference<List<UserDTO>>() {})
@@ -162,28 +202,36 @@ public class RestServiceTest {
 
         Assertions.assertEquals(1, users.size());
 
+        JwtResponseDTO userResp = _restClient.get()
+                .uri("api/users/" + userD.email() + "?password=" + userD.password())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(JwtResponseDTO.class)
+                .returnResult().getResponseBody();
+
         _restClient.get() // get users with not admin
                 .uri("api/users?id=" + userD.email())
+                .header("Authorization", "Bearer " + userResp.access_token())
                 .exchange()
                 .expectStatus().isForbidden();
 
         _restClient.get() // get users with unregistered user
                 .uri("api/users?id=" + "notfound@hotmail.com")
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isUnauthorized();
     }
 
     @Test
     @DirtiesContext
     public void changePasswordTest()
     {
-        UserDTO userD = new UserDTO("email1@gmail.com", "name1", "secret");
+        UserDTO userD = new UserDTO("email1@gmail.com", "name1ee", "seC8et$e");
 
         _restClient.put() // change password for unregistered user
-                .uri("api/users/" + userD.email() + "?newPassword=" + "secret2")
+                .uri("api/users/" + userD.email() + "?newPassword=" + "seC8et$e")
                 .body(userD)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isUnauthorized();
 
         _restClient.post() // Add user
                 .uri("api/users")
@@ -191,24 +239,29 @@ public class RestServiceTest {
                 .exchange()
                 .expectStatus().isCreated();
 
-        _restClient.get()   // Login
+        JwtResponseDTO resp = _restClient.get()
                 .uri("api/users/" + userD.email() + "?password=" + userD.password())
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isOk()
+                .expectBody(JwtResponseDTO.class)
+                .returnResult().getResponseBody();
 
         _restClient.put() // change password
-                .uri("api/users/" + userD.email() + "?newPassword=" + "secret2")
+                .uri("api/users/" + userD.email() + "?newPassword=" + "seC8et$z")
+                .header("Authorization", "Bearer " + resp.access_token())
                 .body(userD)
                 .exchange()
                 .expectStatus().isOk();
 
         _restClient.get()   // Login with old password
                 .uri("api/users/" + userD.email() + "?password=" + userD.password())
+                .header("Authorization", "Bearer " + resp.access_token())
                 .exchange()
                 .expectStatus().isUnauthorized();
 
         _restClient.get()   // Login with new password
-                .uri("api/users/" + userD.email() + "?password=" + "secret2")
+                .uri("api/users/" + userD.email() + "?password=" + "seC8et$z")
+                .header("Authorization", "Bearer " + resp.access_token())
                 .exchange()
                 .expectStatus().isOk();
     }

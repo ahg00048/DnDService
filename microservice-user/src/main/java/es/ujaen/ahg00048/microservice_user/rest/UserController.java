@@ -1,5 +1,6 @@
 package es.ujaen.ahg00048.microservice_user.rest;
 
+import es.ujaen.ahg00048.microservice_user.customQualifers.Password;
 import es.ujaen.ahg00048.microservice_user.entity.User;
 import es.ujaen.ahg00048.microservice_user.exception.UserAuthenticationException;
 import es.ujaen.ahg00048.microservice_user.exception.UserAuthorizationException;
@@ -20,6 +21,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +30,7 @@ import java.util.List;
 
 @NoArgsConstructor
 @Slf4j          // logging later
+@Validated
 @RestController
 @RequestMapping("api/users")
 public class UserController {
@@ -42,7 +46,8 @@ public class UserController {
     @Autowired
     private JwtService _jwtService;
 
-
+    @Autowired
+    private PasswordEncoder _pwdEncoder;
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
@@ -72,7 +77,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<JwtResponseDTO> getUser(@PathVariable String id, @RequestParam(required = true, value = "password") String password) {
+    public ResponseEntity<JwtResponseDTO> getUser(@PathVariable String id,
+                                                  @RequestParam(required = true, value = "password") @Password String password) {
         try {
             User user = _service.getUser(id);
 
@@ -87,7 +93,8 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeUser(@PathVariable String id, @RequestParam(required = true, value = "idToRemove") String idToRemove) {
+    public ResponseEntity<Void> removeUser(@PathVariable String id,
+                                           @RequestParam(required = true, value = "userToRemove") String idToRemove) {
         try {
             User user = _service.getUser(id);
             _service.removeUser(user, idToRemove);
@@ -100,10 +107,11 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> modifyUser(@PathVariable String id, @RequestParam(required = true, value = "newPassword") String newPassword) { /// change in the future
+    public ResponseEntity<Void> modifyUser(@PathVariable String id,
+                                           @RequestParam(required = true, value = "newPassword") @Password String newPassword) {
         try {
             User user = _service.getUser(id);
-            _service.changePassword(user, newPassword);
+            _service.changePassword(user, _pwdEncoder.encode(newPassword));
             return ResponseEntity.ok().build();
         } catch (UserRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

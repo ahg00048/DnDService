@@ -1,5 +1,6 @@
 package es.ujaen.ahg00048.microservice_user.service;
 
+import es.ujaen.ahg00048.microservice_user.customQualifers.Password;
 import es.ujaen.ahg00048.microservice_user.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
@@ -33,7 +34,7 @@ public class UserService {
 
     @PostConstruct
     public void initialize() {
-        _admin = new User(_env.getProperty("admin.email"), "adminnn", _env.getProperty("admin.pwd"));
+        _admin = new User(_env.getProperty("admin.email"), "adminnn", _env.getProperty("admin.cyptedPwd"));
     }
 
     public User getUser(@NotBlank @Email String email) throws UserRegistrationException {

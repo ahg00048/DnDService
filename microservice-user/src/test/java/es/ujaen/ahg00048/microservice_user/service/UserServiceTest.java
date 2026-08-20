@@ -59,7 +59,7 @@ public class UserServiceTest {
     public void removalTest() {
         final User user1 = new User("valid@gmail.com", "name1ee", "secretee");
         final User user2 = new User("valid2@gmail.com", "name1ee", "secretee");
-        final User admin = _service.login(_env.getProperty("admin.email"), _env.getProperty("admin.pwd"));
+        final User admin = _service.login(_env.getProperty("admin.email"), _env.getProperty("admin.cyptedPwd"));
 
         final String user1Email = user1.getEmail();
         final String user2Email = user2.getEmail();
@@ -84,7 +84,7 @@ public class UserServiceTest {
     public void obtainAllUsers() {
         final User user1 = new User("valid@gmail.com", "name1ee", "secretee");
         final User user2 = new User("valid2@gmail.com", "name1ee", "secretee");
-        final User admin = _service.login(_env.getProperty("admin.email"), _env.getProperty("admin.pwd"));
+        final User admin = _service.login(_env.getProperty("admin.email"), _env.getProperty("admin.cyptedPwd"));
 
         Assertions.assertEquals(0, _service.getUsers(admin).size()); // There are no users
 
