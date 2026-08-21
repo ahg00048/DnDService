@@ -1,5 +1,21 @@
 package es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.inventory.Inventory;
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.Conditions;
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.Feature;
@@ -8,27 +24,19 @@ import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.prope
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.attributes.Attributes;
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.saves.Saves;
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.skills.Skills;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Setter
 @Getter
-@NoArgsConstructor
+@Document("characterSheets")
 public class CharacterSheet {
+    @Id
     private String id;
 
     @NotNull
     private String imageId = "";
 
+    @Indexed
     @NotNull @Email
     private String userId = "";
     @NotBlank
@@ -57,4 +65,8 @@ public class CharacterSheet {
     private List<Feature> features = new ArrayList<>();
 
     public String biography;
+
+    public CharacterSheet() {
+        id = new ObjectId().toString();
+    }
 }

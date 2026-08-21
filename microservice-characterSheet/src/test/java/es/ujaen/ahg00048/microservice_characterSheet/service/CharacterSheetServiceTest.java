@@ -2,11 +2,14 @@ package es.ujaen.ahg00048.microservice_characterSheet.service;
 
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.CharacterSheet;
 import es.ujaen.ahg00048.microservice_characterSheet.exception.CharacterSheetRegistrationException;
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolationException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -19,6 +22,15 @@ public class CharacterSheetServiceTest {
     @Autowired
     private CharacterSheetService _service;
 
+    @Autowired
+    private MongoTemplate _mongoTemplate;
+
+
+    @PostConstruct
+    @AfterEach
+    public void cleanUp() {
+        _mongoTemplate.getDb().drop();
+    }
 
     @Test
     @DirtiesContext
@@ -50,13 +62,10 @@ public class CharacterSheetServiceTest {
 
         Assertions.assertThrows(ConstraintViolationException.class, () -> _service.modifyCharSheet(charSheet)); // modify invalid character sheet
 
-        int level = 2;
-
-        charSheet.setId("id" + 0);              // Before mongodb id initializer
         charSheet.setUserId(userId);
         charSheet.setName("some char name");
         charSheet.setClassname("a classname");
-        charSheet.setLevel(level);
+        charSheet.setLevel(2);
 
         Assertions.assertThrows(CharacterSheetRegistrationException.class, () -> _service.modifyCharSheet(charSheet)); // modify unregistered character sheet
 
@@ -74,7 +83,7 @@ public class CharacterSheetServiceTest {
 
         respCharSheet = _service.getCharSheet(charSheet.getId());
 
-        Assertions.assertNotEquals(level, respCharSheet.getLevel()); // the one saved is not the same as the one delivered
+        Assertions.assertNotEquals(charSheet.getLevel(), respCharSheet.getLevel()); // the one saved is not the same as the one delivered
     }
 
     @Test
@@ -90,7 +99,6 @@ public class CharacterSheetServiceTest {
         for (int i = 0; i < nCharSheets; i++) {
             CharacterSheet charSheet = new CharacterSheet();
 
-            charSheet.setId("id" + i);              // Before mongodb id initializer
             charSheet.setUserId(userId);
             charSheet.setName("some char name" + i);
             charSheet.setClassname("a classname");

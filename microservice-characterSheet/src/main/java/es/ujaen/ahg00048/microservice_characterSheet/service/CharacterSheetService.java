@@ -1,15 +1,18 @@
 package es.ujaen.ahg00048.microservice_characterSheet.service;
 
+import com.mongodb.BasicDBObject;
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 import lombok.NoArgsConstructor;
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import es.ujaen.ahg00048.microservice_characterSheet.repository.CharacterSheetRepository;
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.CharacterSheet;
 import es.ujaen.ahg00048.microservice_characterSheet.exception.CharacterSheetRegistrationException;
 
@@ -17,41 +20,33 @@ import es.ujaen.ahg00048.microservice_characterSheet.exception.CharacterSheetReg
 @Validated
 @NoArgsConstructor
 public class CharacterSheetService {
-    private final Map<String, CharacterSheet> _charSheets = new HashMap<>();
+    @Autowired
+    private CharacterSheetRepository _charSheetsRep;
+
 
     public List<String> getCharSheets(String userId) throws CharacterSheetRegistrationException {
-        List<String> userCharSheets = new ArrayList<>();
-
-        for (CharacterSheet charSheet : _charSheets.values()) {
-            if (charSheet.getUserId().equals(userId))
-                userCharSheets.add(charSheet.getId());
-        }
-
-        return userCharSheets;
+        return _charSheetsRep.findAllByUserId(userId).stream().map(CharacterSheet::getId).toList();
     }
 
     public CharacterSheet getCharSheet(String id) throws CharacterSheetRegistrationException {
-        if (!_charSheets.containsKey(id))
-            throw new CharacterSheetRegistrationException();
-
-        return _charSheets.get(id);
+        return _charSheetsRep.findById(id).orElseThrow(CharacterSheetRegistrationException::new);
     }
 
     public void addCharSheet(@Valid CharacterSheet charSheet) throws CharacterSheetRegistrationException {
-        _charSheets.put(charSheet.getId(), charSheet);
+        _charSheetsRep.insert(charSheet);
     }
 
     public CharacterSheet modifyCharSheet(@Valid CharacterSheet charSheet) throws CharacterSheetRegistrationException {
-        if (!_charSheets.containsKey(charSheet.getId()))
+        if (!_charSheetsRep.existsById(charSheet.getId()))
             throw new CharacterSheetRegistrationException();
 
-        return _charSheets.put(charSheet.getId(), charSheet);
+        return _charSheetsRep.save(charSheet);
     }
 
     public void removeCharSheet(String id) throws CharacterSheetRegistrationException {
-        if (!_charSheets.containsKey(id))
+        if (!_charSheetsRep.existsById(id))
             throw new CharacterSheetRegistrationException();
 
-        _charSheets.remove(id);
+        _charSheetsRep.deleteById(id);
     }
 }
