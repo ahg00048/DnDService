@@ -1,10 +1,15 @@
 package es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.inventory;
 
+import es.ujaen.ahg00048.microservice_characterSheet.qualifier.DiceRoll;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Weapon {
-    public String name = "";
-    public String description = "";
-    public int roll = 0;
-    public String rollType = "";
-    public String damageFormula = "";
-    public String damageType = "";
+    private String name = "";
+    private String description = "";
+    private String rollType = "";
+    private String roll = "";
+    private float weight = 0.0f;
 }

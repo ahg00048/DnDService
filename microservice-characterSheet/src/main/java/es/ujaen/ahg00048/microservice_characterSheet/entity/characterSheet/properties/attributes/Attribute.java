@@ -1,6 +1,11 @@
 package es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.attributes;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Attribute {
-    public int value = 10;
-    public int modifier = 0;
+    private int value = 10;
+    private int modifier = 0;
 }

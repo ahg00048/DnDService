@@ -1,10 +1,15 @@
 package es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.attributes;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Attributes {
-    public final Attribute strength = new Attribute();
-    public final Attribute dexterity = new Attribute();
-    public final Attribute constitution = new Attribute();
-    public final Attribute intelligence = new Attribute();
-    public final Attribute wisdom = new Attribute();
-    public final Attribute charisma = new Attribute();
+    private final Attribute strength = new Attribute();
+    private final Attribute dexterity = new Attribute();
+    private final Attribute constitution = new Attribute();
+    private final Attribute intelligence = new Attribute();
+    private final Attribute wisdom = new Attribute();
+    private final Attribute charisma = new Attribute();
 }

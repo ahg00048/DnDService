@@ -8,6 +8,10 @@ import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.prope
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.attributes.Attributes;
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.saves.Saves;
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.skills.Skills;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,30 +25,36 @@ import java.util.List;
 @NoArgsConstructor
 public class CharacterSheet {
     private String id;
-    private String imageId;
-    private String userId;
 
-    public String name;
-    public String classname;
-    public int level = 1;
+    @NotNull
+    private String imageId = "";
 
-    public int defense = 0;
-    public int initiative = 0;
-    public int proficiency = 0;
-    public int speed = 0;
-    public int healthPoints = 0;
-    public int maxHealthPoints = 0;
-    public int hitRolls = 0;
-    public int maxHitRolls = 0;
+    @NotNull @Email
+    private String userId = "";
+    @NotBlank
+    private String name = "";
+    @NotBlank
+    private String classname = "";
+    @Positive
+    private int level = 1;
 
-    public Attributes attributes = new Attributes();
-    public Saves saves = new Saves();
-    public Skills skills = new Skills();
-    public Inventory inventory = new Inventory();
-    public Conditions conditions = new Conditions();
-    public List<Spell> spells = new ArrayList<>();
-    public List<PassiveEffect> passiveEffects = new ArrayList<>();
-    public List<Feature> features = new ArrayList<>();
+    private int defense = 0;
+    private int initiative = 0;
+    private int proficiency = 0;
+    private int speed = 0;
+    private int healthPoints = 0;
+    private int maxHealthPoints = 0;
+    private int hitRolls = 0;
+    private int maxHitRolls = 0;
+
+    private Attributes attributes = new Attributes();
+    private Saves saves = new Saves();
+    private Skills skills = new Skills();
+    private Inventory inventory = new Inventory();
+    private Conditions conditions = new Conditions();
+    private List<Spell> spells = new ArrayList<>();
+    private List<PassiveEffect> passiveEffects = new ArrayList<>();
+    private List<Feature> features = new ArrayList<>();
 
     public String biography;
 }

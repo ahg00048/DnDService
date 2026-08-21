@@ -1,6 +1,6 @@
 package es.ujaen.ahg00048.microservice_user.rest;
 
-import es.ujaen.ahg00048.microservice_user.qualifiers.Password;
+import es.ujaen.ahg00048.microservice_user.qualifier.Password;
 import es.ujaen.ahg00048.microservice_user.entity.User;
 import es.ujaen.ahg00048.microservice_user.exception.UserAuthorizationException;
 import es.ujaen.ahg00048.microservice_user.exception.UserRegistrationException;
