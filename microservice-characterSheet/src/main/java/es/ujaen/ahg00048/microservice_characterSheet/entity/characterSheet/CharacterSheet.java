@@ -4,13 +4,13 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -28,6 +28,7 @@ import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.prope
 
 @Setter
 @Getter
+@AllArgsConstructor
 @Document("characterSheets")
 public class CharacterSheet {
     @Id
@@ -64,9 +65,42 @@ public class CharacterSheet {
     private List<PassiveEffect> passiveEffects = new ArrayList<>();
     private List<Feature> features = new ArrayList<>();
 
-    public String biography;
+    private String biography;
 
     public CharacterSheet() {
         id = new ObjectId().toString();
+    }
+
+    public CharacterSheet(String imageId, String userId, String name, String classname, int level, int defense, int initiative, int proficiency,
+                          int speed, int healthPoints, int maxHealthPoints, int hitRolls, int maxHitRolls, Attributes attributes, Saves saves,
+                          Skills skills, Inventory inventory, Conditions conditions, List<Spell> spells, List<PassiveEffect> passiveEffects, List<Feature> features, String biography) {
+        id = new ObjectId().toString();
+
+        this.imageId = imageId;
+        this.userId = userId;
+        this.name = name;
+        this.classname = classname;
+        this.level = level;
+
+        this.defense = defense;
+        this.initiative = initiative;
+        this.proficiency = proficiency;
+        this.speed = speed;
+        this.healthPoints = healthPoints;
+        this.maxHealthPoints = maxHealthPoints;
+        this.hitRolls = hitRolls;
+        this.maxHitRolls = maxHitRolls;
+
+        this.attributes = attributes;
+        this.saves = saves;
+        this.skills = skills;
+        this.inventory = inventory;
+        this.conditions = conditions;
+
+        this.spells = spells;
+        this.passiveEffects = passiveEffects;
+        this.features = features;
+
+        this.biography = biography;
     }
 }

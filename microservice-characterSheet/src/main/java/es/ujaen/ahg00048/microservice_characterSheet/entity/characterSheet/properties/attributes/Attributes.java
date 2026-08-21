@@ -1,15 +1,19 @@
 package es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.attributes;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Attributes {
-    private final Attribute strength = new Attribute();
-    private final Attribute dexterity = new Attribute();
-    private final Attribute constitution = new Attribute();
-    private final Attribute intelligence = new Attribute();
-    private final Attribute wisdom = new Attribute();
-    private final Attribute charisma = new Attribute();
+    private Attribute strength;
+    private Attribute dexterity;
+    private Attribute constitution;
+    private Attribute intelligence;
+    private Attribute wisdom;
+    private Attribute charisma;
 }

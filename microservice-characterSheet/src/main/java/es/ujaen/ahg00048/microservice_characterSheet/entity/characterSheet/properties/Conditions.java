@@ -1,10 +1,14 @@
 package es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Conditions {
     private boolean grappled = false;
     private boolean restrained = false;

@@ -1,31 +1,35 @@
 package es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties.skills;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Skills {
-    private final Skill acrobatics = new Skill();
-    private final Skill sleight_of_hand = new Skill();
-    private final Skill stealth = new Skill();
+    private Skill acrobatics = new Skill();
+    private Skill sleight_of_hand = new Skill();
+    private Skill stealth = new Skill();
 
-    private final Skill athletics = new Skill();
+    private Skill athletics = new Skill();
 
-    private final Skill arcana = new Skill();
-    private final Skill history = new Skill();
-    private final Skill investigation = new Skill();
-    private final Skill nature = new Skill();
-    private final Skill religion = new Skill();
+    private Skill arcana = new Skill();
+    private Skill history = new Skill();
+    private Skill investigation = new Skill();
+    private Skill nature = new Skill();
+    private Skill religion = new Skill();
 
-    private final Skill animal_handling = new Skill();
-    private final Skill perception = new Skill();
-    private final Skill insight = new Skill();
-    private final Skill survival = new Skill();
-    private final Skill medicine = new Skill();
+    private Skill animal_handling = new Skill();
+    private Skill perception = new Skill();
+    private Skill insight = new Skill();
+    private Skill survival = new Skill();
+    private Skill medicine = new Skill();
 
-    private final Skill performance = new Skill();
-    private final Skill deception = new Skill();
-    private final Skill intimidation = new Skill();
-    private final Skill persuasion = new Skill();
+    private Skill performance = new Skill();
+    private Skill deception = new Skill();
+    private Skill intimidation = new Skill();
+    private Skill persuasion = new Skill();
 }
