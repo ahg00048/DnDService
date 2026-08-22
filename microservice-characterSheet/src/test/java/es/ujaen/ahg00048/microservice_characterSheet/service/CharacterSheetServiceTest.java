@@ -60,14 +60,14 @@ public class CharacterSheetServiceTest {
 
         CharacterSheet charSheet = new CharacterSheet();
 
-        Assertions.assertThrows(ConstraintViolationException.class, () -> _service.modifyCharSheet(charSheet)); // modify invalid character sheet
+        Assertions.assertThrows(ConstraintViolationException.class, () -> _service.modifyCharSheet("", charSheet)); // modify invalid character sheet
 
         charSheet.setUserId(userId);
         charSheet.setName("some char name");
         charSheet.setClassname("a classname");
         charSheet.setLevel(2);
 
-        Assertions.assertThrows(CharacterSheetRegistrationException.class, () -> _service.modifyCharSheet(charSheet)); // modify unregistered character sheet
+        Assertions.assertThrows(CharacterSheetRegistrationException.class, () -> _service.modifyCharSheet(charSheet.getId(), charSheet)); // modify unregistered character sheet
 
         Assertions.assertDoesNotThrow(() -> _service.addCharSheet(charSheet)); // add valid Character sheet
 
@@ -79,7 +79,7 @@ public class CharacterSheetServiceTest {
 
         final CharacterSheet inmutCharSheet = respCharSheet;
 
-        Assertions.assertDoesNotThrow(() -> _service.modifyCharSheet(inmutCharSheet)); // modify character sheet
+        Assertions.assertDoesNotThrow(() -> _service.modifyCharSheet(inmutCharSheet.getId(), inmutCharSheet)); // modify character sheet
 
         respCharSheet = _service.getCharSheet(charSheet.getId());
 

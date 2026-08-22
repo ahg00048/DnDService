@@ -20,9 +20,11 @@ import es.ujaen.ahg00048.microservice_characterSheet.rest.DTO.characterSheet.pro
 import es.ujaen.ahg00048.microservice_characterSheet.rest.DTO.characterSheet.properties.attributes.AttributesDTO;
 import es.ujaen.ahg00048.microservice_characterSheet.rest.DTO.characterSheet.properties.saves.SavesDTO;
 import es.ujaen.ahg00048.microservice_characterSheet.rest.DTO.characterSheet.properties.skills.SkillsDTO;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class CharacterSheetMapper {
     private Skills entitySkills(CharacterSheetDTO characterSheetDTO) {
         SkillsDTO skillsDTO = characterSheetDTO.skills();

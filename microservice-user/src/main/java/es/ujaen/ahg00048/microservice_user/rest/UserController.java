@@ -47,6 +47,7 @@ public class UserController {
     @Autowired
     private PasswordEncoder _pwdEncoder;
 
+    
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
     public void validationConstraintViolationException() {}
