@@ -102,8 +102,8 @@ public class CharacterSheetMapper {
 
         List<Spell> spells = characterSheetDTO.spells()
                 .stream().map(sDTO -> new Spell(sDTO.type(), sDTO.name(), sDTO.description(),
-                                                sDTO.range(), sDTO.target(), sDTO.components(),
-                                                sDTO.castTime(), sDTO.duration(), sDTO.roll())).toList();
+                        sDTO.range(), sDTO.target(), sDTO.components(),
+                        sDTO.castTime(), sDTO.duration(), sDTO.roll())).toList();
 
         List<PassiveEffect> passiveEffects = characterSheetDTO.passiveEffects()
                 .stream().map(peDTO -> new PassiveEffect(peDTO.effect(), peDTO.source())).toList();
@@ -112,6 +112,34 @@ public class CharacterSheetMapper {
                 .stream().map(fDTO -> new Feature(fDTO.name(), fDTO.description())).toList();
 
         return new CharacterSheet(characterSheetDTO.id(), characterSheetDTO.imageId(), characterSheetDTO.userId(), characterSheetDTO.name(), characterSheetDTO.classname(), characterSheetDTO.level(),
+                characterSheetDTO.defense(), characterSheetDTO.initiative(), characterSheetDTO.proficiency(), characterSheetDTO.speed(), characterSheetDTO.healthPoints(),
+                characterSheetDTO.maxHealthPoints(), characterSheetDTO.hitRolls(), characterSheetDTO.maxHitRolls(), attributes, saves, skills, inventory, conditions,
+                spells, passiveEffects, features, characterSheetDTO.biography());
+    }
+
+    public CharacterSheet newEntity(CharacterSheetDTO characterSheetDTO) {
+        Attributes attributes = entityAttributes(characterSheetDTO);
+
+        Saves saves = entitySaves(characterSheetDTO);
+
+        Skills skills = entitySkills(characterSheetDTO);
+
+        Inventory inventory = entityInventory(characterSheetDTO);
+
+        Conditions conditions = entityConditions(characterSheetDTO);
+
+        List<Spell> spells = characterSheetDTO.spells()
+                .stream().map(sDTO -> new Spell(sDTO.type(), sDTO.name(), sDTO.description(),
+                        sDTO.range(), sDTO.target(), sDTO.components(),
+                        sDTO.castTime(), sDTO.duration(), sDTO.roll())).toList();
+
+        List<PassiveEffect> passiveEffects = characterSheetDTO.passiveEffects()
+                .stream().map(peDTO -> new PassiveEffect(peDTO.effect(), peDTO.source())).toList();
+
+        List<Feature> features = characterSheetDTO.features()
+                .stream().map(fDTO -> new Feature(fDTO.name(), fDTO.description())).toList();
+
+        return new CharacterSheet(characterSheetDTO.imageId(), characterSheetDTO.userId(), characterSheetDTO.name(), characterSheetDTO.classname(), characterSheetDTO.level(),
                 characterSheetDTO.defense(), characterSheetDTO.initiative(), characterSheetDTO.proficiency(), characterSheetDTO.speed(), characterSheetDTO.healthPoints(),
                 characterSheetDTO.maxHealthPoints(), characterSheetDTO.hitRolls(), characterSheetDTO.maxHitRolls(), attributes, saves, skills, inventory, conditions,
                 spells, passiveEffects, features, characterSheetDTO.biography());

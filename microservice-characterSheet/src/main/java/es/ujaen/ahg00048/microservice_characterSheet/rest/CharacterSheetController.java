@@ -28,6 +28,11 @@ public class CharacterSheetController {
     @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
     public void validationConstraintViolationException() {}
 
+    @GetMapping("/maxAllowed")
+    public ResponseEntity<Integer> getMaxSheetsAllowed() {
+        return ResponseEntity.ok(_service.getMaxCharSheetsAllowed());
+    }
+
     @GetMapping
     public ResponseEntity<List<String>> getSheets(@RequestParam String userId) {
         return ResponseEntity.ok(_service.getCharSheets(userId));
@@ -36,7 +41,7 @@ public class CharacterSheetController {
     @PostMapping
     public ResponseEntity<Void> addSheet(@RequestBody CharacterSheetDTO characterSheetDTO) {
         try {
-            _service.addCharSheet(_mapper.entity(characterSheetDTO));
+            _service.addCharSheet(_mapper.newEntity(characterSheetDTO));
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (CharacterSheetRegistrationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();

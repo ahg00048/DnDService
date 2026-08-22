@@ -65,7 +65,7 @@ public class CharacterSheet {
     private List<PassiveEffect> passiveEffects = new ArrayList<>();
     private List<Feature> features = new ArrayList<>();
 
-    private String biography;
+    private String biography = "";
 
     public CharacterSheet() {
         id = new ObjectId().toString();

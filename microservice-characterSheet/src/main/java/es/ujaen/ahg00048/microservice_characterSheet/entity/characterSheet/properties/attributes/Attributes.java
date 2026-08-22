@@ -10,10 +10,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Attributes {
-    private Attribute strength;
-    private Attribute dexterity;
-    private Attribute constitution;
-    private Attribute intelligence;
-    private Attribute wisdom;
-    private Attribute charisma;
+    private Attribute strength = new Attribute();
+    private Attribute dexterity = new Attribute();
+    private Attribute constitution = new Attribute();
+    private Attribute intelligence = new Attribute();
+    private Attribute wisdom = new Attribute();
+    private Attribute charisma = new Attribute();
 }

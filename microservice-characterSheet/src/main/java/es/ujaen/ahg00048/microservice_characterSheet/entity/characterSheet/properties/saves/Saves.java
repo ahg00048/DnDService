@@ -10,10 +10,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Saves {
-    private Save strength;
-    private Save dexterity;
-    private Save constitution;
-    private Save intelligence;
-    private Save wisdom;
-    private Save charisma;
+    private Save strength = new Save();
+    private Save dexterity = new Save();
+    private Save constitution = new Save();
+    private Save intelligence = new Save();
+    private Save wisdom = new Save();
+    private Save charisma = new Save();
 }

@@ -27,6 +27,11 @@ public class CharacterSheetService {
 
     private final static int max_number_sheets_por_user = 10;
 
+
+    public int getMaxCharSheetsAllowed() {
+        return max_number_sheets_por_user;
+    }
+
     public List<String> getCharSheets(@Email @NotBlank String userId) {
         return _charSheetsRep.findAllByUserId(userId).stream().map(CharacterSheet::getId).toList();
     }
