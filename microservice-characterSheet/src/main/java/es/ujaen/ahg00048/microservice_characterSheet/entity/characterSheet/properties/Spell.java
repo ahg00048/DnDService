@@ -1,13 +1,21 @@
 package es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties;
 
+import es.ujaen.ahg00048.microservice_characterSheet.qualifier.DiceRoll;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
 public class Spell {
-    public String type = "";
-    public String name = "";
-    public String description = "";
-    public int range = 0;
-    public String target = "";
-    public String components = "";
-    public String castTime = "";
-    public String duration = "";
-    public int roll = 0;
+    private String type = "";
+    private String name = "";
+    private String description = "";
+    private int range = 0;
+    private String target = "";
+    private String components = "";
+    private String castTime = "";
+    private String duration = "";
+    private String roll = "";
 }

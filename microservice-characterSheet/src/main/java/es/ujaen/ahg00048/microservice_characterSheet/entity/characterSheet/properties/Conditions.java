@@ -1,19 +1,28 @@
 package es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.properties;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Conditions {
-    public boolean grappled = false;
-    public boolean restrained = false;
-    public boolean frightened = false;
-    public boolean stunned = false;
-    public boolean exhaustion = false;
-    public boolean blinded = false;
-    public boolean prone = false;
-    public boolean deafened = false;
-    public boolean poisoned = false;
-    public boolean charmed = false;
-    public boolean incapacitated = false;
-    public boolean unconscious = false;
-    public boolean invisible = false;
-    public boolean petrified = false;
-    public boolean paralyzed = false;
+    private boolean grappled = false;
+    private boolean restrained = false;
+    private boolean frightened = false;
+    private boolean stunned = false;
+    private boolean exhaustion = false;
+    private boolean blinded = false;
+    private boolean prone = false;
+    private boolean deafened = false;
+    private boolean poisoned = false;
+    private boolean charmed = false;
+    private boolean incapacitated = false;
+    private boolean unconscious = false;
+    private boolean invisible = false;
+    private boolean petrified = false;
+    private boolean paralyzed = false;
 }
