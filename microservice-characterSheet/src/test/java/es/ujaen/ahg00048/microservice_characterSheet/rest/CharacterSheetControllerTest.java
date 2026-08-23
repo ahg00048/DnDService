@@ -55,49 +55,32 @@ public class RestControllerTest {
         characterSheet.setName("some name");
         characterSheet.setClassname("someClass");
 
-        List<String> sheetsIds = _restClient.get() // empty list due to unregistered sheets
-                .uri("/api/charSheets?userId=" + randomEmail)
+        List<CharacterSheetDTO> sheets = _restClient.get() // empty list due to unregistered sheets
+                .uri("/api/v1/charSheets?userId=" + randomEmail)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(new ParameterizedTypeReference<List<String>>() {
+                .expectBody(new ParameterizedTypeReference<List<CharacterSheetDTO>>() {
                 })
                 .returnResult().getResponseBody();
 
-        Assertions.assertEquals(0, sheetsIds.size());
+        Assertions.assertEquals(0, sheets.size());
 
         for(int i = 0; i < 2; i++) { // add two sheets
             _restClient.post()
-                    .uri("/api/charSheets")
+                    .uri("/api/v1/charSheets")
                     .body(_mapper.dto(characterSheet))
                     .exchange()
                     .expectStatus().isCreated();
         }
 
-        sheetsIds = _restClient.get() // list of size 2
-                .uri("/api/charSheets?userId=" + randomEmail)
+        sheets = _restClient.get() // list of size 2
+                .uri("/api/v1/charSheets?userId=" + randomEmail)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(new ParameterizedTypeReference<List<String>>() {
-                })
+                .expectBody(new ParameterizedTypeReference<List<CharacterSheetDTO>>() {})
                 .returnResult().getResponseBody();
 
-        Assertions.assertEquals(2, sheetsIds.size());
-
-        for(String id : sheetsIds){  // get characterSheets themselves
-            CharacterSheetDTO characterSheetDTO = _restClient.get()
-                .uri("/api/charSheets/" + id)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CharacterSheetDTO.class)
-                .returnResult().getResponseBody();
-
-            Assertions.assertEquals(id, characterSheetDTO.id());
-        }
-
-        _restClient.get() // get unregistered sheet
-                .uri("/api/charSheets/invalid_id")
-                .exchange()
-                .expectStatus().isNotFound();
+        Assertions.assertEquals(2, sheets.size());
     }
 
     @Test
@@ -112,7 +95,7 @@ public class RestControllerTest {
         characterSheet.setClassname("someClass");
 
         Integer maxSheetsAllowed = _restClient.get()
-                .uri("/api/charSheets/maxAllowed")
+                .uri("/api/v1/charSheets/maxAllowed")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Integer.class)
@@ -121,14 +104,14 @@ public class RestControllerTest {
 
         for(int i = 0; i < maxSheetsAllowed; i++) {
             _restClient.post() // add sheet
-                    .uri("/api/charSheets")
+                    .uri("/api/v1/charSheets")
                     .body(_mapper.dto(characterSheet))
                     .exchange()
                     .expectStatus().isCreated();
         }
 
         _restClient.post() // add more than the limit
-                .uri("/api/charSheets")
+                .uri("/api/v1/charSheets")
                 .body(_mapper.dto(characterSheet))
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.CONFLICT);
@@ -146,25 +129,19 @@ public class RestControllerTest {
         characterSheet.setClassname("someClass");
 
         _restClient.post() // add sheet
-                .uri("/api/charSheets")
+                .uri("/api/v1/charSheets")
                 .body(_mapper.dto(characterSheet))
                 .exchange()
                 .expectStatus().isCreated();
 
-        List<String> sheetsIds = _restClient.get() // list of size 2
-                .uri("/api/charSheets?userId=" + randomEmail)
+        List<CharacterSheetDTO> sheets = _restClient.get() // list of size 2
+                .uri("/api/v1/charSheets?userId=" + randomEmail)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(new ParameterizedTypeReference<List<String>>() {
-                })
+                .expectBody(new ParameterizedTypeReference<List<CharacterSheetDTO>>() {})
                 .returnResult().getResponseBody();
 
-        CharacterSheetDTO characterSheetDTO = _restClient.get() // get sheet
-                .uri("/api/charSheets/" + sheetsIds.getLast())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CharacterSheetDTO.class)
-                .returnResult().getResponseBody();
+        CharacterSheetDTO characterSheetDTO = sheets.getFirst();
 
         Assertions.assertEquals(1, characterSheetDTO.level());
 
@@ -173,13 +150,13 @@ public class RestControllerTest {
         characterSheetDTO = _mapper.dto(characterSheet);
 
         _restClient.put()
-                .uri("/api/charSheets/invalid_id")
+                .uri("/api/v1/charSheets/invalid_id")
                 .body(characterSheetDTO)
                 .exchange()
                 .expectStatus().isNotFound();
 
         characterSheetDTO = _restClient.put()
-                .uri("/api/charSheets/" + sheetsIds.getLast())
+                .uri("/api/v1/charSheets/" + sheets.getLast().id())
                 .body(characterSheetDTO)
                 .exchange()
                 .expectStatus().isOk()
@@ -201,39 +178,36 @@ public class RestControllerTest {
         characterSheet.setClassname("someClass");
 
         _restClient.post() // add sheet
-                .uri("/api/charSheets")
+                .uri("/api/v1/charSheets")
                 .body(_mapper.dto(characterSheet))
                 .exchange()
                 .expectStatus().isCreated();
 
-        List<String> sheetsIds = _restClient.get() // list of size 2
-                .uri("/api/charSheets?userId=" + randomEmail)
+        List<CharacterSheetDTO> sheets = _restClient.get() // list of size 1
+                .uri("/api/v1/charSheets?userId=" + randomEmail)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(new ParameterizedTypeReference<List<String>>() {
-                })
+                .expectBody(new ParameterizedTypeReference<List<CharacterSheetDTO>>() {})
                 .returnResult().getResponseBody();
 
-        CharacterSheetDTO characterSheetDTO = _restClient.get() // get sheet
-                .uri("/api/charSheets/" + sheetsIds.getLast())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CharacterSheetDTO.class)
-                .returnResult().getResponseBody();
-
+        CharacterSheetDTO characterSheetDTO = sheets.getFirst();
         _restClient.delete() // Removing unregistered sheet
-                .uri("/api/charSheets/invalid_id")
+                .uri("/api/v1/charSheets/invalid_id")
                 .exchange().
                 expectStatus().isNotFound();
 
         _restClient.delete() // Removing sheet
-                .uri("/api/charSheets/" + characterSheetDTO.id())
+                .uri("/api/v1/charSheets/" + characterSheetDTO.id())
                 .exchange().
                 expectStatus().isOk();
 
-        _restClient.get() // get removed sheet
-                .uri("/api/charSheets/" + sheetsIds.getLast())
+        sheets = _restClient.get() // list of size 0
+                .uri("/api/v1/charSheets?userId=" + randomEmail)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isOk()
+                .expectBody(new ParameterizedTypeReference<List<CharacterSheetDTO>>() {})
+                .returnResult().getResponseBody();
+
+        Assertions.assertEquals(0, sheets.size());
     }
 }
