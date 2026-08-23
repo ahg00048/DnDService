@@ -14,13 +14,13 @@ public class Lobby {
     private boolean open;       // public/private lobby
     private String password;
 
-    private final List<String> users;
+    private final List<String> usersIds;
     private Board board;
 
 
     public Lobby(String lobbyCreator, boolean open, String password) {
-        users = new ArrayList<>();
-        users.add(lobbyCreator);
+        usersIds = new ArrayList<>();
+        usersIds.add(lobbyCreator);
 
         this.open = open;
         this.password = password;
