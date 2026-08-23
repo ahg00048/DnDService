@@ -71,7 +71,7 @@ public class CharacterSheetServiceTest {
 
         Assertions.assertDoesNotThrow(() -> _service.addCharSheet(charSheet)); // add valid Character sheet
 
-        CharacterSheet respCharSheet = _service.getCharSheet(charSheet.getId()); // get character sheet
+        CharacterSheet respCharSheet = _service.getCharSheets(userId).getLast(); // get character sheet
 
         Assertions.assertEquals(charSheet.getLevel(), respCharSheet.getLevel()); // the one saved is the same as the one delivered
 
@@ -81,7 +81,7 @@ public class CharacterSheetServiceTest {
 
         Assertions.assertDoesNotThrow(() -> _service.modifyCharSheet(inmutCharSheet.getId(), inmutCharSheet)); // modify character sheet
 
-        respCharSheet = _service.getCharSheet(charSheet.getId());
+        respCharSheet = _service.getCharSheets(userId).getLast();
 
         Assertions.assertNotEquals(charSheet.getLevel(), respCharSheet.getLevel()); // the one saved is not the same as the one delivered
     }
@@ -91,7 +91,7 @@ public class CharacterSheetServiceTest {
     public void getCharacterSheetTest() {
         String userId = "random@email.com";
 
-        List<String> charSheetsIds = _service.getCharSheets(userId);
+        List<CharacterSheet> charSheetsIds = _service.getCharSheets(userId);
 
         Assertions.assertEquals(0, charSheetsIds.size()); // No character sheets saved
 
@@ -112,13 +112,11 @@ public class CharacterSheetServiceTest {
         Assertions.assertEquals(nCharSheets, charSheetsIds.size()); // 3 character sheets saved
 
         for (int i = 0; i < nCharSheets - 1; i++) {
-            CharacterSheet charSheet = _service.getCharSheet(charSheetsIds.get(i));         // user gets character sheet
-            CharacterSheet nextCharSheet = _service.getCharSheet(charSheetsIds.get(i + 1)); // user gets character sheet
+            CharacterSheet charSheet = charSheetsIds.get(i);         // user gets character sheet
+            CharacterSheet nextCharSheet = charSheetsIds.get(i + 1); // user gets character sheet
 
             Assertions.assertNotEquals(nextCharSheet.getLevel(), charSheet.getLevel());     // check they are different in level
             Assertions.assertNotEquals(nextCharSheet.getName(), charSheet.getName());       // check they are different in name
         }
-
-        Assertions.assertThrows(CharacterSheetRegistrationException.class, () -> _service.getCharSheet("invalid_id"));
     }
 }

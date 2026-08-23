@@ -48,11 +48,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error")
                         .permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users/{id}")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{id}")
                         .permitAll()
-                        .requestMatchers("/api/users/{id}")
+                        .requestMatchers("/api/v1/users/{id}")
                         .access(new WebExpressionAuthorizationManager("isAuthenticated() and principal.username == #id"))
                         .anyRequest().authenticated())
                 .addFilterBefore(_jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

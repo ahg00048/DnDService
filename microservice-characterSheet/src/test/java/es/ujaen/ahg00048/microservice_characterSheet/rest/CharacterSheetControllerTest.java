@@ -24,7 +24,7 @@ import java.util.List;
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
 @ActiveProfiles("test")
-public class RestControllerTest {
+public class CharacterSheetControllerTest {
     @LocalServerPort
     private int serverPort;
 

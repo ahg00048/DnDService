@@ -32,12 +32,8 @@ public class CharacterSheetService {
         return max_number_sheets_por_user;
     }
 
-    public List<String> getCharSheets(@Email @NotBlank String userId) {
-        return _charSheetsRep.findAllByUserId(userId).stream().map(CharacterSheet::getId).toList();
-    }
-
-    public CharacterSheet getCharSheet(@NotBlank String id) throws CharacterSheetRegistrationException {
-        return _charSheetsRep.findById(id).orElseThrow(CharacterSheetRegistrationException::new);
+    public List<CharacterSheet> getCharSheets(@Email @NotBlank String userId) {
+        return _charSheetsRep.findAllByUserId(userId);
     }
 
     public void addCharSheet(@Valid CharacterSheet charSheet) throws CharacterSheetRegistrationException {

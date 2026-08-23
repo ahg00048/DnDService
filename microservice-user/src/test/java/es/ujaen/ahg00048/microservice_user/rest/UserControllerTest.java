@@ -22,7 +22,7 @@ import es.ujaen.ahg00048.microservice_user.rest.DTO.UserDTO;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
 @ActiveProfiles("test")
-public class RestServiceTest {
+public class UserControllerTest {
 
     @LocalServerPort
     private int serverPort;
