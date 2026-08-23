@@ -30,7 +30,7 @@ import java.util.List;
 @Slf4j          // logging later
 @Validated
 @RestController
-@RequestMapping("api/users")
+@RequestMapping("api/v1/users")
 public class UserController {
     @Autowired
     private UserService _service;

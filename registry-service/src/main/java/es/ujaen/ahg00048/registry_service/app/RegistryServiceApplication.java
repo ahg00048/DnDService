@@ -1,4 +1,4 @@
-package es.ujaen.ahg00048.registry_service;
+package es.ujaen.ahg00048.registry_service.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

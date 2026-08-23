@@ -15,7 +15,7 @@ import es.ujaen.ahg00048.microservice_characterSheet.rest.mapper.CharacterSheetM
 import es.ujaen.ahg00048.microservice_characterSheet.service.CharacterSheetService;
 
 @RestController
-@RequestMapping("/api/charSheets")
+@RequestMapping("/api/v1/charSheets")
 public class CharacterSheetController {
     @Autowired
     private CharacterSheetService _service;
@@ -34,8 +34,8 @@ public class CharacterSheetController {
     }
 
     @GetMapping
-    public ResponseEntity<List<String>> getSheets(@RequestParam String userId) {
-        return ResponseEntity.ok(_service.getCharSheets(userId));
+    public ResponseEntity<List<CharacterSheetDTO>> getSheets(@RequestParam(value = "userId", required = true) String userId) {
+        return ResponseEntity.ok(_service.getCharSheets(userId).stream().map(CharacterSheetDTO::new).toList());
     }
 
     @PostMapping
@@ -45,15 +45,6 @@ public class CharacterSheetController {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (CharacterSheetRegistrationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<CharacterSheetDTO> getSheet(@PathVariable(value = "id") String id) {
-        try {
-            return ResponseEntity.ok(_mapper.dto(_service.getCharSheet(id)));
-        } catch (CharacterSheetRegistrationException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
