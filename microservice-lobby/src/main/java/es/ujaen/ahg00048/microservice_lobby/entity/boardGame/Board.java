@@ -22,6 +22,7 @@ public class Board {
 
     public Board(int scale) {
         pieces = new ArrayList<>();
+        background = "";
 
         this.scale = scale;
     }

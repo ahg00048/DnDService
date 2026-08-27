@@ -1,8 +1,10 @@
 package es.ujaen.ahg00048.microservice_lobby.entity;
 
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Board;
+import es.ujaen.ahg00048.microservice_lobby.exception.UserRegistrationException;
 import lombok.Getter;
 import lombok.Setter;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,10 +21,38 @@ public class Lobby {
 
 
     public Lobby(String lobbyCreator, boolean open, String password) {
+        id = new ObjectId().toString();
+
         usersIds = new ArrayList<>();
         usersIds.add(lobbyCreator);
 
         this.open = open;
         this.password = password;
+    }
+
+
+    public void updateBoard(String userId, Board updatedBoard) throws UserRegistrationException {
+        if (!usersIds.contains(userId))
+            throw new UserRegistrationException();
+
+        board = updatedBoard;
+    }
+
+    public void addUser(String userId) throws UserRegistrationException {
+        if (usersIds.contains(userId))
+            throw new UserRegistrationException();
+
+        usersIds.add(userId);
+    }
+
+    public void removeUser(String userId) throws UserRegistrationException {
+        if (!usersIds.contains(userId))
+            throw new UserRegistrationException();
+
+        usersIds.add(userId);
+    }
+
+    public boolean isEmpty() {
+        return usersIds.isEmpty();
     }
 }
