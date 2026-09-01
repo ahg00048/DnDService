@@ -31,13 +31,6 @@ public class Lobby {
     }
 
 
-    public void updateBoard(String userId, Board updatedBoard) throws UserRegistrationException {
-        if (!usersIds.contains(userId))
-            throw new UserRegistrationException();
-
-        board = updatedBoard;
-    }
-
     public void addUser(String userId) throws UserRegistrationException {
         if (usersIds.contains(userId))
             throw new UserRegistrationException();
@@ -54,5 +47,9 @@ public class Lobby {
 
     public boolean isEmpty() {
         return usersIds.isEmpty();
+    }
+
+    public boolean contains(String userId) {
+        return usersIds.contains(userId);
     }
 }
