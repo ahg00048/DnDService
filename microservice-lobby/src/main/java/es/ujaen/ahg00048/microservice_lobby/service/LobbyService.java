@@ -8,6 +8,10 @@ import es.ujaen.ahg00048.microservice_lobby.exception.LobbyRegistrationException
 import es.ujaen.ahg00048.microservice_lobby.exception.UserRegistrationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -22,10 +26,29 @@ public class LobbyService {
     private final Map<String, Lobby> _lobbiesRep = new HashMap<>();
     private final Map<String, Board> _boardsRep = new HashMap<>();
 
-    private final static int MAX_BOARDS_PER_USER = 3;
+    public static int MAX_BOARDS_PER_USER;
+    public static int MAX_USERS_PER_LOBBY;
+    public static int MAX_PIECES_PER_BOARDS;
 
 
-    public Lobby createLobby(@Email String userId, boolean open, String password) throws LobbyRegistrationException {
+    @Autowired
+    public LobbyService(
+            @Value("${app.user.max.boards}") int max_boards_per_user,
+            @Value("${app.lobby.max.users}") int max_users_per_lobby,
+            @Value("${app.lobby.board.max.pieces}") int max_pieces_per_boards) {
+        MAX_BOARDS_PER_USER = max_boards_per_user;
+        MAX_USERS_PER_LOBBY = max_users_per_lobby;
+        MAX_PIECES_PER_BOARDS = max_pieces_per_boards;
+    }
+
+
+    /// Lobbies logic -----------------------------------------------------------------------------------------------------------
+
+    public List<Lobby> getPublicLobbies() {
+        return _lobbiesRep.values().stream().filter(Lobby::isOpen).toList();
+    }
+
+    public Lobby createLobby(@Email @NotBlank String userId, boolean open, String password) throws LobbyRegistrationException {
         if (_lobbiesRep.values().stream().anyMatch((l -> l.getUsersIds().contains(userId))))
             throw new LobbyRegistrationException();
 
@@ -36,7 +59,7 @@ public class LobbyService {
         return lobby;
     }
 
-    public Lobby joinLobby(@Email String userId, String id) throws LobbyRegistrationException, UserRegistrationException {
+    public Lobby joinLobby(@Email @NotBlank String userId, String id) throws LobbyRegistrationException, UserRegistrationException {
         if (!_lobbiesRep.containsKey(id))
             throw new LobbyRegistrationException();
 
@@ -46,7 +69,7 @@ public class LobbyService {
         return lobby;
     }
 
-    public void leaveLobby(@Email String userId, String id) throws LobbyRegistrationException, UserRegistrationException {
+    public void leaveLobby(@Email @NotBlank String userId, String id) throws LobbyRegistrationException, UserRegistrationException {
         if (!_lobbiesRep.containsKey(id))
             throw new LobbyRegistrationException();
 
@@ -57,8 +80,9 @@ public class LobbyService {
             _lobbiesRep.remove(lobby.getId());
     }
 
+    /// Boards game logic -----------------------------------------------------------------------------------------------------------
 
-    public Lobby addPiece(@Email String userId, String id) {
+    public Lobby addPiece(@Email @NotBlank String userId, String id) throws LobbyRegistrationException, UserRegistrationException, BoardRegistrationException {
         if (!_lobbiesRep.containsKey(id))
             throw new LobbyRegistrationException();
 
@@ -71,7 +95,7 @@ public class LobbyService {
         return lobby;
     }
 
-    public Lobby updatePiece(@Email String userId, String id, @Valid Piece piece) {
+    public Lobby updatePiece(@Email @NotBlank String userId, String id, @Valid Piece piece) throws LobbyRegistrationException, UserRegistrationException, BoardRegistrationException {
         if (!_lobbiesRep.containsKey(id))
             throw new LobbyRegistrationException();
 
@@ -84,7 +108,7 @@ public class LobbyService {
         return lobby;
     }
 
-    public Lobby removePiece(@Email String userId, String id, @Valid Piece piece) {
+    public Lobby removePiece(@Email @NotBlank String userId, String id, @Valid Piece piece) throws LobbyRegistrationException, UserRegistrationException, BoardRegistrationException {
         if (!_lobbiesRep.containsKey(id))
             throw new LobbyRegistrationException();
 
@@ -97,7 +121,7 @@ public class LobbyService {
         return lobby;
     }
 
-    public Lobby modifyBoardProperties(@Email String userId, String id, String imageId, int scale) {
+    public Lobby modifyBoardProperties(@Email @NotBlank String userId, String id, String imageId, int scale) throws LobbyRegistrationException, UserRegistrationException {
         if (!_lobbiesRep.containsKey(id))
             throw new LobbyRegistrationException();
 
@@ -111,8 +135,9 @@ public class LobbyService {
         return lobby;
     }
 
+    /// Boards persistence logic -----------------------------------------------------------------------------------------------------------
 
-    public void addBoard(String userId, @Valid Board board) {
+    public void addBoard(@Email @NotBlank String userId, @Valid Board board) throws BoardRegistrationException {
         if (_boardsRep.values().stream().filter(b -> b.getUserId().equals(userId)).toList().size() >= MAX_BOARDS_PER_USER)
             throw new BoardRegistrationException();
 
@@ -122,18 +147,18 @@ public class LobbyService {
         _boardsRep.put(board.getId(), board);
     }
 
-    public void saveBoard(String userId, @Valid Board board) {
+    public void saveBoard(@Email @NotBlank String userId, @Valid Board board) throws BoardRegistrationException {
         if (!_boardsRep.containsKey(board.getId()) || !_boardsRep.get(board.getId()).getUserId().equals(userId))
             throw new BoardRegistrationException();
 
         _boardsRep.put(board.getId(), board);
     }
 
-    public List<Board> getSavedBoards(String userId) {
+    public List<Board> getSavedBoards(@Email @NotBlank String userId) {
         return _boardsRep.values().stream().filter(b -> b.getUserId().equals(userId)).toList();
     }
 
-    public void removeBoard(String userId, @Valid Board board) {
+    public void removeBoard(@Email @NotBlank String userId, @Valid Board board) throws BoardRegistrationException {
         if (!_boardsRep.containsKey(board.getId()) || !_boardsRep.get(board.getId()).getUserId().equals(userId))
             throw new BoardRegistrationException();
 

@@ -1,6 +1,7 @@
 package es.ujaen.ahg00048.microservice_lobby.entity.boardGame;
 
 import es.ujaen.ahg00048.microservice_lobby.exception.BoardRegistrationException;
+import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.types.ObjectId;
@@ -11,8 +12,6 @@ import java.util.List;
 @Getter
 @Setter
 public class Board {
-    private final static int MAX_NUMBER_OF_PIECES = 30;
-
     // persist
     private String userId;
     private String id;
@@ -47,7 +46,7 @@ public class Board {
 
 
     public void addPiece() throws BoardRegistrationException {
-        if (pieces.size() >= MAX_NUMBER_OF_PIECES)
+        if (pieces.size() >= LobbyService.MAX_PIECES_PER_BOARDS)
             throw new BoardRegistrationException();
 
         int id = 0;
