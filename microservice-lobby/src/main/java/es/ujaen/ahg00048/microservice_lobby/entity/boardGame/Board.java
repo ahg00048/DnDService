@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +17,12 @@ import java.util.List;
 
 @Getter
 @Setter
+@Document("boards")
 public class Board {
     // persist
+    @Indexed(unique = false)
     private String userId = "";
+    @Id
     private String id = "";
 
     @NotNull

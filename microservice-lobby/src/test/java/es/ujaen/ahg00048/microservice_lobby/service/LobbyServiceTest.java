@@ -3,12 +3,16 @@ package es.ujaen.ahg00048.microservice_lobby.service;
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Board;
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Piece;
 import es.ujaen.ahg00048.microservice_lobby.exception.BoardRegistrationException;
+import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolationException;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -22,11 +26,19 @@ import java.util.List;
 
 @SpringBootTest(classes = es.ujaen.ahg00048.microservice_lobby.app.MicroserviceLobbyApplication.class)
 @ActiveProfiles("test")
-
 public class LobbyServiceTest {
     @Autowired
     private LobbyService _lobbyService;
 
+    @Autowired
+    private MongoTemplate _mongoTemplate;
+
+
+    @PostConstruct
+    @AfterEach
+    public void cleanUp() {
+        _mongoTemplate.getDb().drop();
+    }
 
     @Test
     @DirtiesContext
@@ -137,7 +149,7 @@ public class LobbyServiceTest {
         final Board board = lobby.getBoard();
 
         for (int i = 0; i < LobbyService.MAX_BOARDS_PER_USER; i++) {
-            Assertions.assertDoesNotThrow(() -> _lobbyService.addBoard(validUser1Id, new Board(board)));
+            Assertions.assertDoesNotThrow(() -> _lobbyService.addBoard(validUser1Id, board));
         }
 
         Assertions.assertThrows(BoardRegistrationException.class, () -> _lobbyService.addBoard(validUser1Id, board)); // User tries to add more than the permitted amount
@@ -150,7 +162,7 @@ public class LobbyServiceTest {
 
         Assertions.assertThrows(BoardRegistrationException.class, () -> _lobbyService.saveBoard(validUser1Id, savedBoards.getLast())); // Save not persistent board
 
-        Assertions.assertThrows(BoardRegistrationException.class, () -> _lobbyService.saveBoard(validUser2Id, savedBoards.getFirst())); // Save valid board from other user
+        Assertions.assertThrows(InvalidOperationException.class, () -> _lobbyService.saveBoard(validUser2Id, savedBoards.getFirst())); // Save valid board from other user
 
         Assertions.assertDoesNotThrow(() -> _lobbyService.removeBoard(validUser1Id, savedBoards.getFirst())); // Remove board
 

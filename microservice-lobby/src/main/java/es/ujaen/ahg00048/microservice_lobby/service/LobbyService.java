@@ -7,6 +7,7 @@ import es.ujaen.ahg00048.microservice_lobby.exception.BoardRegistrationException
 import es.ujaen.ahg00048.microservice_lobby.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_lobby.exception.LobbyRegistrationException;
 import es.ujaen.ahg00048.microservice_lobby.exception.UserRegistrationException;
+import es.ujaen.ahg00048.microservice_lobby.repository.BoardRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -18,13 +19,15 @@ import org.springframework.validation.annotation.Validated;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 @Service
 @Validated
 public class LobbyService {
     private final Map<String, Lobby> _lobbiesRep = new HashMap<>();
-    private final Map<String, Board> _boardsRep = new HashMap<>();
+    @Autowired
+    private BoardRepository _boardsRep;
 
     public static int MAX_BOARDS_PER_USER;
     public static int MAX_USERS_PER_LOBBY;
@@ -138,30 +141,34 @@ public class LobbyService {
     /// Boards persistence logic -----------------------------------------------------------------------------------------------------------
 
     public void addBoard(@Email @NotBlank String userId, @Valid Board board) throws BoardRegistrationException {
-        if (_boardsRep.values().stream().filter(b -> b.getUserId().equals(userId)).toList().size() >= MAX_BOARDS_PER_USER)
+        if (_boardsRep.findByUserId(userId).size() >= MAX_BOARDS_PER_USER)
             throw new BoardRegistrationException();
 
         board.initId();
         board.setUserId(userId);
 
-        _boardsRep.put(board.getId(), board);
+        _boardsRep.insert(board);
     }
 
-    public void saveBoard(@Email @NotBlank String userId, @Valid Board board) throws BoardRegistrationException {
-        if (!_boardsRep.containsKey(board.getId()) || !_boardsRep.get(board.getId()).getUserId().equals(userId))
-            throw new BoardRegistrationException();
+    public void saveBoard(@Email @NotBlank String userId, @Valid Board board) throws BoardRegistrationException, InvalidOperationException {
+        Board savedBoard = _boardsRep.findById(board.getId()).orElseThrow(BoardRegistrationException::new);
 
-        _boardsRep.put(board.getId(), board);
+        if (!savedBoard.getUserId().equals(userId))
+            throw new InvalidOperationException();
+
+        _boardsRep.save(board);
     }
 
     public List<Board> getSavedBoards(@Email @NotBlank String userId) {
-        return _boardsRep.values().stream().filter(b -> b.getUserId().equals(userId)).toList();
+        return _boardsRep.findByUserId(userId);
     }
 
-    public void removeBoard(@Email @NotBlank String userId, @Valid Board board) throws BoardRegistrationException {
-        if (!_boardsRep.containsKey(board.getId()) || !_boardsRep.get(board.getId()).getUserId().equals(userId))
-            throw new BoardRegistrationException();
+    public void removeBoard(@Email @NotBlank String userId, @Valid Board board) throws BoardRegistrationException, InvalidOperationException {
+        Board savedBoard = _boardsRep.findById(board.getId()).orElseThrow(BoardRegistrationException::new);
 
-        _boardsRep.remove(board.getId());
+        if (!savedBoard.getUserId().equals(userId))
+            throw new InvalidOperationException();
+
+        _boardsRep.delete(savedBoard);
     }
 }

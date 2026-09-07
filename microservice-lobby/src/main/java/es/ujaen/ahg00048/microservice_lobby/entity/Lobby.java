@@ -7,13 +7,17 @@ import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
+@RedisHash("lobbies")
 public class Lobby {
+    @Id
     private String id;
     private boolean open;       // public/private lobby
     private String password;

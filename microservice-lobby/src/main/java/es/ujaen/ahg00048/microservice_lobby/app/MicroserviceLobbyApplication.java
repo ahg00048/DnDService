@@ -4,11 +4,13 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
 @SpringBootApplication
 @ComponentScan({"es.ujaen.ahg00048.microservice_lobby.service",
 		"es.ujaen.ahg00048.microservice_lobby.rest"})
-// @EnableMongoRepositories("es.ujaen.ahg00048.microservice_lobby.repository")
+@EnableMongoRepositories("es.ujaen.ahg00048.microservice_lobby.repository")
+@EnableRedisRepositories("es.ujaen.ahg00048.microservice_lobby.repository")
 public class MicroserviceLobbyApplication {
 
 	public static void main(String[] args) {
