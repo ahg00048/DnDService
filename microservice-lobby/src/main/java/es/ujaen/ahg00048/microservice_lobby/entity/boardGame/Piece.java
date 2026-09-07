@@ -1,5 +1,6 @@
 package es.ujaen.ahg00048.microservice_lobby.entity.boardGame;
 
+import jakarta.validation.constraints.*;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,23 +11,27 @@ import lombok.Setter;
 public class Piece {
     private int id;
 
-    private float x, y;
-    private String imageId;
-    private int hp;
-    private int maxHp;
+    @DecimalMin(value = "0.0", inclusive = true)
+    @DecimalMax(value = "1.0", inclusive = true)
+    private float x = 0.5f;
+
+    @DecimalMin(value = "0.0", inclusive = true)
+    @DecimalMax(value = "1.0", inclusive = true)
+    private float y = 0.5f;
+
+    @NotNull
+    private String imageId = "";
+
+    @PositiveOrZero
+    private int hp = 10;
+    @Positive
+    private int maxHp = 10;
 
 
     public Piece() {
-        x = y = 0.0f;
-        imageId = "";
-        hp = maxHp = 10;
     }
 
     public Piece(int id) {
-        x = y = 0.0f;
-        imageId = "";
-        hp = maxHp = 10;
-
         this.id = id;
     }
 

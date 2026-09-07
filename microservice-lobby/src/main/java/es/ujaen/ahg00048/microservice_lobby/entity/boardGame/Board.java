@@ -1,42 +1,42 @@
 package es.ujaen.ahg00048.microservice_lobby.entity.boardGame;
 
-import es.ujaen.ahg00048.microservice_lobby.exception.BoardRegistrationException;
+import es.ujaen.ahg00048.microservice_lobby.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Getter
 @Setter
 public class Board {
     // persist
-    private String userId;
-    private String id;
+    private String userId = "";
+    private String id = "";
 
-    private String background;
+    @NotNull
+    private String backgroundImage = "";
     private final List<Piece> pieces;
-    private int scale;
+    @Min(value = 10)
+    @Max(value = 500)
+    private int scale = 10;
 
 
-    public Board(int scale, String background) {
+    public Board() {
         pieces = new ArrayList<>();
-        userId = "";
-        id = "";
-
-        this.background = background;
-        this.scale = scale;
     }
 
-    public Board(int scale) {
-        pieces = new ArrayList<>();
-        background = "";
-        userId = "";
-        id = "";
-
-        this.scale = scale;
+    public Board(Board other ) {
+        userId = other.userId;
+        id = other.id;
+        backgroundImage = other.backgroundImage;
+        pieces = new ArrayList<>(other.pieces);
+        scale = other.scale;
     }
 
 
@@ -45,9 +45,9 @@ public class Board {
     }
 
 
-    public void addPiece() throws BoardRegistrationException {
+    public void addPiece() throws InvalidOperationException {
         if (pieces.size() >= LobbyService.MAX_PIECES_PER_BOARDS)
-            throw new BoardRegistrationException();
+            throw new InvalidOperationException();
 
         int id = 0;
         Piece newPiece = new Piece(id);
@@ -59,16 +59,16 @@ public class Board {
         pieces.add(newPiece);
     }
 
-    public void removePiece(Piece piece) throws BoardRegistrationException {
+    public void removePiece(Piece piece) throws InvalidOperationException {
         if (!pieces.contains(piece))
-            throw new BoardRegistrationException();
+            throw new InvalidOperationException();
 
         pieces.remove(piece);
     }
 
-    public void updatePiece(Piece piece) throws BoardRegistrationException {
+    public void updatePiece(Piece piece) throws InvalidOperationException {
         if (!pieces.contains(piece))
-            throw new BoardRegistrationException();
+            throw new InvalidOperationException();
 
         pieces.set(pieces.indexOf(piece), piece);
     }

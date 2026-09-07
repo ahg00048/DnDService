@@ -4,12 +4,12 @@ import es.ujaen.ahg00048.microservice_lobby.entity.Lobby;
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Board;
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Piece;
 import es.ujaen.ahg00048.microservice_lobby.exception.BoardRegistrationException;
+import es.ujaen.ahg00048.microservice_lobby.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_lobby.exception.LobbyRegistrationException;
 import es.ujaen.ahg00048.microservice_lobby.exception.UserRegistrationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -59,12 +59,12 @@ public class LobbyService {
         return lobby;
     }
 
-    public Lobby joinLobby(@Email @NotBlank String userId, String id) throws LobbyRegistrationException, UserRegistrationException {
+    public Lobby joinLobby(@Email @NotBlank String userId, String id, String password) throws LobbyRegistrationException, UserRegistrationException, InvalidOperationException {
         if (!_lobbiesRep.containsKey(id))
             throw new LobbyRegistrationException();
 
         Lobby lobby = _lobbiesRep.get(id);
-        lobby.addUser(userId);
+        lobby.addUser(userId, password);
 
         return lobby;
     }
@@ -82,7 +82,7 @@ public class LobbyService {
 
     /// Boards game logic -----------------------------------------------------------------------------------------------------------
 
-    public Lobby addPiece(@Email @NotBlank String userId, String id) throws LobbyRegistrationException, UserRegistrationException, BoardRegistrationException {
+    public Lobby addPiece(@Email @NotBlank String userId, String id) throws LobbyRegistrationException, UserRegistrationException, InvalidOperationException {
         if (!_lobbiesRep.containsKey(id))
             throw new LobbyRegistrationException();
 
@@ -95,7 +95,7 @@ public class LobbyService {
         return lobby;
     }
 
-    public Lobby updatePiece(@Email @NotBlank String userId, String id, @Valid Piece piece) throws LobbyRegistrationException, UserRegistrationException, BoardRegistrationException {
+    public Lobby updatePiece(@Email @NotBlank String userId, String id, @Valid Piece piece) throws LobbyRegistrationException, UserRegistrationException, InvalidOperationException {
         if (!_lobbiesRep.containsKey(id))
             throw new LobbyRegistrationException();
 
@@ -108,7 +108,7 @@ public class LobbyService {
         return lobby;
     }
 
-    public Lobby removePiece(@Email @NotBlank String userId, String id, @Valid Piece piece) throws LobbyRegistrationException, UserRegistrationException, BoardRegistrationException {
+    public Lobby removePiece(@Email @NotBlank String userId, String id, @Valid Piece piece) throws LobbyRegistrationException, UserRegistrationException, InvalidOperationException {
         if (!_lobbiesRep.containsKey(id))
             throw new LobbyRegistrationException();
 
@@ -129,7 +129,7 @@ public class LobbyService {
         if (!lobby.contains(userId))
             throw new UserRegistrationException();
 
-        lobby.getBoard().setBackground(imageId);
+        lobby.getBoard().setBackgroundImage(imageId);
         lobby.getBoard().setScale(scale);
 
         return lobby;

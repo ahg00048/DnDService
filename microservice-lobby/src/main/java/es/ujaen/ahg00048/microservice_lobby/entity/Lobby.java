@@ -1,6 +1,7 @@
 package es.ujaen.ahg00048.microservice_lobby.entity;
 
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Board;
+import es.ujaen.ahg00048.microservice_lobby.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_lobby.exception.UserRegistrationException;
 import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
 import lombok.Getter;
@@ -24,6 +25,7 @@ public class Lobby {
     public Lobby(String lobbyCreator, boolean open, String password) {
         id = new ObjectId().toString();
 
+        board = new Board();
         usersIds = new ArrayList<>();
         usersIds.add(lobbyCreator);
 
@@ -32,9 +34,11 @@ public class Lobby {
     }
 
 
-    public void addUser(String userId) {
+    public void addUser(String userId, String password) {
         if (usersIds.contains(userId) || usersIds.size() >= LobbyService.MAX_USERS_PER_LOBBY)
             throw new UserRegistrationException();
+        if (!password.equals(this.password) && !open)
+            throw new InvalidOperationException();
 
         usersIds.add(userId);
     }
