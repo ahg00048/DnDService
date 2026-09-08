@@ -5,10 +5,12 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 
 @Getter
 @Setter
-public class Piece {
+public class Piece implements Serializable {
     private int id;
 
     @DecimalMin(value = "0.0", inclusive = true)

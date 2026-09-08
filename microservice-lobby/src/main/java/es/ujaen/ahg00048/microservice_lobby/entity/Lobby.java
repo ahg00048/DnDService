@@ -9,15 +9,15 @@ import lombok.Setter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
-@RedisHash("lobbies")
-public class Lobby {
-    @Id
+public class Lobby implements Serializable {
     private String id;
     private boolean open;       // public/private lobby
     private String password;

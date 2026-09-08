@@ -1,18 +1,14 @@
 package es.ujaen.ahg00048.microservice_lobby.service;
 
-import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Board;
-import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Piece;
-import es.ujaen.ahg00048.microservice_lobby.exception.BoardRegistrationException;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolationException;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -20,6 +16,9 @@ import es.ujaen.ahg00048.microservice_lobby.entity.Lobby;
 import es.ujaen.ahg00048.microservice_lobby.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_lobby.exception.LobbyRegistrationException;
 import es.ujaen.ahg00048.microservice_lobby.exception.UserRegistrationException;
+import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Board;
+import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Piece;
+import es.ujaen.ahg00048.microservice_lobby.exception.BoardRegistrationException;
 
 import java.util.List;
 
@@ -33,11 +32,15 @@ public class LobbyServiceTest {
     @Autowired
     private MongoTemplate _mongoTemplate;
 
+    @Autowired
+    private RedisTemplate<String, Lobby> _redisTemplate;
+
 
     @PostConstruct
     @AfterEach
     public void cleanUp() {
         _mongoTemplate.getDb().drop();
+        _redisTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
     }
 
     @Test

@@ -1,4 +1,4 @@
-package es.ujaen.ahg00048.microservice_lobby.repository;
+package es.ujaen.ahg00048.microservice_lobby.repository.mongo;
 
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Board;
 import org.springframework.data.mongodb.repository.MongoRepository;

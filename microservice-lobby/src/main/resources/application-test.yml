@@ -1,4 +1,6 @@
-logging.level.org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+logging.level.org.springframework.data:
+  mongodb.core.MongoTemplate: DEBUG
+  redis.core.RedisTemplate: DEBUG
 spring.mongodb.database: "dndservice_db_test"
 
 eureka.client.enabled: false
