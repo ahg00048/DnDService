@@ -15,6 +15,8 @@ import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import java.util.Optional;
 public class LobbyService {
     @Autowired
     private LobbyRepository _lobbiesRep;
+
     @Autowired
     private BoardRepository _boardsRep;
 
@@ -127,6 +130,17 @@ public class LobbyService {
 
         lobby.getBoard().setBackgroundImage(imageId);
         lobby.getBoard().setScale(scale);
+
+        return _lobbiesRep.save(lobby);
+    }
+
+    public Lobby clearBoard(@Email @NotBlank String userId, String id) throws LobbyRegistrationException, UserRegistrationException {
+        Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
+
+        if (!lobby.contains(userId))
+            throw new UserRegistrationException();
+
+        lobby.getBoard().clear();
 
         return _lobbiesRep.save(lobby);
     }

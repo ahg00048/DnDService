@@ -2,6 +2,7 @@ package es.ujaen.ahg00048.microservice_lobby.service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import java.util.List;
 
 @SpringBootTest(classes = es.ujaen.ahg00048.microservice_lobby.app.MicroserviceLobbyApplication.class)
 @ActiveProfiles("test")
+@Slf4j
 public class LobbyServiceTest {
     @Autowired
     private LobbyService _lobbyService;
@@ -172,5 +174,49 @@ public class LobbyServiceTest {
         List<Board> savedBoards2 = _lobbyService.getSavedBoards(validUser1Id);
 
         Assertions.assertNotEquals(LobbyService.MAX_BOARDS_PER_USER, savedBoards2.size()); // Check that it has been removed
+    }
+
+    @Test
+    @DirtiesContext
+    public void BoardOperationsConcurrencyTest()
+    {
+        String validUser1Id = "random1@gmail.com";
+        String validUser2Id = "random2@gmail.com";
+
+        String password = "secret";
+        Lobby lobby = _lobbyService.createLobby(validUser1Id, true, password);
+        lobby = _lobbyService.joinLobby(validUser2Id, lobby.getId(), password);
+
+        final String lobbyId = lobby.getId();
+
+        for (int i = 0; i < LobbyService.MAX_PIECES_PER_BOARDS; i++) {
+            lobby = _lobbyService.addPiece(validUser2Id, lobbyId);
+        }
+
+        Assertions.assertEquals(LobbyService.MAX_PIECES_PER_BOARDS, lobby.getBoard().getPieces().size());
+
+        _lobbyService.clearBoard(validUser2Id, lobbyId);
+
+        Thread thread = new Thread(() -> {
+            for (int i = 0; i < LobbyService.MAX_PIECES_PER_BOARDS / 2; i++) {
+                _lobbyService.addPiece(validUser1Id, lobbyId);
+                log.info("Thread count: " + i);
+            }
+        });
+        thread.start();
+
+        for (int i = 0; i < LobbyService.MAX_PIECES_PER_BOARDS / 2; i++) {
+            _lobbyService.addPiece(validUser2Id, lobbyId);
+            log.info("count: " + i);
+        }
+
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            log.error("Unexpected exception raised");
+        }
+
+        lobby = _lobbyService.getPublicLobbies().getFirst();
+        Assertions.assertEquals(LobbyService.MAX_PIECES_PER_BOARDS, lobby.getBoard().getPieces().size());
     }
 }

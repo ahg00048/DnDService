@@ -1,11 +1,13 @@
 package es.ujaen.ahg00048.microservice_lobby.repository.redis;
 
 import es.ujaen.ahg00048.microservice_lobby.entity.Lobby;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +21,7 @@ public class LobbyRepository {
 
 
     public Optional<Lobby> findById(String id) {
+
         return Optional.ofNullable((Lobby) _template.opsForHash().get(_redisHashKey, id));
     }
 

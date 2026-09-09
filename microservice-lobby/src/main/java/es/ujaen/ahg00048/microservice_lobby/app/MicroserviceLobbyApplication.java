@@ -9,13 +9,14 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
 @SpringBootApplication
-@ComponentScan(value = {"es.ujaen.ahg00048.microservice_lobby.service",
-		"es.ujaen.ahg00048.microservice_lobby.rest",
-		"es.ujaen.ahg00048.microservice_lobby.config",
-		"es.ujaen.ahg00048.microservice_lobby.repository"},
-		excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
-				classes = {es.ujaen.ahg00048.microservice_lobby.repository.mongo.BoardRepository.class}))
-@EntityScan
+@ComponentScan(value =
+			{"es.ujaen.ahg00048.microservice_lobby.service",
+			"es.ujaen.ahg00048.microservice_lobby.rest",
+			"es.ujaen.ahg00048.microservice_lobby.config",
+			"es.ujaen.ahg00048.microservice_lobby.repository"},
+		excludeFilters =
+		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
+			classes = {es.ujaen.ahg00048.microservice_lobby.repository.mongo.BoardRepository.class}))
 @EnableMongoRepositories("es.ujaen.ahg00048.microservice_lobby.repository.mongo")
 public class MicroserviceLobbyApplication {
 	public static void main(String[] args) {
