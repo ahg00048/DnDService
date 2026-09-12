@@ -7,7 +7,6 @@ import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.integration.redis.util.RedisLockRegistry;
-import org.springframework.integration.support.locks.ExpirableLockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -17,7 +16,6 @@ import java.time.Duration;
 
 
 @Configuration
-@EnableTransactionManagement
 public class AppConfig {
     private static final String LOCK_REGISTRY_REDIS_KEY = "locks";
     private static final Duration RELEASE_TIME_DURATION = Duration.ofSeconds(10);
@@ -37,13 +35,7 @@ public class AppConfig {
     public RedisTemplate<String, Lobby> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Lobby> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
-        template.setEnableTransactionSupport(true);
 
         return template;
-    }
-
-    @Bean
-    public PlatformTransactionManager transactionManager(MongoDatabaseFactory databaseFactory) {
-        return new MongoTransactionManager(databaseFactory);
     }
 }

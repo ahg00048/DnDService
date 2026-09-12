@@ -1,5 +1,6 @@
 package es.ujaen.ahg00048.microservice_lobby.service;
 
+import es.ujaen.ahg00048.microservice_lobby.exception.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -14,19 +15,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import es.ujaen.ahg00048.microservice_lobby.entity.Lobby;
-import es.ujaen.ahg00048.microservice_lobby.exception.InvalidOperationException;
-import es.ujaen.ahg00048.microservice_lobby.exception.LobbyRegistrationException;
-import es.ujaen.ahg00048.microservice_lobby.exception.UserRegistrationException;
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Board;
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Piece;
-import es.ujaen.ahg00048.microservice_lobby.exception.BoardRegistrationException;
 
 import java.util.List;
 
 
 @SpringBootTest(classes = es.ujaen.ahg00048.microservice_lobby.app.MicroserviceLobbyApplication.class)
 @ActiveProfiles("test")
-@Slf4j
 public class LobbyServiceTest {
     @Autowired
     private LobbyService _lobbyService;
@@ -119,22 +115,25 @@ public class LobbyServiceTest {
 
         lobby = _lobbyService.addPiece(validUser2Id, lobbyId);
 
-        Assertions.assertThrows(InvalidOperationException.class, () -> _lobbyService.addPiece(validUser2Id, lobbyId)); // User is unable to add more pieces than the max
+        Assertions.assertThrows(PieceRegistrationException.class, () -> _lobbyService.addPiece(validUser2Id, lobbyId)); // User is unable to add more pieces than the max
 
         Assertions.assertNotEquals(0, lobby.getBoard().getPieces().size()); // There is one pieces in the board
 
         Piece piece = lobby.getBoard().getPieces().getFirst();
         int newHp = 50;
-        piece.setHp(newHp);
 
-        lobby = _lobbyService.updatePiece(validUser1Id, lobbyId, piece); // Update piece
+        lobby = _lobbyService.updatePieceProperties_hp_maxHp(validUser1Id, lobbyId, piece, newHp, piece.getMaxHp()); // Update piece
         final Piece constPiece = lobby.getBoard().getPieces().getFirst();
 
         Assertions.assertEquals(newHp, constPiece.getHp());
 
+        Assertions.assertThrows(InvalidOperationException.class, () -> _lobbyService.removePiece(validUser1Id, lobbyId, constPiece));
+
+        Assertions.assertDoesNotThrow(() -> _lobbyService.selectPiece(validUser1Id, lobbyId, constPiece));
+
         Assertions.assertDoesNotThrow(() -> _lobbyService.removePiece(validUser1Id, lobbyId, constPiece));
 
-        Assertions.assertThrows(InvalidOperationException.class, () -> _lobbyService.removePiece(validUser1Id, lobbyId, piece));
+        Assertions.assertThrows(PieceRegistrationException.class, () -> _lobbyService.removePiece(validUser1Id, lobbyId, piece));
     }
 
     @Test
@@ -200,20 +199,17 @@ public class LobbyServiceTest {
         Thread thread = new Thread(() -> {
             for (int i = 0; i < LobbyService.MAX_PIECES_PER_BOARDS / 2; i++) {
                 _lobbyService.addPiece(validUser1Id, lobbyId);
-                log.info("Thread count: " + i);
             }
         });
         thread.start();
 
         for (int i = 0; i < LobbyService.MAX_PIECES_PER_BOARDS / 2; i++) {
             _lobbyService.addPiece(validUser2Id, lobbyId);
-            log.info("count: " + i);
         }
 
         try {
             thread.join();
         } catch (InterruptedException e) {
-            log.error("Unexpected exception raised");
         }
 
         lobby = _lobbyService.getPublicLobbies().getFirst();

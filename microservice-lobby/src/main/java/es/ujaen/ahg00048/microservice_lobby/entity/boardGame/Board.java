@@ -1,6 +1,7 @@
 package es.ujaen.ahg00048.microservice_lobby.entity.boardGame;
 
 import es.ujaen.ahg00048.microservice_lobby.exception.InvalidOperationException;
+import es.ujaen.ahg00048.microservice_lobby.exception.PieceRegistrationException;
 import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Getter
@@ -52,9 +54,9 @@ public class Board implements Serializable {
     }
 
 
-    public void addPiece() throws InvalidOperationException {
+    public void addPiece() throws PieceRegistrationException {
         if (pieces.size() >= LobbyService.MAX_PIECES_PER_BOARDS)
-            throw new InvalidOperationException();
+            throw new PieceRegistrationException();
 
         int id = 0;
         Piece newPiece = new Piece(id);
@@ -66,18 +68,34 @@ public class Board implements Serializable {
         pieces.add(newPiece);
     }
 
-    public void removePiece(Piece piece) throws InvalidOperationException {
+    public void removePiece(Piece piece) throws PieceRegistrationException {
         if (!pieces.contains(piece))
-            throw new InvalidOperationException();
+            throw new PieceRegistrationException();
 
         pieces.remove(piece);
     }
 
-    public void updatePiece(Piece piece) throws InvalidOperationException {
+    public void updatePiece(Piece piece) throws PieceRegistrationException {
         if (!pieces.contains(piece))
-            throw new InvalidOperationException();
+            throw new PieceRegistrationException();
 
         pieces.set(pieces.indexOf(piece), piece);
+    }
+
+    public Optional<Piece> findPiece(int id) throws PieceRegistrationException {
+        for (Piece p : pieces) {
+            if (p.getId() == id)
+                return Optional.of(p);
+        }
+
+        return Optional.empty();
+    }
+
+    public void deselectUserPiece(String userId) {
+        for (Piece p : pieces) {
+            if (p.getCurrentUser().equals(userId))
+                p.setCurrentUser("");
+        }
     }
 
     public void clear() { pieces.clear(); }
