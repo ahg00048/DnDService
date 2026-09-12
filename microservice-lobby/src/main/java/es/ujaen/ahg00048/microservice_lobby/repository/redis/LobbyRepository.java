@@ -21,7 +21,6 @@ public class LobbyRepository {
 
 
     public Optional<Lobby> findById(String id) {
-
         return Optional.ofNullable((Lobby) _template.opsForHash().get(_redisHashKey, id));
     }
 
