@@ -2,6 +2,7 @@ package es.ujaen.ahg00048.microservice_lobby.entity.boardGame;
 
 import jakarta.validation.constraints.*;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,7 @@ import java.io.Serializable;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class Piece implements Serializable {
     private int id;
 

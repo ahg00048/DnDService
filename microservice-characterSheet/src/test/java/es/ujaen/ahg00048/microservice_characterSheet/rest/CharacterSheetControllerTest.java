@@ -14,6 +14,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.client.RestTestClient;
@@ -67,7 +68,7 @@ public class CharacterSheetControllerTest {
 
         for(int i = 0; i < 2; i++) { // add two sheets
             _restClient.post()
-                    .uri("/api/v1/charSheets")
+                    .uri("/api/v1/charSheets?userId=" + randomEmail)
                     .body(_mapper.dto(characterSheet))
                     .exchange()
                     .expectStatus().isCreated();
@@ -104,14 +105,14 @@ public class CharacterSheetControllerTest {
 
         for(int i = 0; i < maxSheetsAllowed; i++) {
             _restClient.post() // add sheet
-                    .uri("/api/v1/charSheets")
+                    .uri("/api/v1/charSheets?userId=" + randomEmail)
                     .body(_mapper.dto(characterSheet))
                     .exchange()
                     .expectStatus().isCreated();
         }
 
         _restClient.post() // add more than the limit
-                .uri("/api/v1/charSheets")
+                .uri("/api/v1/charSheets?userId=" + randomEmail)
                 .body(_mapper.dto(characterSheet))
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.CONFLICT);
@@ -128,11 +129,13 @@ public class CharacterSheetControllerTest {
         characterSheet.setName("some name");
         characterSheet.setClassname("someClass");
 
-        _restClient.post() // add sheet
-                .uri("/api/v1/charSheets")
+        CharacterSheetDTO characterSheet1 = _restClient.post() // add sheet
+                .uri("/api/v1/charSheets?userId=" + randomEmail)
                 .body(_mapper.dto(characterSheet))
                 .exchange()
-                .expectStatus().isCreated();
+                .expectStatus().isCreated()
+                .expectBody(CharacterSheetDTO.class)
+                .returnResult().getResponseBody();
 
         List<CharacterSheetDTO> sheets = _restClient.get() // list of size 2
                 .uri("/api/v1/charSheets?userId=" + randomEmail)
@@ -150,13 +153,13 @@ public class CharacterSheetControllerTest {
         characterSheetDTO = _mapper.dto(characterSheet);
 
         _restClient.put()
-                .uri("/api/v1/charSheets/invalid_id")
+                .uri("/api/v1/charSheets/invalid_id?userId=" + randomEmail)
                 .body(characterSheetDTO)
                 .exchange()
                 .expectStatus().isNotFound();
 
         characterSheetDTO = _restClient.put()
-                .uri("/api/v1/charSheets/" + sheets.getLast().id())
+                .uri("/api/v1/charSheets/" + sheets.getLast().id() + "?userId=" + randomEmail)
                 .body(characterSheetDTO)
                 .exchange()
                 .expectStatus().isOk()
@@ -178,7 +181,7 @@ public class CharacterSheetControllerTest {
         characterSheet.setClassname("someClass");
 
         _restClient.post() // add sheet
-                .uri("/api/v1/charSheets")
+                .uri("/api/v1/charSheets?userId=" + randomEmail)
                 .body(_mapper.dto(characterSheet))
                 .exchange()
                 .expectStatus().isCreated();
@@ -192,12 +195,12 @@ public class CharacterSheetControllerTest {
 
         CharacterSheetDTO characterSheetDTO = sheets.getFirst();
         _restClient.delete() // Removing unregistered sheet
-                .uri("/api/v1/charSheets/invalid_id")
+                .uri("/api/v1/charSheets/invalid_id?userId=" + randomEmail)
                 .exchange().
                 expectStatus().isNotFound();
 
         _restClient.delete() // Removing sheet
-                .uri("/api/v1/charSheets/" + characterSheetDTO.id())
+                .uri("/api/v1/charSheets/" + characterSheetDTO.id() + "?userId=" + randomEmail)
                 .exchange().
                 expectStatus().isOk();
 

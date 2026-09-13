@@ -9,7 +9,6 @@ import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -23,9 +22,9 @@ import java.util.Date;
 @Getter
 @Setter
 public class JwtService {
-    @Value("${jwt.secret}")
+    @Value("${app.jwt.secret}")
     private String _secret;
-    @Value("${jwt.expiration}")
+    @Value("${app.jwt.expiration}")
     private long _expirationMs;
 
 

@@ -37,7 +37,7 @@ public class CharacterSheet {
     @NotNull
     private String imageId = "";
 
-    @Indexed
+    @Indexed(unique = false)
     @NotNull @Email
     private String userId = "";
     @NotBlank

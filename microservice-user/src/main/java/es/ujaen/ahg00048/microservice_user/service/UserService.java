@@ -23,18 +23,19 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 public class UserService {
     @Autowired
-    private UserRepository _usersRep;
+    private Environment _env;
 
     @Autowired
-    private Environment _env;
+    private UserRepository _usersRep;
 
     private User _admin;
 
 
     @PostConstruct
     public void initialize() {
-        _admin = new User(_env.getProperty("admin.email"), "adminnn", _env.getProperty("admin.cyptedPwd"));
+        _admin = new User(_env.getProperty("app.admin.email"), "adminnn", _env.getProperty("app.admin.cyptedPwd"));
     }
+
 
     public User getUser(@NotBlank @Email String email) throws UserRegistrationException {
         if (email.equals(_admin.getEmail()))
@@ -50,6 +51,7 @@ public class UserService {
         return _usersRep.findAll();
     }
 
+    // solo test
     public User login(@NotBlank @Email String email, @NotBlank String password) throws UserAuthenticationException, UserRegistrationException {
         User user = null;
         if (email.equals(_admin.getEmail()) && password.equals(_admin.getPassword()))

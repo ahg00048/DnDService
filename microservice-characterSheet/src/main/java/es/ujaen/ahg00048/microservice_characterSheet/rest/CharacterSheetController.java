@@ -1,6 +1,7 @@
 package es.ujaen.ahg00048.microservice_characterSheet.rest;
 
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.CharacterSheet;
+import es.ujaen.ahg00048.microservice_characterSheet.exception.InvalidOperationException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class CharacterSheetController {
 
     @GetMapping("/maxAllowed")
     public ResponseEntity<Integer> getMaxSheetsAllowed() {
-        return ResponseEntity.ok(_service.getMaxCharSheetsAllowed());
+        return ResponseEntity.ok(CharacterSheetService.MAX_NUMBER_SHEETS_PER_USER);
     }
 
     @GetMapping
@@ -39,32 +40,39 @@ public class CharacterSheetController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> addSheet(@RequestBody CharacterSheetDTO characterSheetDTO) {
+    public ResponseEntity<CharacterSheet> addSheet(@RequestParam(value = "userId", required = true) String userId,
+                                                   @RequestBody CharacterSheetDTO characterSheetDTO) {
         try {
-            _service.addCharSheet(_mapper.newEntity(characterSheetDTO));
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } catch (CharacterSheetRegistrationException e) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(_service.addCharSheet(userId, _mapper.newEntity(characterSheetDTO)));
+        } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CharacterSheetDTO> modifySheet(@PathVariable(value = "id") String id, @RequestBody CharacterSheetDTO characterSheetDTO) {
+    public ResponseEntity<CharacterSheetDTO> modifySheet(@RequestParam(value = "userId", required = true) String userId,
+                                                         @PathVariable(value = "id") String id,
+                                                         @RequestBody CharacterSheetDTO characterSheetDTO) {
         try {
-            CharacterSheet characterSheet = _service.modifyCharSheet(id, _mapper.entity(characterSheetDTO));
+            CharacterSheet characterSheet = _service.modifyCharSheet(userId, id, _mapper.entity(characterSheetDTO));
             return ResponseEntity.ok(_mapper.dto(characterSheet));
         } catch (CharacterSheetRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (InvalidOperationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeSheet(@PathVariable(value = "id") String id) {
+    public ResponseEntity<Void> removeSheet(@RequestParam(value = "userId", required = true) String userId,
+                                            @PathVariable(value = "id") String id) {
         try {
-            _service.removeCharSheet(id);
+            _service.removeCharSheet(userId, id);
             return ResponseEntity.ok().build();
         } catch (CharacterSheetRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (InvalidOperationException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 }

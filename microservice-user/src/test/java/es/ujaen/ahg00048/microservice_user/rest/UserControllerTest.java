@@ -85,8 +85,8 @@ public class UserControllerTest {
     @DirtiesContext
     public void removeUserTest()
     {
-        String adminEmail = _env.getProperty("admin.email");
-        String adminPwd = _env.getProperty("admin.pwd");
+        String adminEmail = _env.getProperty("app.admin.email");
+        String adminPwd = _env.getProperty("app.admin.pwd");
 
         UserDTO userD1 = new UserDTO("email1@gmail.com", "name1ee", "seC8et$z");
         UserDTO userD2 = new UserDTO("email2@gmail.com", "name2ee", "seC8et$z");
@@ -162,8 +162,8 @@ public class UserControllerTest {
     @DirtiesContext
     public void getUsersTest()
     {
-        String adminEmail = _env.getProperty("admin.email");
-        String adminPwd = _env.getProperty("admin.pwd");
+        String adminEmail = _env.getProperty("app.admin.email");
+        String adminPwd = _env.getProperty("app.admin.pwd");
 
         JwtResponseDTO adminResp = _restClient.get()
                 .uri("api/v1/users/" + adminEmail + "?password=" + adminPwd)

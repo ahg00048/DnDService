@@ -51,6 +51,11 @@ public class LobbyService {
         MAX_PIECES_PER_BOARDS = max_pieces_per_boards;
     }
 
+    /// En el caso en el que una instancia no este inicializada
+
+    public int MAX_BOARDS_PER_USER() { return MAX_BOARDS_PER_USER; }
+    public int MAX_USERS_PER_LOBBY() { return MAX_USERS_PER_LOBBY; }
+    public int MAX_PIECES_PER_BOARDS() { return MAX_PIECES_PER_BOARDS; }
 
     /// Lobbies logic -----------------------------------------------------------------------------------------------------------
 
@@ -58,7 +63,8 @@ public class LobbyService {
         return _lobbiesRep.findAllOpen();
     }
 
-    public Lobby createLobby(@Email @NotBlank String userId, boolean open, String password) throws LobbyRegistrationException {
+    public Lobby createLobby(@Email @NotBlank String userId, boolean open, String password)
+            throws LobbyRegistrationException {
         if (_lobbiesRep.existByUserIdsContaining(userId))
             throw new LobbyRegistrationException();
 
@@ -388,6 +394,10 @@ public class LobbyService {
 
     /// Boards persistence logic -----------------------------------------------------------------------------------------------------------
 
+    public List<Board> getSavedBoards(@Email @NotBlank String userId) {
+        return _boardsRep.findByUserId(userId);
+    }
+
     public Board addBoard(@Email @NotBlank String userId, @Valid Board board) throws BoardRegistrationException {
         if (_boardsRep.findByUserId(userId).size() >= MAX_BOARDS_PER_USER)
             throw new BoardRegistrationException();
@@ -398,21 +408,20 @@ public class LobbyService {
         return _boardsRep.insert(board);
     }
 
-    public Board saveBoard(@Email @NotBlank String userId, @Valid Board board) throws BoardRegistrationException, InvalidOperationException {
-        Board savedBoard = _boardsRep.findById(board.getId()).orElseThrow(BoardRegistrationException::new);
+    public Board saveBoard(@Email @NotBlank String userId, @NotBlank String id, @Valid Board board) throws BoardRegistrationException, InvalidOperationException {
+        Board savedBoard = _boardsRep.findById(id).orElseThrow(BoardRegistrationException::new);
 
         if (!savedBoard.getUserId().equals(userId))
             throw new InvalidOperationException();
 
+        board.setId(id);
+        board.setUserId(userId);
+
         return _boardsRep.save(board);
     }
 
-    public List<Board> getSavedBoards(@Email @NotBlank String userId) {
-        return _boardsRep.findByUserId(userId);
-    }
-
-    public void removeBoard(@Email @NotBlank String userId, @Valid Board board) throws BoardRegistrationException, InvalidOperationException {
-        Board savedBoard = _boardsRep.findById(board.getId()).orElseThrow(BoardRegistrationException::new);
+    public void removeBoard(@Email @NotBlank String userId, @NotBlank String id) throws BoardRegistrationException, InvalidOperationException {
+        Board savedBoard = _boardsRep.findById(id).orElseThrow(BoardRegistrationException::new);
 
         if (!savedBoard.getUserId().equals(userId))
             throw new InvalidOperationException();

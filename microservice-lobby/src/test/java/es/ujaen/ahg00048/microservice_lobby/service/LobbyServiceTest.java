@@ -3,7 +3,6 @@ package es.ujaen.ahg00048.microservice_lobby.service;
 import es.ujaen.ahg00048.microservice_lobby.exception.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolationException;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -164,11 +163,11 @@ public class LobbyServiceTest {
 
         savedBoards.getLast().setId("otherId");
 
-        Assertions.assertThrows(BoardRegistrationException.class, () -> _lobbyService.saveBoard(validUser1Id, savedBoards.getLast())); // Save not persistent board
+        Assertions.assertThrows(BoardRegistrationException.class, () -> _lobbyService.saveBoard(validUser1Id, savedBoards.getLast().getId(), savedBoards.getLast())); // Save not persistent board
 
-        Assertions.assertThrows(InvalidOperationException.class, () -> _lobbyService.saveBoard(validUser2Id, savedBoards.getFirst())); // Save valid board from other user
+        Assertions.assertThrows(InvalidOperationException.class, () -> _lobbyService.saveBoard(validUser2Id, savedBoards.getFirst().getId(), savedBoards.getLast())); // Save valid board from other user
 
-        Assertions.assertDoesNotThrow(() -> _lobbyService.removeBoard(validUser1Id, savedBoards.getFirst())); // Remove board
+        Assertions.assertDoesNotThrow(() -> _lobbyService.removeBoard(validUser1Id, savedBoards.getFirst().getId())); // Remove board
 
         List<Board> savedBoards2 = _lobbyService.getSavedBoards(validUser1Id);
 

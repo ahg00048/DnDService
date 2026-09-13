@@ -4,6 +4,7 @@ import es.ujaen.ahg00048.microservice_lobby.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_lobby.exception.PieceRegistrationException;
 import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,6 +21,7 @@ import java.util.Optional;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @Document("boards")
 public class Board implements Serializable {
     // persist
@@ -30,10 +32,11 @@ public class Board implements Serializable {
 
     @NotNull
     private String backgroundImage = "";
-    private final List<Piece> pieces;
     @Min(value = 10)
     @Max(value = 500)
     private int scale = 10;
+
+    private final List<Piece> pieces;
 
 
     public Board() {

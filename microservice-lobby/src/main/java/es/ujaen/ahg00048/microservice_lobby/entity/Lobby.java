@@ -4,6 +4,7 @@ import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Board;
 import es.ujaen.ahg00048.microservice_lobby.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_lobby.exception.UserRegistrationException;
 import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.types.ObjectId;
@@ -17,13 +18,14 @@ import java.util.List;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class Lobby implements Serializable {
     private String id;
     private boolean open;       // public/private lobby
     private String password;
 
-    private final List<String> usersIds;
     private Board board;
+    private final List<String> usersIds;
 
 
     public Lobby(String lobbyCreator, boolean open, String password) {
