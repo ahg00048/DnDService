@@ -1,6 +1,7 @@
 package es.ujaen.ahg00048.microservice_lobby.controller;
 
 import es.ujaen.ahg00048.microservice_lobby.controller.DTO.LobbyReqBodyDTO;
+import es.ujaen.ahg00048.microservice_lobby.entity.Lobby;
 import es.ujaen.ahg00048.microservice_lobby.exception.BoardRegistrationException;
 import es.ujaen.ahg00048.microservice_lobby.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_lobby.exception.LobbyRegistrationException;
@@ -13,9 +14,11 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/lobbies")
@@ -25,6 +28,9 @@ public class LobbyRestController {
 
     @Autowired
     private LobbyMapper _mapper;
+
+    @Autowired
+    private SimpMessagingTemplate _simpTemplate;
 
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -59,7 +65,9 @@ public class LobbyRestController {
                                               @RequestParam(value = "password", required = true) String password,
                                               @PathVariable String id) {
         try {
-            return ResponseEntity.ok(_mapper.dto(_lobbyService.joinLobby(userId, id, password)));
+            LobbyDTO lobbyDTO = _mapper.dto(_lobbyService.joinLobby(userId, id, password));
+            _simpTemplate.convertAndSend("/topic/lobbies/" + lobbyDTO.id(), lobbyDTO);
+            return ResponseEntity.ok(lobbyDTO);
         } catch (LobbyRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (UserRegistrationException e) {
@@ -75,7 +83,8 @@ public class LobbyRestController {
     public ResponseEntity<Void> leaveLobby(@RequestParam(value = "userId", required = true) String userId,
                                            @PathVariable String id) {
         try {
-            _lobbyService.leaveLobby(userId, id);
+            Optional<Lobby> lobbyOpt = _lobbyService.leaveLobby(userId, id);
+            lobbyOpt.ifPresent(lobby -> _simpTemplate.convertAndSend("/topic/lobbies/" + lobby.getId(), _mapper.dto(lobby)));
             return ResponseEntity.ok().build();
         } catch (LobbyRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

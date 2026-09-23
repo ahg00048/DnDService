@@ -27,18 +27,12 @@ public class LobbyWsController {
     @MessageExceptionHandler(RuntimeException.class)
     public void genericMessageExceptionHandler() {}
 
-    @SubscribeMapping("/lobbies/{id}")
-    @SendTo("/topic/lobbies/{id}")
-    public LobbyDTO subscribeToLobby(@DestinationVariable String id) throws RuntimeException {
-        return _mapper.dto(_lobbyService.getLobby(id));
-    }
-
     @MessageMapping("/lobbies/{id}")
     public LobbyDTO sendCommand(@DestinationVariable String id, @Valid @Payload ACommandDTO command) throws RuntimeException {
         if (command instanceof AddPiece_ClearBoard_CommandDTO subCommand) {
             switch (subCommand.getType()) {
                 case ADD_PIECE:
-                    return  _mapper.dto(_lobbyService.addPiece(subCommand.getUserId(), id));
+                    return _mapper.dto(_lobbyService.addPiece(subCommand.getUserId(), id));
                 case UPDATE_BOARD_CLEAR:
                     return _mapper.dto(_lobbyService.clearBoard(subCommand.getUserId(), id));
             }

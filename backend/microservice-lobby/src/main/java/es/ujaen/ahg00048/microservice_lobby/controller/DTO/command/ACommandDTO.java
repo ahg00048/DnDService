@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.impl.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 
 @Getter
 @Setter
+@AllArgsConstructor
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
@@ -30,6 +32,6 @@ import lombok.Setter;
         @JsonSubTypes.Type(value = AddPiece_ClearBoard_CommandDTO.class, name = "UPDATE_BOARD_CLEAR")
 })
 public abstract class ACommandDTO {
-    public String userId = "";
-    public CommandType type = CommandType.ADD_PIECE;
+    private String userId = "";
+    private CommandType type = CommandType.ADD_PIECE;
 }
