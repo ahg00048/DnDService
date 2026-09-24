@@ -53,9 +53,6 @@ public class LobbyControllersTest {
     private LobbyMapper _mapper;
 
     @Autowired
-    private LobbyService _lobbyService;
-
-    @Autowired
     private RestTestClient _restClient;
 
     @Autowired
@@ -121,7 +118,7 @@ public class LobbyControllersTest {
         int oldScale = lobbyDTO.board().scale();
         int newScale = oldScale + 1;
 
-        session.subscribe("/topic/lobbies/" + lobbyDTO.id(), new StompFrameHandler() {
+        var userSubSession = session.subscribe("/topic/lobbies-" + lobbyDTO.id(), new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return LobbyDTO.class;
@@ -137,10 +134,9 @@ public class LobbyControllersTest {
         ACommandDTO commandDTO = new UpdateBoard_Image_Scale_CommandDTO(
                 validEmail2, CommandType.UPDATE_BOARD_IMAGE_SCALE,
                 lobbyDTO.board().backgroundImage(), newScale);
-        session.send("/publish/lobbies/" + lobbyDTO.id(), commandDTO);
+        session.send("/publish/lobbies-" + lobbyDTO.id(), commandDTO);
 
-        // Disconnect from the session
-        session.disconnect();
+        userSubSession.unsubscribe();
 
         Board board = _mapper.entity(lobbyDTO.board());
 
@@ -246,7 +242,7 @@ public class LobbyControllersTest {
             log.error("StompClient could not connect to endpoint");
         }
 
-        var user1Subs = user1_session.subscribe("/topic/lobbies/" + lobbyDTO.id(), new StompFrameHandler() {
+        var user1Subs = user1_session.subscribe("/topic/lobbies-" + lobbyDTO.id(), new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return LobbyDTO.class;
@@ -261,11 +257,11 @@ public class LobbyControllersTest {
 
         // Create command and send it
         ACommandDTO commandDTO = new AddPiece_ClearBoard_CommandDTO(validEmail1, CommandType.ADD_PIECE);
-        user1_session.send("/publish/lobbies/" + lobbyDTO.id(), commandDTO);
+        user1_session.send("/publish/lobbies-" + lobbyDTO.id(), commandDTO);
 
         float oldXPos = 0.5f;
 
-        var user2Subs = user2_session.subscribe("/topic/lobbies/" + lobbyDTO.id(), new StompFrameHandler() {
+        var user2Subs = user2_session.subscribe("/topic/lobbies-" + lobbyDTO.id(), new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return LobbyDTO.class;
@@ -282,11 +278,8 @@ public class LobbyControllersTest {
 
         // Create command and send it
         commandDTO = new AddPiece_ClearBoard_CommandDTO(validEmail1, CommandType.UPDATE_BOARD_CLEAR);
-        user2_session.send("/publish/lobbies/" + lobbyDTO.id(), commandDTO);
+        user2_session.send("/publish/lobbies-" + lobbyDTO.id(), commandDTO);
 
         user2Subs.unsubscribe();
-
-        user1_session.disconnect();
-        user2_session.disconnect();
     }
 }

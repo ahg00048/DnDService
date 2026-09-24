@@ -27,7 +27,8 @@ public class LobbyWsController {
     @MessageExceptionHandler(RuntimeException.class)
     public void genericMessageExceptionHandler() {}
 
-    @MessageMapping("/lobbies/{id}")
+    @MessageMapping("/lobbies-{id}")
+    @SendTo("/topic/lobbies-{id}")
     public LobbyDTO sendCommand(@DestinationVariable String id, @Valid @Payload ACommandDTO command) throws RuntimeException {
         if (command instanceof AddPiece_ClearBoard_CommandDTO subCommand) {
             switch (subCommand.getType()) {

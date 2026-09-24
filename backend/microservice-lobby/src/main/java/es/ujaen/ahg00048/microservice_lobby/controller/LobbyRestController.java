@@ -66,7 +66,7 @@ public class LobbyRestController {
                                               @PathVariable String id) {
         try {
             LobbyDTO lobbyDTO = _mapper.dto(_lobbyService.joinLobby(userId, id, password));
-            _simpTemplate.convertAndSend("/topic/lobbies/" + lobbyDTO.id(), lobbyDTO);
+            _simpTemplate.convertAndSend("/topic/lobbies-" + lobbyDTO.id(), lobbyDTO);
             return ResponseEntity.ok(lobbyDTO);
         } catch (LobbyRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -84,7 +84,7 @@ public class LobbyRestController {
                                            @PathVariable String id) {
         try {
             Optional<Lobby> lobbyOpt = _lobbyService.leaveLobby(userId, id);
-            lobbyOpt.ifPresent(lobby -> _simpTemplate.convertAndSend("/topic/lobbies/" + lobby.getId(), _mapper.dto(lobby)));
+            lobbyOpt.ifPresent(lobby -> _simpTemplate.convertAndSend("/topic/lobbies-" + lobby.getId(), _mapper.dto(lobby)));
             return ResponseEntity.ok().build();
         } catch (LobbyRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
