@@ -1,0 +1,15 @@
+logging.level.org.springframework:
+  amqp:
+    rabbit:
+      AsyncRabbitTemplate: DEBUG
+      core.RabbitTemplate: DEBUG
+    core.AmqpTemplate: DEBUG
+  data:
+    transaction: DEBUG
+    mongodb.core.MongoTemplate: DEBUG
+    redis.core.RedisTemplate: DEBUG
+spring.mongodb.database: "dndservice_db_test"
+
+eureka.client.enabled: false
+
+spring.rabbitmq.virtual-host: "vTest"
