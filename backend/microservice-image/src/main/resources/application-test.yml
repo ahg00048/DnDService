@@ -1,0 +1,2 @@
+# root image persistence dir (obviamente temporal el dir elegido)
+app.persistence.filesystem.root: "${project.basedir}/main/java/resources/static"

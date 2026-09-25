@@ -29,4 +29,15 @@ public class Image {
         this.height = height;
         this.type = type;
     }
+
+    public Image(Image other) {
+        id = other.id;
+        userId = other.userId;
+        name = other.name;
+        path = other.path;
+        data = other.data;
+        width = other.width;
+        height = other.height;
+        type = other.type;
+    }
 }

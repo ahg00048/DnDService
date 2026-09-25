@@ -1,6 +1,10 @@
 package es.ujaen.ahg00048.microservice_image.service;
 
 import es.ujaen.ahg00048.microservice_image.entity.image.ImageType;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -28,29 +32,33 @@ public class ImageService {
     }
 
 
-    public Image getImage(String id) throws ImageRegistrationException {
+    public int MAX_IMAGES_PER_USER() {
+        return MAX_IMAGES_PER_USER;
+    }
+
+    public Image getImage(@NotNull String id) throws ImageRegistrationException {
         if (!_imagesRep.containsKey(id))
             throw new ImageRegistrationException();
 
         return _imagesRep.get(id);
     }
 
-    public List<Image> getUserImages(String userId) {
+    public List<Image> getUserImages(@Email @NotBlank String userId) {
         return _imagesRep.values().stream().filter(img -> img.getUserId().equals(userId)).toList();
     }
 
-    public Image saveImage(String userId, byte[] imageData, ImageType type, String name, int width, int height) throws InvalidOperationException {
+    public Image saveImage(@Email @NotBlank String userId, @Valid Image image) throws InvalidOperationException {
         List<Image> userImages = _imagesRep.values().stream().filter(img -> img.getUserId().equals(userId)).toList();
 
         if (userImages.size() >= MAX_IMAGES_PER_USER)
             throw new InvalidOperationException();
 
-        Image image = new Image(userId, name, "path", imageData, width, height, type);
+        image.setUserId(userId);
 
-        return _imagesRep.put(image.getId(), image);
+        return _imagesRep.put(image.getId(), new Image(image));
     }
 
-    public void deleteImage(String userId, String id) throws ImageRegistrationException, InvalidOperationException {
+    public void deleteImage(@Email @NotBlank String userId, @NotNull String id) throws ImageRegistrationException, InvalidOperationException {
         if (!_imagesRep.containsKey(id))
             throw new ImageRegistrationException();
 
