@@ -38,8 +38,8 @@ public class LobbyService {
     public static int MAX_PIECES_PER_BOARDS;
 
     private final static String LOCK_KEY_BASE = "lobby:";
-    private final static String LOCK_KEY_OPERATION_USERS = "users:";
-    private final static String LOCK_KEY_OPERATION_BOARD = "board:";
+    private final static int TIMEOUT_AMOUNT = 1;
+    private final static TimeUnit TIMEOUT_UNIT = TimeUnit.SECONDS;
 
     @Autowired
     public LobbyService(
@@ -78,9 +78,9 @@ public class LobbyService {
     public Lobby getLobby(@NotBlank String id)
             throws LobbyRegistrationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_USERS + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -98,9 +98,9 @@ public class LobbyService {
     public Lobby joinLobby(@Email @NotBlank String userId, @NotBlank String id, @NotNull String password)
             throws LobbyRegistrationException, UserRegistrationException, InvalidOperationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_USERS + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -120,9 +120,9 @@ public class LobbyService {
     public Optional<Lobby> leaveLobby(@Email @NotBlank String userId, @NotBlank String id)
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_USERS + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -151,9 +151,9 @@ public class LobbyService {
     public Lobby addPiece(@Email @NotBlank String userId, @NotBlank String id)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_BOARD + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new RuntimeException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -179,9 +179,9 @@ public class LobbyService {
                                                 @PositiveOrZero int maxHp)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_BOARD + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -209,9 +209,9 @@ public class LobbyService {
                                              @NotNull String imageId)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_BOARD + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -239,9 +239,9 @@ public class LobbyService {
                                            @DecimalMin(value = "0.0", inclusive = true) @DecimalMax(value = "1.0", inclusive = true) float yPos)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_BOARD + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -273,9 +273,9 @@ public class LobbyService {
                              @Valid @NotNull Piece piece)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_BOARD + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -305,9 +305,9 @@ public class LobbyService {
                                @Valid @NotNull Piece piece)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_BOARD + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -337,9 +337,9 @@ public class LobbyService {
                              @Valid @NotNull Piece piece)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_BOARD + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -368,9 +368,9 @@ public class LobbyService {
                              @Valid @NotNull Board board)
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
-            Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_BOARD + id);
+            Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
             try {
-                if (!lock.tryLock(1, TimeUnit.SECONDS))
+                if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                     throw new IllegalStateException(); // Lock could not be acquired
                 // Critical section - start
                 Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -394,9 +394,9 @@ public class LobbyService {
                                        @NotNull String imageId, int scale)
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_BOARD + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
@@ -420,9 +420,9 @@ public class LobbyService {
     public Lobby clearBoard(@Email @NotBlank String userId, @NotBlank String id)
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + LOCK_KEY_OPERATION_BOARD + id);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
-            if (!lock.tryLock(1, TimeUnit.SECONDS))
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);

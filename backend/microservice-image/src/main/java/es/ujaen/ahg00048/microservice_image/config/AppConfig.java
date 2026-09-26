@@ -1,21 +1,21 @@
-package es.ujaen.ahg00048.microservice_lobby.config;
+package es.ujaen.ahg00048.microservice_image.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.MongoTransactionManager;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
-import es.ujaen.ahg00048.microservice_lobby.entity.Lobby;
 
 import java.time.Duration;
 
 
 @Configuration
+@EnableTransactionManagement
 public class AppConfig {
     private static final String LOCK_REGISTRY_REDIS_KEY = "locks";
 
@@ -33,10 +33,12 @@ public class AppConfig {
     }
 
     @Bean
-    public RedisTemplate<String, Lobby> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        RedisTemplate<String, Lobby> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
+    public PlatformTransactionManager platformTransactionManager(MongoDatabaseFactory dbFactory) {
+        return new MongoTransactionManager(dbFactory);
+    }
 
-        return template;
+    @Bean
+    MongoTemplate mongoTemplate(MongoDatabaseFactory dbFactory) {
+        return new MongoTemplate(dbFactory);
     }
 }

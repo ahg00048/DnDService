@@ -53,11 +53,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setTimeToFirstMessage(30000);
     }
 
-    @Bean
-    public ServletServerContainerFactoryBean createWebSocketContainer() {
-        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-        container.setMaxTextMessageBufferSize(8192);
-        container.setMaxBinaryMessageBufferSize(8192);
-        return container;
-    }
+//    @Bean
+//    public ServletServerContainerFactoryBean createWebSocketContainer() {
+//        ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
+//        container.setMaxTextMessageBufferSize(8192);
+//        container.setMaxBinaryMessageBufferSize(8192);
+//        return container;
+//    }
 }
