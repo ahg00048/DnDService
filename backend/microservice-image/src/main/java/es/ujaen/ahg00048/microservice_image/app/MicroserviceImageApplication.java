@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @ComponentScan({"es.ujaen.ahg00048.microservice_image.service",
 		"es.ujaen.ahg00048.microservice_image.rest",
 		"es.ujaen.ahg00048.microservice_image.config",
-		"es.ujaen.ahg00048.microservice_image.repository.fileSystem"})
+		"es.ujaen.ahg00048.microservice_image.repository.minIO"})
 @EnableMongoRepositories("es.ujaen.ahg00048.microservice_image.repository.mongo")
 public class MicroserviceImageApplication {
 	public static void main(String[] args) {

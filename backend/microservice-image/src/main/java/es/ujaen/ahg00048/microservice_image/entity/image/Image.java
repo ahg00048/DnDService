@@ -18,39 +18,34 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document("images")
 public class Image {
     private String id;
-
     @Email @NotBlank
     private String userId;
-
+    @NotBlank
+    private String path;
     @NotBlank
     private String name;
+    @NotBlank
+    private String type;
+
     @Transient
     private byte[] data;
-    @Positive
-    private int width;
-    @Positive
-    private int height;
 
-    private ImageType type;
-
-    public Image(String userId, String name, byte[] data, int width, int height, ImageType type) {
+    public Image(String userId, String name, String type) {
         id = new ObjectId().toString();
 
         this.userId = userId;
         this.name = name;
-        this.data = data;
-        this.width = width;
-        this.height = height;
         this.type = type;
+
+        this.path = "/" + userId + "/" + id;
     }
 
     public Image(Image other) {
         id = other.id;
+        path = other.path;
         userId = other.userId;
         name = other.name;
-        data = other.data;
-        width = other.width;
-        height = other.height;
         type = other.type;
+        data = other.data;
     }
 }

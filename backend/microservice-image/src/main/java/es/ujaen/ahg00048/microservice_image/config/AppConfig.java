@@ -21,6 +21,7 @@ public class AppConfig {
 
     private static final Duration RELEASE_TIME_DURATION = Duration.ofSeconds(10);
 
+
     @Bean
     public RedisLockRegistry lockRegistry(RedisConnectionFactory redisConnectionFactory) {
         RedisLockRegistry redisLockRegistry = new RedisLockRegistry(

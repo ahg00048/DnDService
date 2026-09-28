@@ -3,3 +3,9 @@ spring.mongodb:
   replica-set-name:
 # root image persistence dir (obviamente temporal el dir elegido)
 app.persistence.filesystem.root: "./src/main/resources/static"
+
+app.sampleImagePath: "./src/main/resources/static/sampleImage.png"
+
+minio:
+  bucket:
+    name: "test"

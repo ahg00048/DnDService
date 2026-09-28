@@ -1,20 +1,22 @@
 package es.ujaen.ahg00048.microservice_image.service;
 
-import es.ujaen.ahg00048.microservice_image.repository.fileSystem.ImageFileSystemRepository;
-import jakarta.validation.Valid;
+import es.ujaen.ahg00048.microservice_image.exception.ImageFormatException;
+import es.ujaen.ahg00048.microservice_image.exception.ImageOverSizedException;
+import es.ujaen.ahg00048.microservice_image.utils.FileUtils;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.tomcat.autoconfigure.TomcatServerProperties;
 import org.springframework.context.annotation.Profile;
 import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -23,6 +25,7 @@ import es.ujaen.ahg00048.microservice_image.entity.image.Image;
 import es.ujaen.ahg00048.microservice_image.exception.ImageRegistrationException;
 import es.ujaen.ahg00048.microservice_image.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_image.repository.mongo.ImageMongoRepository;
+import es.ujaen.ahg00048.microservice_image.repository.minIO.ImageMinIORepository;
 
 
 @Service
@@ -32,31 +35,30 @@ public class ImageService {
     private ImageMongoRepository _imagesMongoRep;
 
     @Autowired
-    private ImageFileSystemRepository _imagesFileSysRep;
+    private ImageMinIORepository _imagesMinIORep;
+
+
+    @Getter
+    @Value("${app.user.max.images}")
+    private int MAX_IMAGES_PER_USER;
+
 
     @Autowired
     private RedisLockRegistry _lockRegistry;
-
-    private static int MAX_IMAGES_PER_USER;
 
     private final static String LOCK_KEY_BASE = "image:";
     private final static int TIMEOUT_AMOUNT = 1;
     private final static TimeUnit TIMEOUT_UNIT = TimeUnit.SECONDS;
 
 
-    @Autowired
-    public ImageService(@Value("${app.user.max.images}") int maxImagesPerUser) {
-        MAX_IMAGES_PER_USER = maxImagesPerUser;
-    }
+    private final static String[] MIME_TYPES_ALLOWED = {"image/jpeg","image/png"};
+    @Value("${app.image.max.sizeInKB}")
+    private int MAX_IMAGE_SIZE_IN_KB;
 
-
-    public int MAX_IMAGES_PER_USER() {
-        return MAX_IMAGES_PER_USER;
-    }
 
     @Transactional
     public Image getImage(@NotNull String id)
-            throws ImageRegistrationException, IOException,
+            throws ImageRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
@@ -65,7 +67,9 @@ public class ImageService {
 
             Image image = _imagesMongoRep.findById(id).orElseThrow(ImageRegistrationException::new);
 
-            image.setData(_imagesFileSysRep.findByPath(image.getId()));
+            byte[] imageData = _imagesMinIORep.findByPath(image.getPath());
+
+            image.setData(imageData);
 
             return image;
         } catch (InterruptedException e) {
@@ -79,37 +83,48 @@ public class ImageService {
 
     @Transactional
     public List<Image> getUserImages(@Email @NotBlank String userId)
-        throws IOException {
+        throws ImageRegistrationException {
 
         List<Image> images = _imagesMongoRep.findAllByUserId(userId);
 
         for (Image img : images) {
-            img.setData(_imagesFileSysRep.findByPath(img.getId()));
+            img.setData(_imagesMinIORep.findByPath(img.getPath()));
         }
 
         return images;
     }
 
     @Transactional
-    public Image saveImage(@Email @NotBlank String userId, @Valid Image image)
-            throws InvalidOperationException, IOException {
+    public Image saveImage(@Email @NotBlank String userId, MultipartFile file)
+            throws ImageRegistrationException, InvalidOperationException,
+            ImageOverSizedException, ImageFormatException {
+        long size = file.getSize();
+        if (file.getSize() >= (MAX_IMAGE_SIZE_IN_KB * 1024L))
+            throw new ImageOverSizedException();
+
+        if (file.getContentType() == null ||
+                file.getOriginalFilename() == null ||
+                !Arrays.asList(MIME_TYPES_ALLOWED).contains(file.getContentType()) ||
+                !FileUtils.hasImageExtension(FileUtils.parseFileName(file.getOriginalFilename())))
+            throw new ImageFormatException();
+
         List<Image> userImages = _imagesMongoRep.findAllByUserId(userId);
 
         if (userImages.size() >= MAX_IMAGES_PER_USER)
             throw new InvalidOperationException();
 
-        image.setUserId(userId);
+        Image image = new Image(userId, FileUtils.parseFileName(file.getOriginalFilename()), file.getContentType());
 
         _imagesMongoRep.insert(image);
 
-        _imagesFileSysRep.save(image.getId(), image.getData());
+        _imagesMinIORep.save(image.getPath(), file);
 
         return image;
     }
 
     @Transactional
     public void deleteImage(@Email @NotBlank String userId, @NotNull String id)
-            throws ImageRegistrationException, InvalidOperationException, IOException,
+            throws ImageRegistrationException, InvalidOperationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
         try {
@@ -121,9 +136,12 @@ public class ImageService {
             if (!image.getUserId().equals(userId))
                 throw new InvalidOperationException();
 
-            _imagesFileSysRep.delete(image.getId());
+            String imageId = image.getId();
+            String imagePath = image.getPath();
 
-            _imagesMongoRep.deleteById(image.getId());
+            _imagesMongoRep.deleteById(imageId);
+
+            _imagesMinIORep.delete(imagePath);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
@@ -134,13 +152,13 @@ public class ImageService {
 
     @Profile("test")
     @Transactional
-    public void dropAllImages() throws IOException {
+    public void dropAllImages() throws ImageRegistrationException {
         List<Image> images = _imagesMongoRep.findAll();
 
-        for (Image img : images) {
-            _imagesFileSysRep.delete(img.getId());
-        }
+        List<String> paths = images.stream().map(Image::getPath).toList();
 
         _imagesMongoRep.deleteAll();
+
+        _imagesMinIORep.deleteAll(paths);
     }
 }
