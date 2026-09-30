@@ -79,9 +79,11 @@ public class LobbyService {
             throws LobbyRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -91,7 +93,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
@@ -99,9 +102,11 @@ public class LobbyService {
             throws LobbyRegistrationException, UserRegistrationException, InvalidOperationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -113,7 +118,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
@@ -121,9 +127,11 @@ public class LobbyService {
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -142,7 +150,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
@@ -152,9 +161,11 @@ public class LobbyService {
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new RuntimeException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -169,7 +180,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
@@ -180,9 +192,11 @@ public class LobbyService {
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -200,7 +214,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
@@ -210,9 +225,11 @@ public class LobbyService {
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -229,7 +246,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
@@ -240,9 +258,11 @@ public class LobbyService {
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -264,7 +284,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
@@ -274,9 +295,11 @@ public class LobbyService {
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -297,7 +320,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
@@ -306,9 +330,11 @@ public class LobbyService {
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -329,7 +355,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
@@ -338,9 +365,11 @@ public class LobbyService {
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -360,7 +389,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
@@ -368,26 +398,29 @@ public class LobbyService {
                              @Valid @NotNull Board board)
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
-            Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
-            try {
-                if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
-                    throw new IllegalStateException(); // Lock could not be acquired
-                // Critical section - start
-                Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
+        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
+        try {
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
+                throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
+            // Critical section - start
+            Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
-                if (!lobby.contains(userId))
-                    throw new UserRegistrationException();
+            if (!lobby.contains(userId))
+                throw new UserRegistrationException();
 
-                lobby.setBoard(board);
+            lobby.setBoard(board);
 
-                return _lobbiesRep.save(lobby);
-                // Critical section - end
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException(e);
-            } finally {
+            return _lobbiesRep.save(lobby);
+            // Critical section - end
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } finally {
+            if (locked)
                 lock.unlock();
-            }
+        }
     }
 
     public Lobby modifyBoardProperties(@Email @NotBlank String userId, @NotBlank String id,
@@ -395,9 +428,11 @@ public class LobbyService {
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -413,7 +448,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
@@ -421,9 +457,11 @@ public class LobbyService {
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
@@ -438,7 +476,8 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 

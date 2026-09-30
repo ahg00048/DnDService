@@ -1,27 +1,26 @@
 package es.ujaen.ahg00048.microservice_image.rest;
 
-import es.ujaen.ahg00048.microservice_image.entity.image.Image;
-import es.ujaen.ahg00048.microservice_image.exception.ImageRegistrationException;
-import es.ujaen.ahg00048.microservice_image.exception.InvalidOperationException;
-import es.ujaen.ahg00048.microservice_image.rest.DTO.ImageDTO;
-import es.ujaen.ahg00048.microservice_image.rest.mapper.ImageMapper;
-import es.ujaen.ahg00048.microservice_image.service.ImageService;
+
+import es.ujaen.ahg00048.microservice_image.rest.DTO.ImageWrap;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import es.ujaen.ahg00048.microservice_image.exception.ImageFormatException;
+import es.ujaen.ahg00048.microservice_image.exception.ImageOverSizedException;
+import es.ujaen.ahg00048.microservice_image.exception.ImageRegistrationException;
+import es.ujaen.ahg00048.microservice_image.exception.InvalidOperationException;
+import es.ujaen.ahg00048.microservice_image.service.ImageService;
 
-@RestController("/api/v1/images")
+
+@RestController
+@RequestMapping("/api/v1/images")
 public class ImageController {
-
-    @Autowired
-    private ImageMapper _mapper;
 
     @Autowired
     private ImageService _imageService;
@@ -29,36 +28,50 @@ public class ImageController {
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
-    public void validationConstraintViolationException() {}
+    public void constraintValidationViolationException() {}
+
+
+    @GetMapping("/MaxAllowedPerUser")
+    public ResponseEntity<Integer> getMaxImagesPerUserAllowed() {
+        return ResponseEntity.ok(_imageService.getMAX_IMAGES_PER_USER());
+    }
 
     @GetMapping
-    public ResponseEntity<List<ImageDTO>> getUserImages(@RequestParam(value = "userId", required = true) String userId) {
+    public ResponseEntity<List<?>> getImageUrls(@RequestParam(value = "userId", required = false) String userId,
+                                                @RequestParam(value = "imagesIds", required = false) List<String> imagesIds) {
         try {
-            _imageService.getUserImages(userId);
-            return ResponseEntity.ok().build();
-        } catch (ImageRegistrationException e) {
+            if (userId != null) {
+                return ResponseEntity.ok(_imageService.getUserImagesIds(userId));
+            } else if (imagesIds != null) {
+                return ResponseEntity.ok(_imageService.getImagesUrls(imagesIds));
+            } else{
+                return ResponseEntity.badRequest().build();
+            }
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PostMapping
-    public ResponseEntity<ImageDTO> addImage(@RequestParam(value = "userId", required = true) String userId,
-                                         @RequestBody MultipartFile image) {
+    public ResponseEntity<String> addImage(@RequestParam(value = "userId", required = true) String userId,
+                                           @RequestParam(value = "image", required = true) MultipartFile file) {
         try {
-            _imageService.saveImage(userId, null);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(_imageService.saveImage(userId, file));
+        } catch (ImageFormatException e) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
+        } catch (ImageOverSizedException e) {
+            return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (ImageRegistrationException e) {
+        } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ImageDTO> getImage(@PathVariable(value = "id") String id) {
+    public ResponseEntity<String> getImage(@PathVariable(value = "id") String id) {
         try {
-            _imageService.getImage(id);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(_imageService.getImageUrl(id));
         } catch (ImageRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (RuntimeException e) {

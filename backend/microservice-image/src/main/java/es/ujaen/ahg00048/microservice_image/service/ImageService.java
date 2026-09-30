@@ -2,7 +2,9 @@ package es.ujaen.ahg00048.microservice_image.service;
 
 import es.ujaen.ahg00048.microservice_image.exception.ImageFormatException;
 import es.ujaen.ahg00048.microservice_image.exception.ImageOverSizedException;
-import es.ujaen.ahg00048.microservice_image.utils.FileUtils;
+import es.ujaen.ahg00048.microservice_image.rest.DTO.ImageWrap;
+import es.ujaen.ahg00048.microservice_image.utils.ImageUtils;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,12 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
-import es.ujaen.ahg00048.microservice_image.entity.image.Image;
+import es.ujaen.ahg00048.microservice_image.entity.Image;
 import es.ujaen.ahg00048.microservice_image.exception.ImageRegistrationException;
 import es.ujaen.ahg00048.microservice_image.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_image.repository.mongo.ImageMongoRepository;
@@ -46,7 +49,7 @@ public class ImageService {
     @Autowired
     private RedisLockRegistry _lockRegistry;
 
-    private final static String LOCK_KEY_BASE = "image:";
+    private final static String LOCK_IMAGE_KEY_BASE = "image:";
     private final static int TIMEOUT_AMOUNT = 1;
     private final static TimeUnit TIMEOUT_UNIT = TimeUnit.SECONDS;
 
@@ -56,56 +59,92 @@ public class ImageService {
     private int MAX_IMAGE_SIZE_IN_KB;
 
 
+    /**
+     * @return the ids of the images belonging to the user
+     */
+    public List<String> getUserImagesIds(@Email @NotBlank String userId) {
+        return _imagesMongoRep.findAllByUserId(userId).stream().map(Image::getId).toList();
+    }
+
+    /**
+     * @return the access url of the image
+     */
     @Transactional
-    public Image getImage(@NotNull String id)
+    public String getImageUrl(@NotNull String id)
             throws ImageRegistrationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        Lock lock = _lockRegistry.obtain(LOCK_IMAGE_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException();
+            locked = true;
 
             Image image = _imagesMongoRep.findById(id).orElseThrow(ImageRegistrationException::new);
 
-            byte[] imageData = _imagesMinIORep.findByPath(image.getPath());
-
-            image.setData(imageData);
-
-            return image;
+            return _imagesMinIORep.getPreSignedUrl(image.getPath(), image.getType());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
-
     }
 
+    /**
+     * @return the pair id, url of every image of the user
+     */
     @Transactional
-    public List<Image> getUserImages(@Email @NotBlank String userId)
-        throws ImageRegistrationException {
-
-        List<Image> images = _imagesMongoRep.findAllByUserId(userId);
-
-        for (Image img : images) {
-            img.setData(_imagesMinIORep.findByPath(img.getPath()));
+    public List<ImageWrap> getImagesUrls(List<String> imagesIds)
+            throws ImageRegistrationException,
+            IllegalStateException {
+        List<Lock> locks = new ArrayList<>(imagesIds.size());
+        for (String id : imagesIds) {
+            locks.add(_lockRegistry.obtain(LOCK_IMAGE_KEY_BASE + id));
         }
 
-        return images;
+        int locked = 0;
+        try {
+            while (locked < locks.size()) {
+                if (!locks.get(locked).tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
+                    throw new IllegalStateException();
+
+                locked++;
+            }
+
+            List<Image> images = _imagesMongoRep.findAllById(imagesIds);
+            List<ImageWrap> imageWraps = new ArrayList<>(images.size());
+
+            for (Image img : images) {
+                imageWraps.add(new ImageWrap(img.getId(), _imagesMinIORep.getPreSignedUrl(img.getPath(), img.getType())));
+            }
+
+            return imageWraps;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } finally {
+            for (int i = 0; i < locked; i++) {
+                locks.get(i).unlock();
+            }
+        }
     }
 
+    /**
+     * @return the id of the image
+     */
     @Transactional
-    public Image saveImage(@Email @NotBlank String userId, MultipartFile file)
-            throws ImageRegistrationException, InvalidOperationException,
-            ImageOverSizedException, ImageFormatException {
-        long size = file.getSize();
+    public String saveImage(@Email @NotBlank String userId, @Valid @NotNull MultipartFile file)
+            throws InvalidOperationException, ImageOverSizedException, ImageFormatException,
+            IllegalStateException {
         if (file.getSize() >= (MAX_IMAGE_SIZE_IN_KB * 1024L))
             throw new ImageOverSizedException();
 
         if (file.getContentType() == null ||
                 file.getOriginalFilename() == null ||
                 !Arrays.asList(MIME_TYPES_ALLOWED).contains(file.getContentType()) ||
-                !FileUtils.hasImageExtension(FileUtils.parseFileName(file.getOriginalFilename())))
+                !ImageUtils.hasImageExtension(ImageUtils.parseFileName(file.getOriginalFilename())))
             throw new ImageFormatException();
 
         List<Image> userImages = _imagesMongoRep.findAllByUserId(userId);
@@ -113,23 +152,27 @@ public class ImageService {
         if (userImages.size() >= MAX_IMAGES_PER_USER)
             throw new InvalidOperationException();
 
-        Image image = new Image(userId, FileUtils.parseFileName(file.getOriginalFilename()), file.getContentType());
+        Image image = new Image(userId, ImageUtils.parseFileName(file.getOriginalFilename()), file.getContentType());
 
         _imagesMongoRep.insert(image);
 
-        _imagesMinIORep.save(image.getPath(), file);
+        byte[] fileData = ImageUtils.optimizeImage(file);
 
-        return image;
+        _imagesMinIORep.save(image.getPath(), fileData, image.getType());
+
+        return image.getId();
     }
 
     @Transactional
     public void deleteImage(@Email @NotBlank String userId, @NotNull String id)
             throws ImageRegistrationException, InvalidOperationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_KEY_BASE + id);
+        Lock lock = _lockRegistry.obtain(LOCK_IMAGE_KEY_BASE + id);
+        boolean locked = false;
         try {
             if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException();
+            locked = true;
 
             Image image = _imagesMongoRep.findById(id).orElseThrow(ImageRegistrationException::new);
 
@@ -146,13 +189,15 @@ public class ImageService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            lock.unlock();
+            if (locked)
+                lock.unlock();
         }
     }
 
     @Profile("test")
     @Transactional
-    public void dropAllImages() throws ImageRegistrationException {
+    public void dropAllImages()
+            throws ImageRegistrationException {
         List<Image> images = _imagesMongoRep.findAll();
 
         List<String> paths = images.stream().map(Image::getPath).toList();
@@ -160,5 +205,12 @@ public class ImageService {
         _imagesMongoRep.deleteAll();
 
         _imagesMinIORep.deleteAll(paths);
+    }
+
+    @Profile("test")
+    @Transactional
+    public List<Image> getUserImagesTest(@Email @NotBlank String userId)
+            throws ImageRegistrationException {
+        return _imagesMongoRep.findAllByUserId(userId);
     }
 }

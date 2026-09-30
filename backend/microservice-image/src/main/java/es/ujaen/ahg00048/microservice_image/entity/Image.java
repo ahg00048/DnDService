@@ -1,9 +1,7 @@
-package es.ujaen.ahg00048.microservice_image.entity.image;
+package es.ujaen.ahg00048.microservice_image.entity;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,8 +25,6 @@ public class Image {
     @NotBlank
     private String type;
 
-    @Transient
-    private byte[] data;
 
     public Image(String userId, String name, String type) {
         id = new ObjectId().toString();
@@ -46,6 +42,5 @@ public class Image {
         userId = other.userId;
         name = other.name;
         type = other.type;
-        data = other.data;
     }
 }

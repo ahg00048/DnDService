@@ -4,8 +4,10 @@ spring.mongodb:
 # root image persistence dir (obviamente temporal el dir elegido)
 app.persistence.filesystem.root: "./src/main/resources/static"
 
-app.sampleImagePath: "./src/main/resources/static/sampleImage.png"
-
+app:
+  sampleImagePath: "./src/main/resources/static/sampleImage.png"
+  sampleOverSizedImagePath: "./src/main/resources/static/sampleImageOverSized.png"
+  sampleFilePath: "./src/main/resources/static/sampleFile.txt"
 minio:
   bucket:
     name: "test"

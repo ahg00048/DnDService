@@ -1,11 +1,10 @@
 package es.ujaen.ahg00048.microservice_image.service;
 
-import es.ujaen.ahg00048.microservice_image.entity.image.Image;
+import es.ujaen.ahg00048.microservice_image.entity.Image;
 import es.ujaen.ahg00048.microservice_image.exception.ImageRegistrationException;
 import es.ujaen.ahg00048.microservice_image.exception.InvalidOperationException;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MediaType;
@@ -16,13 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.multipart.MultipartFile;
-import org.xmlunit.builder.Input;
 
-import javax.print.attribute.standard.Media;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +33,7 @@ public class ImageServiceTest {
 
     @Value("${app.sampleImagePath}")
     private String _sampleImagePath;
+
 
     @PostConstruct
     @AfterEach
@@ -66,12 +62,10 @@ public class ImageServiceTest {
             log.error("Sample image not found.");
         }
 
-
         MockMultipartFile MockMPFile = new MockMultipartFile("image",
                 file.getName(),
                 MediaType.IMAGE_PNG.toString(),
                 data);
-
 
         for (int i = 0; i < _imageService.getMAX_IMAGES_PER_USER(); i++) {
             Assertions.assertDoesNotThrow(() -> _imageService.saveImage(validUserId1, MockMPFile));
@@ -79,19 +73,21 @@ public class ImageServiceTest {
         // Unable to add more than the amount specified
         Assertions.assertThrows(InvalidOperationException.class, () -> _imageService.saveImage(validUserId1, MockMPFile));
 
+        List<String> user1ImagesIds = new ArrayList<>();
         List<Image> user1Images = new ArrayList<>();
         try {
-            user1Images = _imageService.getUserImages(validUserId1);
+            user1ImagesIds = _imageService.getUserImagesIds(validUserId1);
+            user1Images = _imageService.getUserImagesTest(validUserId1);
         } catch (RuntimeException e) {
             log.error("Unexpected IOException during test");
         }
         // Check that it is indeed the max amount
-        Assertions.assertEquals(_imageService.getMAX_IMAGES_PER_USER(), user1Images.size());
+        Assertions.assertEquals(_imageService.getMAX_IMAGES_PER_USER(), user1ImagesIds.size());
 
         String imageId = user1Images.getFirst().getId();
 
         // Get image by id
-        Assertions.assertDoesNotThrow(() -> _imageService.getImage(imageId));
+        Assertions.assertDoesNotThrow(() -> _imageService.getImageUrl(imageId));
 
         // Try to delete image from another user
         Assertions.assertThrows(InvalidOperationException.class, () -> _imageService.deleteImage(validUserId2, imageId));
@@ -106,6 +102,6 @@ public class ImageServiceTest {
         Assertions.assertThrows(ImageRegistrationException.class, () -> _imageService.deleteImage(validUserId1, imageId));
 
         // Try to get image deleted
-        Assertions.assertThrows(ImageRegistrationException.class, () -> _imageService.getImage(imageId));
+        Assertions.assertThrows(ImageRegistrationException.class, () -> _imageService.getImageUrl(imageId));
     }
 }
