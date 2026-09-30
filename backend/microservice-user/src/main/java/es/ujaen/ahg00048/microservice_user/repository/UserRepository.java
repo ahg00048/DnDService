@@ -6,5 +6,4 @@ import es.ujaen.ahg00048.microservice_user.entity.User;
 
 
 public interface UserRepository extends MongoRepository<User, String> {
-
 }

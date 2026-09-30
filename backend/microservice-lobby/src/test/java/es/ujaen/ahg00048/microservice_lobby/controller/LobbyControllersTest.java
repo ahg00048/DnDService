@@ -40,11 +40,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
+@Slf4j
 @SpringBootTest(classes = es.ujaen.ahg00048.microservice_lobby.app.MicroserviceLobbyApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
 @ActiveProfiles("test")
-@Slf4j
 public class LobbyControllersTest {
     @LocalServerPort
     private int serverPort;
