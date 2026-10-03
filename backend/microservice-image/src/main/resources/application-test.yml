@@ -1,13 +1,14 @@
+# Mongodb
+logging.level.org.springframework.data.mongodb.core.MongoTemplate: DEBUG
 spring.mongodb:
   database: "dndservice_db_test"
   replica-set-name:
-# root image persistence dir (obviamente temporal el dir elegido)
-app.persistence.filesystem.root: "./src/main/resources/static"
-
+# MinIO
+minio.bucket.name: "test"
+# Eureka
+eureka.client.enabled: false
+# App specific
 app:
   sampleImagePath: "./src/main/resources/static/sampleImage.png"
   sampleOverSizedImagePath: "./src/main/resources/static/sampleImageOverSized.png"
   sampleFilePath: "./src/main/resources/static/sampleFile.txt"
-minio:
-  bucket:
-    name: "test"
