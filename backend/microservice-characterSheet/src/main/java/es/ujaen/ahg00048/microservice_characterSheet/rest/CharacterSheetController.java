@@ -46,6 +46,8 @@ public class CharacterSheetController {
             return ResponseEntity.status(HttpStatus.CREATED).body(_service.addCharSheet(userId, _mapper.newEntity(characterSheetDTO)));
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -60,6 +62,8 @@ public class CharacterSheetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -73,6 +77,8 @@ public class CharacterSheetController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

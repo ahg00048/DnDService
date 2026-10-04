@@ -11,5 +11,7 @@ import java.util.List;
 @Transactional
 public interface CharacterSheetRepository extends MongoRepository<CharacterSheet, String> {
     List<CharacterSheet> findAllByUserId(String userId);
+    List<CharacterSheet> findAllByImageId(String imageId);
+    void deleteAllByUserId(String userId);
     int countAllByUserId(String userId);
 }

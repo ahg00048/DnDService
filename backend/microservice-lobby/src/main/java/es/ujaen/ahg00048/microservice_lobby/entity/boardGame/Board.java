@@ -33,7 +33,7 @@ public class Board implements Serializable {
     @Max(value = 500)
     private int scale = 10;
 
-    private final List<Piece> pieces;
+    private List<Piece> pieces;
 
 
     public Board() {

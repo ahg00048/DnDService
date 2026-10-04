@@ -10,6 +10,9 @@ logging.level.org.springframework:
     redis.core.RedisTemplate: DEBUG
 spring.mongodb.database: "dndservice_db_test"
 # RabbitMQ config
-spring.rabbitmq.virtual-host: "vTest"
+rabbitmq:
+  virtual-host:
+    ws: "vTest"
+    mb: "vTest"
 # Eureka config
 eureka.client.enabled: false

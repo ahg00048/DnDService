@@ -1,6 +1,9 @@
 # Mongodb config
 spring.mongodb.database: "dndservice_db_board"
 # RabbitMQ config
-spring.rabbitmq.virtual-host: "vLobbiesStomp"
+rabbitmq:
+  virtual-host:
+    ws: "vLobbiesStomp"
+    mb: "vMicroservicesMQ"
 # Eureka config
 eureka.instance.instance-id: "${spring.application.name}:${random.uuid}"

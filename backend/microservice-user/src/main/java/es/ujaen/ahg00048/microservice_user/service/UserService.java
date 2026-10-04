@@ -6,6 +6,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.NoArgsConstructor;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,9 @@ public class UserService {
 
     @Autowired
     private UserRepository _usersRep;
+
+    @Autowired
+    private RabbitTemplate _rabbitTemplate;
 
     private User _admin;
 
@@ -87,6 +92,8 @@ public class UserService {
             throw new UserAuthorizationException();
 
         _usersRep.deleteById(email);
+
+        _rabbitTemplate.send(new Message(email.getBytes()));
     }
 
     public void changePassword(@Valid User caller, @NotBlank String newPassword) throws UserRegistrationException, UserBadOperation {
