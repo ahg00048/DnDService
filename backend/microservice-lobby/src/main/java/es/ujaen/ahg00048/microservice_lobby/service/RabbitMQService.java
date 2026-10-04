@@ -1,11 +1,11 @@
 package es.ujaen.ahg00048.microservice_lobby.service;
 
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @Service
@@ -22,11 +22,23 @@ public class RabbitMQService {
         _lobbyService.removeUser_admin(userId);
     }
 
+    @Service
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = "${rabbitmq.queue.lobby.image}", durable = "true"),
             exchange = @Exchange(value = "${rabbitmq.exchange.image}", ignoreDeclarationExceptions = "true"),
             key = "${rabbitmq.bind.key.image}"))
-    public void imageDeletionListener(String imageId) {
-        _lobbyService.removeImage_admin(imageId);
+    public class ImageDeletionListener {
+        @RabbitHandler
+        public void imageDeletionListener(String imageId) {
+            _lobbyService.removeImage_admin(imageId);
+        }
+
+        @RabbitHandler
+        @Transactional
+        public void imagesDeletionListener(List<String> imagesIds) {
+            for (String id : imagesIds) {
+                _lobbyService.removeImage_admin(id);
+            }
+        }
     }
 }

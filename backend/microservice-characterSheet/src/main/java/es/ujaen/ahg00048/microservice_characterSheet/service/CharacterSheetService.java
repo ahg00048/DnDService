@@ -134,6 +134,7 @@ public class CharacterSheetService {
     /**
      * Only used by RabbitMQ listener
      */
+    @Transactional
     public void removeImage_admin(@NotBlank String imageId)
             throws IllegalStateException {
         List<Lock> locks = new ArrayList<>();

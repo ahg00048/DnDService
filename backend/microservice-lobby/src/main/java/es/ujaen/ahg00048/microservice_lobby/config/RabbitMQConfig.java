@@ -18,7 +18,7 @@ import java.time.Duration;
 public class RabbitMQConfig {
     @Bean
     public ConnectionFactory connectionFactory(@Value("${spring.rabbitmq.host}") String host,
-                                               @Value("${spring.rabbitmq.port}") int port,
+                                               @Value("${rabbitmq.port.mb}") int port,
                                                @Value("${rabbitmq.virtual-host.mb}") String vHost,
                                                @Value("${spring.rabbitmq.username}") String username,
                                                @Value("${spring.rabbitmq.password}") String password) {
