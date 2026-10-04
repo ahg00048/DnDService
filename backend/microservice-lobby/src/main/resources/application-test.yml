@@ -9,7 +9,7 @@ logging.level.org.springframework:
     mongodb.core.MongoTemplate: DEBUG
     redis.core.RedisTemplate: DEBUG
 spring.mongodb.database: "dndservice_db_test"
-
-eureka.client.enabled: false
-
+# RabbitMQ config
 spring.rabbitmq.virtual-host: "vTest"
+# Eureka config
+eureka.client.enabled: false

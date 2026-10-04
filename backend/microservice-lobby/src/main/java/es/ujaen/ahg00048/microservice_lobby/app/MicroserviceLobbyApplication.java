@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @SpringBootApplication
 @ComponentScan(value =
 			{"es.ujaen.ahg00048.microservice_lobby.service",
-                    "es.ujaen.ahg00048.microservice_lobby.controller",
+			"es.ujaen.ahg00048.microservice_lobby.controller",
 			"es.ujaen.ahg00048.microservice_lobby.config",
 			"es.ujaen.ahg00048.microservice_lobby.repository"},
 		excludeFilters =

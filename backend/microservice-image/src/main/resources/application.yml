@@ -1,10 +1,8 @@
+# Mongodb
 spring.mongodb:
   database: "dndservice_db_image"
   replica-set-name:
-# root image persistence dir (obviamente temporal el dir elegido)
-app.persistence.filesystem.root: "./src/main/resources/static"
-
-
-minio:
-  bucket:
-    name: "images"
+# MinIO
+minio.bucket.name: "images"
+# Eureka config
+eureka.instance.instance-id: "${spring.application.name}:${random.uuid}"
