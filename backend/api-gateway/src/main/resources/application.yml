@@ -1,0 +1,102 @@
+# Eureka config
+eureka.instance.instance-id: ${spring.application.name}:${random.uuid}
+
+# Redis properties
+spring.data.redis.host: 127.0.0.1
+spring.data.redis.port: 6379
+
+# App Custom Config
+rateLimit.bucket.capacity: 50
+rateLimit.bucket.refillTokens: 1
+rateLimit.bucket.refillPeriod: 2s
+rateLimit.bucket.requestedTokens: 1
+
+server:
+  port: 8080
+
+# Logging
+logging:
+  level:
+    reactor:
+      netty: DEBUG
+    org:
+      springframework:
+        cloud:
+          gateway: DEBUG
+        web:
+          reactive: DEBUG
+        http:
+          server:
+            reactive: DEBUG
+
+spring:
+  application:
+    name:
+      api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+          routes:
+# USER rest service ====================================================================================
+            - id: microservice-user
+              uri: lb://MICROSERVICE-USER
+              predicates:
+              - Method=GET,POST,PUT,DELETE
+              - Path=/api/v1/users/**
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    bucket4j-rate-limiter.capacity: ${rateLimit.bucket.capacity}
+                    bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
+                    bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
+                    bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
+# CHARACTER SHEET rest service ====================================================================================
+            - id: microservice-characterSheet
+              uri: lb://MICROSERVICE-CHARACTERSHEET
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    bucket4j-rate-limiter.capacity: ${rateLimit.bucket.capacity}
+                    bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
+                    bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
+                    bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
+              predicates:
+              - Path=/api/v1/charSheets/**
+# IMAGE rest service ====================================================================================
+            - id: microservice-image
+              uri: lb://MICROSERVICE-IMAGE
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    bucket4j-rate-limiter.capacity: ${rateLimit.bucket.capacity}
+                    bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
+                    bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
+                    bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
+              predicates:
+              - Path=/api/v1/images/**
+# LOBBY rest service ====================================================================================
+            - id: microservice-lobby-rs
+              uri: lb://MICROSERVICE-LOBBY
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    bucket4j-rate-limiter.capacity: ${rateLimit.bucket.capacity}
+                    bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
+                    bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
+                    bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
+              predicates:
+              - Path=/api/v1/lobbies/**
+# LOBBY websocket service ====================================================================================
+            - id: microservice-lobby-ws
+              uri: lb:ws://MICROSERVICE-LOBBY
+              predicates:
+                - Path=/websock/**
+# IMAGE sockJs service ====================================================================================
+            - id: microservice-lobby-sockJs
+              uri: lb://MICROSERVICE-LOBBY
+              predicates:
+              - Path=/websock/info/**

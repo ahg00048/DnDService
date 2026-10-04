@@ -1,19 +1,21 @@
 package es.ujaen.ahg00048.api_gateway.config;
 
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.distributed.ExpirationAfterWriteStrategy;
 import io.github.bucket4j.distributed.proxy.AsyncProxyManager;
 import io.github.bucket4j.redis.lettuce.cas.LettuceBasedProxyManager;
+
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.codec.ByteArrayCodec;
 import io.lettuce.core.codec.RedisCodec;
 import io.lettuce.core.codec.StringCodec;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import reactor.core.publisher.Mono;
 
 import static java.time.Duration.ofSeconds;
 
@@ -28,7 +30,13 @@ public class RateLimiterConfig {
 
 
     @Bean
-    public AsyncProxyManager<String> proxyManager() {
+    public KeyResolver keyResolver() {
+        return exchange -> Mono.just(exchange.getRequest().getRemoteAddress()
+                .getAddress().getHostAddress());
+    }
+
+    @Bean
+    public AsyncProxyManager<String> lettuceProxyManager() {
         RedisURI uri = RedisURI.Builder.redis(redisHost, redisPort).build();
         RedisClient client = RedisClient.create(uri);
         StatefulRedisConnection<String, byte[]> redisConnection = client.connect(RedisCodec.of(StringCodec.UTF8, ByteArrayCodec.INSTANCE));
