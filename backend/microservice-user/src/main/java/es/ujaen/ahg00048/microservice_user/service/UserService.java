@@ -23,7 +23,6 @@ import org.springframework.validation.annotation.Validated;
 
 @Service
 @Validated
-@NoArgsConstructor
 public class UserService {
     @Autowired
     private Environment _env;

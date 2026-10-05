@@ -15,5 +15,4 @@ public interface BoardRepository extends MongoRepository<Board, String> {
 
     @Query(value = "{ 'pieces.imageId' : ?0, 'backgroundImage' : ?0 }")
     List<Board> findAllContainingImageId(String imageId);
-
 }

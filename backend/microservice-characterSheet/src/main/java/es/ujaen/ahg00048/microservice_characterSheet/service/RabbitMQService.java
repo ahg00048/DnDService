@@ -34,7 +34,6 @@ public class RabbitMQService {
         }
 
         @RabbitHandler
-        @Transactional
         public void imagesDeletionListener(List<String> imagesIds) {
             for (String id : imagesIds) {
                 _characterSheetService.removeImage_admin(id);

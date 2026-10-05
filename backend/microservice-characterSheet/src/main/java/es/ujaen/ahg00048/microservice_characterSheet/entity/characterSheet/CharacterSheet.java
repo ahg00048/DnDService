@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -33,6 +34,9 @@ import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.prope
 public class CharacterSheet {
     @Id
     private String id;
+
+    @Version
+    private Long version;
 
     @NotNull
     private String imageId = "";
@@ -75,6 +79,39 @@ public class CharacterSheet {
                           int speed, int healthPoints, int maxHealthPoints, int hitRolls, int maxHitRolls, Attributes attributes, Saves saves,
                           Skills skills, Inventory inventory, Conditions conditions, List<Spell> spells, List<PassiveEffect> passiveEffects, List<Feature> features, String biography) {
         id = new ObjectId().toString();
+
+        this.imageId = imageId;
+        this.userId = userId;
+        this.name = name;
+        this.classname = classname;
+        this.level = level;
+
+        this.defense = defense;
+        this.initiative = initiative;
+        this.proficiency = proficiency;
+        this.speed = speed;
+        this.healthPoints = healthPoints;
+        this.maxHealthPoints = maxHealthPoints;
+        this.hitRolls = hitRolls;
+        this.maxHitRolls = maxHitRolls;
+
+        this.attributes = attributes;
+        this.saves = saves;
+        this.skills = skills;
+        this.inventory = inventory;
+        this.conditions = conditions;
+
+        this.spells = spells;
+        this.passiveEffects = passiveEffects;
+        this.features = features;
+
+        this.biography = biography;
+    }
+
+    public CharacterSheet(String id, String imageId, String userId, String name, String classname, int level, int defense, int initiative, int proficiency,
+                          int speed, int healthPoints, int maxHealthPoints, int hitRolls, int maxHitRolls, Attributes attributes, Saves saves,
+                          Skills skills, Inventory inventory, Conditions conditions, List<Spell> spells, List<PassiveEffect> passiveEffects, List<Feature> features, String biography) {
+        this.id = id;
 
         this.imageId = imageId;
         this.userId = userId;
