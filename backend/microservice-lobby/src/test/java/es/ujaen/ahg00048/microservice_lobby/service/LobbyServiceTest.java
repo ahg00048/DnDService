@@ -1,6 +1,7 @@
 package es.ujaen.ahg00048.microservice_lobby.service;
 
 import es.ujaen.ahg00048.microservice_lobby.exception.*;
+import es.ujaen.ahg00048.microservice_lobby.repository.mongo.BoardRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
@@ -39,6 +40,7 @@ public class LobbyServiceTest {
         _mongoTemplate.getDb().drop();
         _redisTemplate.getConnectionFactory().getConnection().serverCommands().flushDb();
     }
+
 
     @Test
     @DirtiesContext

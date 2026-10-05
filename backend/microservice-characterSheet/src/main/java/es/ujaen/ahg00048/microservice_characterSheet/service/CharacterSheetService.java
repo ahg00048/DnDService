@@ -4,14 +4,20 @@ import es.ujaen.ahg00048.microservice_characterSheet.exception.InvalidOperationE
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 import es.ujaen.ahg00048.microservice_characterSheet.repository.CharacterSheetRepository;
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.CharacterSheet;
@@ -21,10 +27,8 @@ import es.ujaen.ahg00048.microservice_characterSheet.exception.CharacterSheetReg
 @Validated
 public class CharacterSheetService {
     @Autowired
-    private Environment _env;
-
-    @Autowired
     private CharacterSheetRepository _charSheetsRep;
+
 
     public static int MAX_NUMBER_SHEETS_PER_USER;
 
@@ -38,6 +42,7 @@ public class CharacterSheetService {
     public List<CharacterSheet> getCharSheets(@Email @NotBlank String userId) {
         return _charSheetsRep.findAllByUserId(userId);
     }
+
 
     public CharacterSheet addCharSheet(@Email @NotBlank String userId, @Valid CharacterSheet charSheet)
             throws InvalidOperationException {
@@ -58,6 +63,7 @@ public class CharacterSheetService {
 
         charSheet.setUserId(userId);
         charSheet.setId(id);
+        charSheet.setVersion(savedCharSheet.getVersion());
 
         return _charSheetsRep.save(charSheet);
     }
@@ -70,5 +76,25 @@ public class CharacterSheetService {
             throw new InvalidOperationException();
 
         _charSheetsRep.deleteById(id);
+    }
+
+    /**
+     * Only used by RabbitMQ listener
+     */
+    public void removeImage_admin(@NotBlank String imageId) {
+        List<CharacterSheet> charSheets = _charSheetsRep.findAllByImageId(imageId);
+
+        for (CharacterSheet charSheet : charSheets) {
+            charSheet.setImageId("");
+        }
+
+        _charSheetsRep.saveAll(charSheets);
+    }
+
+    /**
+     * Only used by RabbitMQ listener
+     */
+    public void removeCharSheet_admin(@NotBlank String userId) {
+        _charSheetsRep.deleteAllByUserId(userId);
     }
 }

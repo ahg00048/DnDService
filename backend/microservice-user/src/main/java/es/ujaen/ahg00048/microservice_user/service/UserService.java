@@ -6,7 +6,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.NoArgsConstructor;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +23,15 @@ import org.springframework.validation.annotation.Validated;
 
 @Service
 @Validated
-@NoArgsConstructor
 public class UserService {
     @Autowired
     private Environment _env;
 
     @Autowired
     private UserRepository _usersRep;
+
+    @Autowired
+    private RabbitTemplate _rabbitTemplate;
 
     private User _admin;
 
@@ -51,28 +56,16 @@ public class UserService {
         return _usersRep.findAll();
     }
 
-    // solo test
-    public User login(@NotBlank @Email String email, @NotBlank String password) throws UserAuthenticationException, UserRegistrationException {
-        User user = null;
-        if (email.equals(_admin.getEmail()) && password.equals(_admin.getPassword()))
-            user = _admin;
-        else
-            user = _usersRep.findById(email).orElseThrow(UserRegistrationException::new); // User not registered
-
-        if (!user.getPassword().equals(password)) // Wrong password
-            throw new UserAuthenticationException();
-
-        return user;
-    }
-
-    public void addUser(@Valid User newUser) throws UserRegistrationException {
+    public void addUser(@Valid User newUser)
+            throws UserRegistrationException {
         if (_usersRep.existsById(newUser.getEmail())) // User registered
             throw new UserRegistrationException();
 
         _usersRep.insert(newUser);
     }
 
-    public void removeUser(@Valid User caller, @NotBlank @Email String email) throws UserRegistrationException, UserAuthorizationException {
+    public void removeUser(@Valid User caller, @NotBlank @Email String email)
+            throws UserRegistrationException, UserAuthorizationException {
         Optional<User> user = _usersRep.findById(caller.getEmail());
         if (user.isEmpty())
             if (!caller.equals(_admin))
@@ -87,12 +80,30 @@ public class UserService {
             throw new UserAuthorizationException();
 
         _usersRep.deleteById(email);
+
+        _rabbitTemplate.send(new Message(email.getBytes()));
     }
 
-    public void changePassword(@Valid User caller, @NotBlank String newPassword) throws UserRegistrationException, UserBadOperation {
+    public void changePassword(@Valid User caller, @NotBlank String newPassword)
+            throws UserRegistrationException, UserBadOperation {
         User user = _usersRep.findById(caller.getEmail()).orElseThrow(UserRegistrationException::new);
 
         user.setPassword(newPassword);
+
         _usersRep.save(user);
+    }
+
+    @Profile("test")
+    public User login(@NotBlank @Email String email, @NotBlank String password) throws UserAuthenticationException, UserRegistrationException {
+        User user = null;
+        if (email.equals(_admin.getEmail()) && password.equals(_admin.getPassword()))
+            user = _admin;
+        else
+            user = _usersRep.findById(email).orElseThrow(UserRegistrationException::new); // User not registered
+
+        if (!user.getPassword().equals(password)) // Wrong password
+            throw new UserAuthenticationException();
+
+        return user;
     }
 }

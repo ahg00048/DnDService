@@ -1,0 +1,28 @@
+package es.ujaen.ahg00048.microservice_lobby.config;
+
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.support.converter.SimpleMessageConverter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+
+@Configuration
+public class RabbitMQConfig {
+    @Bean
+    public ConnectionFactory connectionFactory(@Value("${spring.rabbitmq.host}") String host,
+                                               @Value("${rabbitmq.port.mb}") int port,
+                                               @Value("${rabbitmq.virtual-host.mb}") String vHost,
+                                               @Value("${spring.rabbitmq.username}") String username,
+                                               @Value("${spring.rabbitmq.password}") String password) {
+        CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
+        connectionFactory.setHost(host);
+        connectionFactory.setPort(port);
+        connectionFactory.setVirtualHost(vHost);
+        connectionFactory.setUsername(username);
+        connectionFactory.setPassword(password);
+
+        return connectionFactory;
+    }
+}

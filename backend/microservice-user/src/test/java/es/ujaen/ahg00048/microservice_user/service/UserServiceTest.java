@@ -1,5 +1,6 @@
 package es.ujaen.ahg00048.microservice_user.service;
 
+import es.ujaen.ahg00048.microservice_user.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 import es.ujaen.ahg00048.microservice_user.entity.User;
 import es.ujaen.ahg00048.microservice_user.exception.*;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 
@@ -23,14 +25,17 @@ public class UserServiceTest {
 
     @Autowired
     Environment _env;
+    
 
     @AfterEach
     @PostConstruct
     public void cleanUp() {
         _mongoTemplate.getDb().drop();
     }
+    
 
     @Test
+    @DirtiesContext
     public void registerTest() {
         User user = new User("valid@gmail.com", "name1ee", "secretee");
 
@@ -40,6 +45,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @DirtiesContext
     public void loginTest() {
         User user = new User("valid@gmail.com", "name1ee", "secretee");
         final String userEmail = user.getEmail();
@@ -56,6 +62,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @DirtiesContext
     public void removalTest() {
         final User user1 = new User("valid@gmail.com", "name1ee", "secretee");
         final User user2 = new User("valid2@gmail.com", "name1ee", "secretee");
@@ -81,6 +88,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @DirtiesContext
     public void obtainAllUsers() {
         final User user1 = new User("valid@gmail.com", "name1ee", "secretee");
         final User user2 = new User("valid2@gmail.com", "name1ee", "secretee");

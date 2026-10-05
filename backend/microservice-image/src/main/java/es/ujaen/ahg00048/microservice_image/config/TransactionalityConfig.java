@@ -1,6 +1,5 @@
 package es.ujaen.ahg00048.microservice_image.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -16,7 +15,7 @@ import java.time.Duration;
 
 @Configuration
 @EnableTransactionManagement
-public class AppConfig {
+public class TransactionalityConfig {
     private static final String LOCK_REGISTRY_REDIS_KEY = "locks";
 
     private static final Duration RELEASE_TIME_DURATION = Duration.ofSeconds(10);

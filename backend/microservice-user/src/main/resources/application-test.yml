@@ -3,3 +3,5 @@ logging.level.org.springframework.data.mongodb.core.MongoTemplate: DEBUG
 spring.mongodb.database: "dndservice_db_test"
 # Eureka config
 eureka.client.enabled: false
+# RabbitMq
+spring.rabbitmq.virtual-host: "vTest"

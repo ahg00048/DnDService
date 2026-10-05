@@ -8,7 +8,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @SpringBootApplication
 @ComponentScan({"es.ujaen.ahg00048.microservice_characterSheet.service",
 		"es.ujaen.ahg00048.microservice_characterSheet.service",
-		"es.ujaen.ahg00048.microservice_characterSheet.rest"})
+		"es.ujaen.ahg00048.microservice_characterSheet.rest",
+		"es.ujaen.ahg00048.microservice_characterSheet.config"})
 @EnableMongoRepositories("es.ujaen.ahg00048.microservice_characterSheet.repository")
 public class MicroserviceCharacterSheetApplication {
 	public static void main(String[] args) {

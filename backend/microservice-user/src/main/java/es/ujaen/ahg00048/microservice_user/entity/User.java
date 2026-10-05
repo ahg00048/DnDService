@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
@@ -25,6 +26,8 @@ public class User {
     @Size(min = 8)
     private String password;
 
+    @Version
+    private Long version;
 
     public User(String email, String name, String password) {
         this.email = email;
