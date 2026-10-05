@@ -4,5 +4,7 @@ spring.mongodb:
   replica-set-name:
 # MinIO
 minio.bucket.name: "images"
+# RabbitMQ
+spring.rabbitmq.virtual-host: "vMicroservicesMQ"
 # Eureka config
 eureka.instance.instance-id: "${spring.application.name}:${random.uuid}"

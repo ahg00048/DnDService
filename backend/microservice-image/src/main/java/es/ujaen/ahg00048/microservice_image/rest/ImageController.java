@@ -63,7 +63,7 @@ public class ImageController {
             return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (IllegalStateException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

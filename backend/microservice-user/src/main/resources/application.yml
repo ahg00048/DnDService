@@ -2,3 +2,5 @@
 spring.mongodb.database: "dndservice_db_user"
 # Eureka config
 eureka.instance.instance-id: "${spring.application.name}:${random.uuid}"
+# RabbitMq
+spring.rabbitmq.virtual-host: "vMicroservicesMQ"

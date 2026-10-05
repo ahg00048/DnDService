@@ -74,7 +74,7 @@ public class LobbyRestController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (IllegalStateException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -90,7 +90,7 @@ public class LobbyRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (UserRegistrationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (IllegalStateException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -119,6 +119,8 @@ public class LobbyRestController {
             return ResponseEntity.ok(_mapper.dto(_lobbyService.addBoard(userId, _mapper.entity(boardDTO))));
         } catch (BoardRegistrationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -132,6 +134,8 @@ public class LobbyRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -145,6 +149,8 @@ public class LobbyRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

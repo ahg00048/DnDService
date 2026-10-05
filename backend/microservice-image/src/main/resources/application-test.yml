@@ -5,6 +5,8 @@ spring.mongodb:
   replica-set-name:
 # MinIO
 minio.bucket.name: "test"
+# RabbitMQ
+spring.rabbitmq.virtual-host: "vTest"
 # Eureka
 eureka.client.enabled: false
 # App specific
