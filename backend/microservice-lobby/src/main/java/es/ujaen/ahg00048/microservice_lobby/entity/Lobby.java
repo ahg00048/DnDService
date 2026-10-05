@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -40,7 +41,8 @@ public class Lobby implements Serializable {
     }
 
 
-    public void addUser(String userId, String password) {
+    public void addUser(String userId, String password)
+            throws UserRegistrationException, InvalidOperationException {
         if (usersIds.contains(userId) || usersIds.size() >= LobbyService.MAX_USERS_PER_LOBBY)
             throw new UserRegistrationException();
         if (!password.equals(this.password) && !open)
@@ -49,7 +51,8 @@ public class Lobby implements Serializable {
         usersIds.add(userId);
     }
 
-    public void removeUser(String userId) {
+    public void removeUser(String userId)
+            throws UserRegistrationException {
         if (!usersIds.contains(userId))
             throw new UserRegistrationException();
 

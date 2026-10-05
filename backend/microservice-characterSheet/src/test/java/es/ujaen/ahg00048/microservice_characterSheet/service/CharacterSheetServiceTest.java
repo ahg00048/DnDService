@@ -33,7 +33,7 @@ public class CharacterSheetServiceTest {
         _mongoTemplate.getDb().drop();
     }
 
-
+    
     @Test
     @DirtiesContext
     public void addingAndRemovingCharacterSheetTest() {

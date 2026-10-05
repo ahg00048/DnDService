@@ -63,6 +63,7 @@ public class CharacterSheetService {
 
         charSheet.setUserId(userId);
         charSheet.setId(id);
+        charSheet.setVersion(savedCharSheet.getVersion());
 
         return _charSheetsRep.save(charSheet);
     }

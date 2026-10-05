@@ -1,12 +1,11 @@
 package es.ujaen.ahg00048.microservice_lobby.entity.boardGame;
 
-import es.ujaen.ahg00048.microservice_lobby.exception.InvalidOperationException;
-import es.ujaen.ahg00048.microservice_lobby.exception.PieceRegistrationException;
-import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
 import jakarta.validation.constraints.*;
 import lombok.*;
+
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,6 +13,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import es.ujaen.ahg00048.microservice_lobby.exception.PieceRegistrationException;
+import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
 
 
 @Getter
@@ -26,6 +28,9 @@ public class Board implements Serializable {
     private String userId = "";
     @Id
     private String id = "";
+
+    @Version
+    private Long version;
 
     @NotNull
     private String backgroundImage = "";
@@ -40,12 +45,21 @@ public class Board implements Serializable {
         pieces = new ArrayList<>();
     }
 
-    public Board(Board other ) {
+    public Board(Board other) {
         userId = other.userId;
+        version = other.version;
         id = other.id;
         backgroundImage = other.backgroundImage;
         pieces = new ArrayList<>(other.pieces);
         scale = other.scale;
+    }
+
+    public Board(String userId, String id, String backgroundImage, int scale, List<Piece> pieces) {
+        this.userId = userId;
+        this.id = id;
+        this.backgroundImage = backgroundImage;
+        this.scale = scale;
+        this.pieces = pieces;
     }
 
 

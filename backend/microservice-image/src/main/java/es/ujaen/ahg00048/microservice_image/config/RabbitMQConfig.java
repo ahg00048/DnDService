@@ -5,6 +5,7 @@ import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
+import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,12 +43,17 @@ public class RabbitMQConfig {
                 .multiplier(2.0)
                 .maxDelay(Duration.ofSeconds(10))
                 .build();
-        template.setMessageConverter(new JacksonJsonMessageConverter());
+        template.setMessageConverter(messageConverter());
         template.setRetryTemplate(new RetryTemplate(retryPolicy));
 
         template.setExchange(exchange);
         template.setRoutingKey(routingKey);
 
         return template;
+    }
+
+    @Bean
+    public SimpleMessageConverter messageConverter() {
+        return new SimpleMessageConverter();
     }
 }

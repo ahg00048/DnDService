@@ -411,6 +411,7 @@ public class LobbyService {
             if (!lobby.contains(userId))
                 throw new UserRegistrationException();
 
+            board.setId("");
             lobby.setBoard(board);
 
             return _lobbiesRep.save(lobby);
@@ -491,101 +492,59 @@ public class LobbyService {
     public Board addBoard(@Email @NotBlank String userId, @Valid @NotNull Board board)
             throws BoardRegistrationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_BOARD_KEY_BASE + userId);
-        boolean locked = false;
-        try {
-            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
-                throw new IllegalStateException();
-            locked = true;
+        if (_boardsRep.findByUserId(userId).size() >= MAX_BOARDS_PER_USER)
+            throw new BoardRegistrationException();
 
-            if (_boardsRep.findByUserId(userId).size() >= MAX_BOARDS_PER_USER)
-                throw new BoardRegistrationException();
+        board.initId();
+        board.setUserId(userId);
 
-            board.initId();
-            board.setUserId(userId);
-
-            return _boardsRep.insert(board);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        } finally {
-            if (locked)
-                lock.unlock();
-        }
+        return _boardsRep.insert(board);
     }
 
     public Board saveBoard(@Email @NotBlank String userId, @NotBlank String id, @Valid @NotNull Board board)
             throws BoardRegistrationException, InvalidOperationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_BOARD_KEY_BASE + userId);
-        boolean locked = false;
-        try {
-            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
-                throw new IllegalStateException();
-            locked = true;
+        Board savedBoard = _boardsRep.findById(id).orElseThrow(BoardRegistrationException::new);
 
-            Board savedBoard = _boardsRep.findById(id).orElseThrow(BoardRegistrationException::new);
+        if (!savedBoard.getUserId().equals(userId))
+            throw new InvalidOperationException();
 
-            if (!savedBoard.getUserId().equals(userId))
-                throw new InvalidOperationException();
+        board.setId(id);
+        board.setUserId(userId);
+        board.setVersion(savedBoard.getVersion());
 
-            board.setId(id);
-            board.setUserId(userId);
-
-            return _boardsRep.save(board);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        } finally {
-            if (locked)
-                lock.unlock();
-        }
+        return _boardsRep.save(board);
     }
 
     public void removeBoard(@Email @NotBlank String userId, @NotBlank String id)
             throws BoardRegistrationException, InvalidOperationException,
             IllegalStateException {
-        Lock lock = _lockRegistry.obtain(LOCK_BOARD_KEY_BASE + userId);
-        boolean locked = false;
-        try {
-            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
-                throw new IllegalStateException();
-            locked = true;
+        Board savedBoard = _boardsRep.findById(id).orElseThrow(BoardRegistrationException::new);
 
-            Board savedBoard = _boardsRep.findById(id).orElseThrow(BoardRegistrationException::new);
+        if (!savedBoard.getUserId().equals(userId))
+            throw new InvalidOperationException();
 
-            if (!savedBoard.getUserId().equals(userId))
-                throw new InvalidOperationException();
-
-            _boardsRep.delete(savedBoard);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
-        } finally {
-            if (locked)
-                lock.unlock();
-        }
+        _boardsRep.delete(savedBoard);
     }
 
     /// Used by RabbitMQ listener --------------------------------------------------------------------------------------------------------------------
 
-    @Transactional
+    @Transactional(noRollbackFor = UserRegistrationException.class)
     public void removeUser_admin(String userId)
             throws UserRegistrationException,
             IllegalStateException {
+        _boardsRep.deleteAllByUserId(userId);
+
         Lobby lobby = _lobbiesRep.findByUserId(userId).orElseThrow(UserRegistrationException::new);
 
         Lock lock1 = _lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + lobby.getId());
-        Lock lock2 = _lockRegistry.obtain(LOCK_BOARD_KEY_BASE + userId);
         boolean locked = false;
         try {
-            if (!lock1.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT) || !lock2.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
+            if (!lock1.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
                 throw new IllegalStateException();
             locked = true;
 
-            _boardsRep.deleteAllByUserId(userId);
-
-            lobby = _lobbiesRep.findByUserId(userId).get();
+            lobby = _lobbiesRep.findByUserId(userId).orElseThrow(UserRegistrationException::new);
 
             lobby.removeUser(userId);
 
@@ -594,31 +553,27 @@ public class LobbyService {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);
         } finally {
-            if (locked) {
+            if (locked)
                 lock1.unlock();
-                lock2.unlock();
-            }
         }
     }
 
     @Transactional
-    public void removeImage_admin(String imageId) {
-        List<Lobby> lobbies = _lobbiesRep.findAllByImageId(imageId);
+    public void removeImage_admin(String imageId)
+            throws IllegalStateException {
         List<Board> boards = _boardsRep.findAllContainingImageId(imageId);
-        Set<String> userBoards = new HashSet<>();
-        List<Lock> locks = new ArrayList<>(lobbies.size());
 
+        for (Board board : boards) {
+            removeImageFromBoard_admin(board, imageId);
+        }
+
+        _boardsRep.saveAll(boards);
+
+        List<Lobby> lobbies = _lobbiesRep.findAllByImageId(imageId);
+        List<Lock> locks = new ArrayList<>(lobbies.size());
 
         for (Lobby lobby : lobbies) {
             locks.add(_lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + lobby.getId()));
-        }
-
-        for (Board board : boards) {
-            String userId = board.getUserId();
-            if (!userBoards.contains(userId)) {
-                locks.add(_lockRegistry.obtain(LOCK_BOARD_KEY_BASE + userId));
-                userBoards.add(userId);
-            }
         }
 
         int locked = 0;
@@ -636,14 +591,6 @@ public class LobbyService {
             }
 
             _lobbiesRep.saveAll(lobbies);
-
-            boards = _boardsRep.findAllContainingImageId(imageId);
-
-            for (Board board : boards) {
-                removeImageFromBoard_admin(board, imageId);
-            }
-
-            _boardsRep.saveAll(boards);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);

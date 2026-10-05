@@ -230,8 +230,7 @@ public class ImageService {
 
     @Transactional
     public void removeUser_admin(String userId)
-            throws ImageRegistrationException,
-            IllegalStateException {
+            throws IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_USER_KEY_BASE + userId);
         boolean locked = false;
         try {
@@ -247,7 +246,9 @@ public class ImageService {
 
             _imagesMongoRep.deleteAll(images);
 
-            _rabbitTemplate.convertAndSend(imagesIds);
+            for (String id : imagesIds) {
+                _rabbitTemplate.send(new Message(id.getBytes()));
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException(e);

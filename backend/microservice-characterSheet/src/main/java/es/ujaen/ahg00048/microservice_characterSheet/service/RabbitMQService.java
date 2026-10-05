@@ -15,29 +15,18 @@ public class RabbitMQService {
 
 
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(value = "${rabbitmq.queue.charSheet}", durable = "true"),
+            value = @Queue(value = "${rabbitmq.queue.charSheet.user}", durable = "true"),
             exchange = @Exchange(value = "${rabbitmq.exchange.user}", ignoreDeclarationExceptions = "true"),
             key = "${rabbitmq.bind.key.user}"))
     public void userDeletionListener(String userId) {
         _characterSheetService.removeCharSheet_admin(userId);
     }
 
-    @Service
     @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(value = "${rabbitmq.queue.charSheet}", durable = "true"),
+            value = @Queue(value = "${rabbitmq.queue.charSheet.image}", durable = "true"),
             exchange = @Exchange(value = "${rabbitmq.exchange.image}", ignoreDeclarationExceptions = "true"),
             key = "${rabbitmq.bind.key.image}"))
-    public class ImageDeletionListener {
-        @RabbitHandler
-        public void imageDeletionListener(String imageId) {
-            _characterSheetService.removeImage_admin(imageId);
-        }
-
-        @RabbitHandler
-        public void imagesDeletionListener(List<String> imagesIds) {
-            for (String id : imagesIds) {
-                _characterSheetService.removeImage_admin(id);
-            }
-        }
+    public void imageDeletionListener(String imageId) {
+        _characterSheetService.removeImage_admin(imageId);
     }
 }

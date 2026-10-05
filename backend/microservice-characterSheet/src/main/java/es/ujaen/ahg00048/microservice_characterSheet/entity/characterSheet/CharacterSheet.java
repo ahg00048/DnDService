@@ -29,14 +29,13 @@ import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.prope
 
 @Setter
 @Getter
-@AllArgsConstructor
 @Document("characterSheets")
 public class CharacterSheet {
     @Id
     private String id;
 
     @Version
-    private Long version;
+    private Long version = null;
 
     @NotNull
     private String imageId = "";
