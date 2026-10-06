@@ -123,18 +123,18 @@ public class LobbyServiceTest {
         Piece piece = lobby.getBoard().getPieces().getFirst();
         int newHp = 50;
 
-        lobby = _lobbyService.updatePieceProperties_hp_maxHp(validUser1Id, lobbyId, piece, newHp, piece.getMaxHp()); // Update piece
+        lobby = _lobbyService.updatePieceProperties_hp_maxHp(validUser1Id, lobbyId, piece.getId(), newHp, piece.getMaxHp()); // Update piece
         final Piece constPiece = lobby.getBoard().getPieces().getFirst();
 
         Assertions.assertEquals(newHp, constPiece.getHp());
 
-        Assertions.assertThrows(InvalidOperationException.class, () -> _lobbyService.removePiece(validUser1Id, lobbyId, constPiece));
+        Assertions.assertThrows(InvalidOperationException.class, () -> _lobbyService.removePiece(validUser1Id, lobbyId, constPiece.getId()));
 
-        Assertions.assertDoesNotThrow(() -> _lobbyService.selectPiece(validUser1Id, lobbyId, constPiece));
+        Assertions.assertDoesNotThrow(() -> _lobbyService.selectPiece(validUser1Id, lobbyId, constPiece.getId()));
 
-        Assertions.assertDoesNotThrow(() -> _lobbyService.removePiece(validUser1Id, lobbyId, constPiece));
+        Assertions.assertDoesNotThrow(() -> _lobbyService.removePiece(validUser1Id, lobbyId, constPiece.getId()));
 
-        Assertions.assertThrows(PieceRegistrationException.class, () -> _lobbyService.removePiece(validUser1Id, lobbyId, piece));
+        Assertions.assertThrows(PieceRegistrationException.class, () -> _lobbyService.removePiece(validUser1Id, lobbyId, piece.getId()));
     }
 
     @Test

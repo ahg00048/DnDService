@@ -41,29 +41,29 @@ public class LobbyWsController {
             switch (subCommand.getType()) {
                 case RM_PIECE:
                     return _mapper.dto(_lobbyService.removePiece(subCommand.getUserId(), id,
-                            _mapper.entity(subCommand.getPiece())));
+                            subCommand.getPieceId()));
                 case SELECT_PIECE:
                     return _mapper.dto(_lobbyService.selectPiece(subCommand.getUserId(), id,
-                            _mapper.entity(subCommand.getPiece())));
+                            subCommand.getPieceId()));
                 case DESELECT_PIECE:
                     return _mapper.dto(_lobbyService.deselectPiece(subCommand.getUserId(), id,
-                            _mapper.entity(subCommand.getPiece())));
+                            subCommand.getPieceId()));
             }
         } else if (command instanceof UpdateBoard_Change_CommandDTO subCommand) {
             return _mapper.dto(_lobbyService.changeBoard(subCommand.getUserId(), id,
-                    _mapper.entity(subCommand.getBoard())));
+                    subCommand.getBoardId()));
         } else if (command instanceof UpdateBoard_Image_Scale_CommandDTO subCommand) {
             return _mapper.dto(_lobbyService.modifyBoardProperties(subCommand.getUserId(), id,
                     subCommand.getImageId(), subCommand.getScale()));
         } else if (command instanceof UpdatePiece_HpMaxHp_CommandDTO subCommand) {
             return _mapper.dto(_lobbyService.updatePieceProperties_hp_maxHp(subCommand.getUserId(), id,
-                    _mapper.entity(subCommand.getPiece()), subCommand.getHp(), subCommand.getMaxHp()));
+                    subCommand.getPieceId(), subCommand.getHp(), subCommand.getMaxHp()));
         } else if (command instanceof UpdatePiece_Image_CommandDTO subCommand) {
             return _mapper.dto(_lobbyService.updatePieceProperties_image(subCommand.getUserId(), id,
-                    _mapper.entity(subCommand.getPiece()), subCommand.getImageId()));
+                    subCommand.getPieceId(), subCommand.getImageId()));
         } else if (command instanceof UpdatePiece_Pos_CommandDTO subCommand) {
             return _mapper.dto(_lobbyService.updatePieceProperties_pos(subCommand.getUserId(), id,
-                    _mapper.entity(subCommand.getPiece()), subCommand.getX(), subCommand.getY()));
+                    subCommand.getPieceId(), subCommand.getX(), subCommand.getY()));
         }
 
         return _mapper.dto(_lobbyService.getLobby(id));

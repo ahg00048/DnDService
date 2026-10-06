@@ -12,11 +12,11 @@ import es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.ACommandDTO;
 @Getter
 @Setter
 public class Select_Deselect_Remove_Piece_CommandDTO extends ACommandDTO {
-    private PieceDTO piece;
+    private int pieceId;
 
 
-    public Select_Deselect_Remove_Piece_CommandDTO(String userId, CommandType type, PieceDTO piece) {
+    public Select_Deselect_Remove_Piece_CommandDTO(String userId, CommandType type, int pieceId) {
         super(userId, type);
-        this.piece = piece;
+        this.pieceId = pieceId;
     }
 }

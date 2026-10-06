@@ -38,7 +38,6 @@ public class LobbyService {
     public static int MAX_PIECES_PER_BOARDS;
 
     private final static String LOCK_LOBBY_KEY_BASE = "lobbies:";
-    private final static String LOCK_BOARD_KEY_BASE = "boards:";
     private final static int TIMEOUT_AMOUNT = 1;
     private final static TimeUnit TIMEOUT_UNIT = TimeUnit.SECONDS;
 
@@ -187,7 +186,7 @@ public class LobbyService {
     }
 
     public Lobby updatePieceProperties_hp_maxHp(@Email @NotBlank String userId, @NotBlank String id,
-                                                @Valid @NotNull Piece piece,
+                                                int pieceId,
                                                 @Positive int hp,
                                                 @PositiveOrZero int maxHp)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException,
@@ -204,7 +203,7 @@ public class LobbyService {
             if (!lobby.contains(userId))
                 throw new UserRegistrationException();
 
-            piece = lobby.getBoard().findPiece(piece.getId()).orElseThrow(PieceRegistrationException::new);
+            Piece piece = lobby.getBoard().findPiece(pieceId).orElseThrow(PieceRegistrationException::new);
             piece.setHp(hp);
             piece.setMaxHp(maxHp);
             lobby.getBoard().updatePiece(piece);
@@ -221,7 +220,7 @@ public class LobbyService {
     }
 
     public Lobby updatePieceProperties_image(@Email @NotBlank String userId, @NotBlank String id,
-                                             @Valid @NotNull Piece piece,
+                                             int pieceId,
                                              @NotNull String imageId)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException,
             IllegalStateException {
@@ -237,7 +236,7 @@ public class LobbyService {
             if (!lobby.contains(userId))
                 throw new UserRegistrationException();
 
-            piece = lobby.getBoard().findPiece(piece.getId()).orElseThrow(PieceRegistrationException::new);
+            Piece piece = lobby.getBoard().findPiece(pieceId).orElseThrow(PieceRegistrationException::new);
             piece.setImageId(imageId);
             lobby.getBoard().updatePiece(piece);
 
@@ -253,7 +252,7 @@ public class LobbyService {
     }
 
     public Lobby updatePieceProperties_pos(@Email @NotBlank String userId, @NotBlank String id,
-                                           @Valid @NotNull Piece piece,
+                                           int pieceId,
                                            @DecimalMin(value = "0.0", inclusive = true) @DecimalMax(value = "1.0", inclusive = true) float xPos,
                                            @DecimalMin(value = "0.0", inclusive = true) @DecimalMax(value = "1.0", inclusive = true) float yPos)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
@@ -270,7 +269,7 @@ public class LobbyService {
             if (!lobby.contains(userId))
                 throw new UserRegistrationException();
 
-            piece = lobby.getBoard().findPiece(piece.getId()).orElseThrow(PieceRegistrationException::new);
+            Piece piece = lobby.getBoard().findPiece(pieceId).orElseThrow(PieceRegistrationException::new);
 
             if (!piece.getCurrentUser().isEmpty())
                 throw new InvalidOperationException();
@@ -292,7 +291,7 @@ public class LobbyService {
 
 
     public Lobby selectPiece(@Email @NotBlank String userId, @NotBlank String id,
-                             @Valid @NotNull Piece piece)
+                             int pieceId)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + id);
@@ -307,7 +306,7 @@ public class LobbyService {
             if (!lobby.contains(userId))
                 throw new UserRegistrationException();
 
-            piece = lobby.getBoard().findPiece(piece.getId()).orElseThrow(PieceRegistrationException::new);
+            Piece piece = lobby.getBoard().findPiece(pieceId).orElseThrow(PieceRegistrationException::new);
 
             if (!piece.getCurrentUser().isEmpty())
                 throw new InvalidOperationException();
@@ -327,7 +326,7 @@ public class LobbyService {
     }
 
     public Lobby deselectPiece(@Email @NotBlank String userId, @NotBlank String id,
-                               @Valid @NotNull Piece piece)
+                               int pieceId)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + id);
@@ -342,7 +341,7 @@ public class LobbyService {
             if (!lobby.contains(userId))
                 throw new UserRegistrationException();
 
-            piece = lobby.getBoard().findPiece(piece.getId()).orElseThrow(PieceRegistrationException::new);
+            Piece piece = lobby.getBoard().findPiece(pieceId).orElseThrow(PieceRegistrationException::new);
 
             if (!piece.getCurrentUser().equals(userId))
                 throw new InvalidOperationException();
@@ -362,7 +361,7 @@ public class LobbyService {
     }
 
     public Lobby removePiece(@Email @NotBlank String userId, @NotBlank String id,
-                             @Valid @NotNull Piece piece)
+                             int pieceId)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + id);
@@ -377,7 +376,7 @@ public class LobbyService {
             if (!lobby.contains(userId))
                 throw new UserRegistrationException();
 
-            piece = lobby.getBoard().findPiece(piece.getId()).orElseThrow(PieceRegistrationException::new);
+            Piece piece = lobby.getBoard().findPiece(pieceId).orElseThrow(PieceRegistrationException::new);
 
             if (!piece.getCurrentUser().equals(userId))
                 throw new InvalidOperationException();
@@ -396,8 +395,8 @@ public class LobbyService {
     }
 
     public Lobby changeBoard(@Email @NotBlank String userId, @NotBlank String id,
-                             @Valid @NotNull Board board)
-            throws LobbyRegistrationException, UserRegistrationException,
+                             @NotBlank String boardId)
+            throws LobbyRegistrationException, UserRegistrationException, BoardRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + id);
         boolean locked = false;
@@ -410,6 +409,8 @@ public class LobbyService {
 
             if (!lobby.contains(userId))
                 throw new UserRegistrationException();
+
+            Board board = _boardsRep.findById(boardId).orElseThrow(BoardRegistrationException::new);
 
             board.setId("");
             lobby.setBoard(board);

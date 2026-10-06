@@ -12,11 +12,11 @@ import es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.ACommandDTO;
 @Getter
 @Setter
 public class UpdateBoard_Change_CommandDTO extends ACommandDTO {
-    private BoardDTO board;
+    private String boardId;
 
 
-    public UpdateBoard_Change_CommandDTO(String userId, CommandType type, BoardDTO board) {
+    public UpdateBoard_Change_CommandDTO(String userId, CommandType type, String boardId) {
         super(userId, type);
-        this.board = board;
+        this.boardId = boardId;
     }
 }
