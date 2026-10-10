@@ -12,7 +12,7 @@ public class UserMapper {
     @Autowired
     private PasswordEncoder _passwordEncoder;
 
-    // User
+
     public User entity(UserDTO user) {
         return new User(user.email(), user.name(), "");
     }

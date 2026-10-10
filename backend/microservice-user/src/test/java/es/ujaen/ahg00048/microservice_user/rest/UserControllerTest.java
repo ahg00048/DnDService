@@ -1,6 +1,6 @@
 package es.ujaen.ahg00048.microservice_user.rest;
 
-import es.ujaen.ahg00048.microservice_user.rest.DTO.JwtResponseDTO;
+import es.ujaen.ahg00048.microservice_user.entity.User;
 import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,12 +67,10 @@ public class UserControllerTest {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        JwtResponseDTO resp = _restClient.get() // Correct login
+        userD = _restClient.get() // Correct login
                 .uri("api/v1/users/" + email + "?password=" + password)
                 .exchange()
-                .expectBody(JwtResponseDTO.class).returnResult().getResponseBody();
-
-        userD = resp.user();
+                .expectBody(UserDTO.class).returnResult().getResponseBody();
 
         _restClient.post() // Add user already registered
                 .uri("api/v1/users")
@@ -103,30 +101,29 @@ public class UserControllerTest {
                 .exchange()
                 .expectStatus().isCreated();
 
-        JwtResponseDTO user1Resp = _restClient.get()
+        UserDTO user1Resp = _restClient.get()
                 .uri("api/v1/users/" + userD1.email() + "?password=" + userD1.password())
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(JwtResponseDTO.class)
+                .expectBody(UserDTO.class)
                 .returnResult().getResponseBody();
 
-        JwtResponseDTO user2Resp = _restClient.get()
+        UserDTO user2Resp = _restClient.get()
                 .uri("api/v1/users/" + userD2.email() + "?password=" + userD2.password())
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(JwtResponseDTO.class)
+                .expectBody(UserDTO.class)
                 .returnResult().getResponseBody();
 
-        JwtResponseDTO adminResp = _restClient.get()
+        UserDTO adminResp = _restClient.get()
                 .uri("api/v1/users/" + adminEmail + "?password=" + adminPwd)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(JwtResponseDTO.class)
+                .expectBody(UserDTO.class)
                 .returnResult().getResponseBody();
 
         List<UserDTO> users = _restClient.get() // get users with admin
                 .uri("api/v1/users?id=" + adminEmail)
-                .header("Authorization", "Bearer " + adminResp.access_token())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(new ParameterizedTypeReference<List<UserDTO>>() {})
@@ -135,25 +132,21 @@ public class UserControllerTest {
 
         _restClient.delete() // user trying removing other user
                 .uri("api/v1/users/" + userD1.email() + "?userToRemove=" + userD2.email())
-                .header("Authorization", "Bearer " + user1Resp.access_token())
                 .exchange()
                 .expectStatus().isForbidden();
 
         _restClient.delete() // user removes his account
                 .uri("api/v1/users/" + userD1.email() + "?userToRemove=" + userD1.email())
-                .header("Authorization", "Bearer " + user1Resp.access_token())
                 .exchange()
                 .expectStatus().isOk();
 
         _restClient.delete() // admin removing other user
                 .uri("api/v1/users/" + adminEmail + "?userToRemove=" + userD2.email())
-                .header("Authorization", "Bearer " + adminResp.access_token())
                 .exchange()
                 .expectStatus().isOk();
 
         _restClient.delete() // admin removing other user unregistered
                 .uri("api/v1/users/" + adminEmail + "?userToRemove=" + userD2.email())
-                .header("Authorization", "Bearer " + adminResp.access_token())
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -165,16 +158,15 @@ public class UserControllerTest {
         String adminEmail = _env.getProperty("app.admin.email");
         String adminPwd = _env.getProperty("app.admin.pwd");
 
-        JwtResponseDTO adminResp = _restClient.get()
+        UserDTO adminResp = _restClient.get()
                 .uri("api/v1/users/" + adminEmail + "?password=" + adminPwd)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(JwtResponseDTO.class)
+                .expectBody(UserDTO.class)
                 .returnResult().getResponseBody();
 
         List<UserDTO> users = _restClient.get() // get users with admin
                 .uri("api/v1/users?id=" + adminEmail)
-                .header("Authorization", "Bearer " + adminResp.access_token())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(new ParameterizedTypeReference<List<UserDTO>>() {})
@@ -193,7 +185,6 @@ public class UserControllerTest {
 
         users =  _restClient.get() // get users with admin
                 .uri("api/v1/users?id=" + adminEmail)
-                .header("Authorization", "Bearer " + adminResp.access_token())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(new ParameterizedTypeReference<List<UserDTO>>() {})
@@ -202,23 +193,22 @@ public class UserControllerTest {
 
         Assertions.assertEquals(1, users.size());
 
-        JwtResponseDTO userResp = _restClient.get()
+        UserDTO userResp = _restClient.get()
                 .uri("api/v1/users/" + userD.email() + "?password=" + userD.password())
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(JwtResponseDTO.class)
+                .expectBody(UserDTO.class)
                 .returnResult().getResponseBody();
 
         _restClient.get() // get users with not admin
                 .uri("api/v1/users?id=" + userD.email())
-                .header("Authorization", "Bearer " + userResp.access_token())
                 .exchange()
                 .expectStatus().isForbidden();
 
         _restClient.get() // get users with unregistered user
                 .uri("api/v1/users?id=" + "notfound@hotmail.com")
                 .exchange()
-                .expectStatus().isUnauthorized();
+                .expectStatus().isNotFound();
     }
 
     @Test
@@ -231,7 +221,7 @@ public class UserControllerTest {
                 .uri("api/v1/users/" + userD.email() + "?newPassword=" + "seC8et$e")
                 .body(userD)
                 .exchange()
-                .expectStatus().isUnauthorized();
+                .expectStatus().isNotFound();
 
         _restClient.post() // Add user
                 .uri("api/v1/users")
@@ -239,29 +229,26 @@ public class UserControllerTest {
                 .exchange()
                 .expectStatus().isCreated();
 
-        JwtResponseDTO resp = _restClient.get()
+        UserDTO resp = _restClient.get()
                 .uri("api/v1/users/" + userD.email() + "?password=" + userD.password())
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(JwtResponseDTO.class)
+                .expectBody(UserDTO.class)
                 .returnResult().getResponseBody();
 
         _restClient.put() // change password
                 .uri("api/v1/users/" + userD.email() + "?newPassword=" + "seC8et$z")
-                .header("Authorization", "Bearer " + resp.access_token())
                 .body(userD)
                 .exchange()
                 .expectStatus().isOk();
 
         _restClient.get()   // Login with old password
                 .uri("api/v1/users/" + userD.email() + "?password=" + userD.password())
-                .header("Authorization", "Bearer " + resp.access_token())
                 .exchange()
                 .expectStatus().isUnauthorized();
 
         _restClient.get()   // Login with new password
                 .uri("api/v1/users/" + userD.email() + "?password=" + "seC8et$z")
-                .header("Authorization", "Bearer " + resp.access_token())
                 .exchange()
                 .expectStatus().isOk();
     }

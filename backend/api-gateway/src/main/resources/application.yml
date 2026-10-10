@@ -30,6 +30,20 @@ logging:
             reactive: DEBUG
 
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          my-oidc-client:
+            provider: my-oidc-provider
+            client-id: my-client-id
+            client-secret: my-client-secret
+            authorization-grant-type: authorization_code
+            scope: openid,profile
+        provider:
+          my-oidc-provider:
+            issuer-uri:
+            token-uri:
   application:
     name:
       api-gateway
@@ -64,6 +78,10 @@ spring:
                     bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
                     bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
                     bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
+                - TokenRelay=
+                - SaveSession
+
+
               predicates:
               - Path=/api/v1/charSheets/**
 # IMAGE rest service ====================================================================================
