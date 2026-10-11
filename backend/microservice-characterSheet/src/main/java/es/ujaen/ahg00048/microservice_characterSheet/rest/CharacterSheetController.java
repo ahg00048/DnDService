@@ -3,6 +3,7 @@ package es.ujaen.ahg00048.microservice_characterSheet.rest;
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.CharacterSheet;
 import es.ujaen.ahg00048.microservice_characterSheet.exception.InvalidOperationException;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import es.ujaen.ahg00048.microservice_characterSheet.exception.CharacterSheetReg
 import es.ujaen.ahg00048.microservice_characterSheet.rest.DTO.characterSheet.CharacterSheetDTO;
 import es.ujaen.ahg00048.microservice_characterSheet.rest.mapper.CharacterSheetMapper;
 import es.ujaen.ahg00048.microservice_characterSheet.service.CharacterSheetService;
+
 
 @RestController
 @RequestMapping("/api/v1/charSheets")
