@@ -63,12 +63,12 @@ public class LobbyService {
         return _lobbiesRep.findAllOpen();
     }
 
-    public Lobby createLobby(@Email @NotBlank String userId, boolean open, @NotNull String password)
+    public Lobby createLobby(@NotBlank String userId, @NotBlank String userName, boolean open, @NotNull String password)
             throws LobbyRegistrationException {
         if (_lobbiesRep.existByUserIdsContaining(userId))
             throw new LobbyRegistrationException();
 
-        Lobby lobby = new Lobby(userId, open, password);
+        Lobby lobby = new Lobby(userId, userName, open, password);
 
         lobby = _lobbiesRep.insert(lobby);
 
@@ -98,7 +98,7 @@ public class LobbyService {
         }
     }
 
-    public Lobby joinLobby(@Email @NotBlank String userId, @NotBlank String id, @NotNull String password)
+    public Lobby joinLobby(@NotBlank String userId, @NotBlank String userName, @NotBlank String id, @NotNull String password)
             throws LobbyRegistrationException, UserRegistrationException, InvalidOperationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + id);
@@ -110,7 +110,7 @@ public class LobbyService {
             // Critical section - start
             Lobby lobby = _lobbiesRep.findById(id).orElseThrow(LobbyRegistrationException::new);
 
-            lobby.addUser(userId, password);
+            lobby.addUser(userId, userName, password);
 
             return _lobbiesRep.save(lobby);
             // Critical section - end
@@ -123,7 +123,7 @@ public class LobbyService {
         }
     }
 
-    public Optional<Lobby> leaveLobby(@Email @NotBlank String userId, @NotBlank String id)
+    public Optional<Lobby> leaveLobby(@NotBlank String userId, @NotBlank String id)
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + id);
@@ -157,7 +157,7 @@ public class LobbyService {
 
     /// Boards game logic -----------------------------------------------------------------------------------------------------------
 
-    public Lobby addPiece(@Email @NotBlank String userId, @NotBlank String id)
+    public Lobby addPiece(@NotBlank String userId, @NotBlank String id)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + id);
@@ -185,7 +185,7 @@ public class LobbyService {
         }
     }
 
-    public Lobby updatePieceProperties_hp_maxHp(@Email @NotBlank String userId, @NotBlank String id,
+    public Lobby updatePieceProperties_hp_maxHp(@NotBlank String userId, @NotBlank String id,
                                                 int pieceId,
                                                 @Positive int hp,
                                                 @PositiveOrZero int maxHp)
@@ -219,7 +219,7 @@ public class LobbyService {
         }
     }
 
-    public Lobby updatePieceProperties_image(@Email @NotBlank String userId, @NotBlank String id,
+    public Lobby updatePieceProperties_image(@NotBlank String userId, @NotBlank String id,
                                              int pieceId,
                                              @NotNull String imageId)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException,
@@ -251,7 +251,7 @@ public class LobbyService {
         }
     }
 
-    public Lobby updatePieceProperties_pos(@Email @NotBlank String userId, @NotBlank String id,
+    public Lobby updatePieceProperties_pos(@NotBlank String userId, @NotBlank String id,
                                            int pieceId,
                                            @DecimalMin(value = "0.0", inclusive = true) @DecimalMax(value = "1.0", inclusive = true) float xPos,
                                            @DecimalMin(value = "0.0", inclusive = true) @DecimalMax(value = "1.0", inclusive = true) float yPos)
@@ -290,7 +290,7 @@ public class LobbyService {
     }
 
 
-    public Lobby selectPiece(@Email @NotBlank String userId, @NotBlank String id,
+    public Lobby selectPiece(@NotBlank String userId, @NotBlank String id,
                              int pieceId)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
@@ -325,7 +325,7 @@ public class LobbyService {
         }
     }
 
-    public Lobby deselectPiece(@Email @NotBlank String userId, @NotBlank String id,
+    public Lobby deselectPiece(@NotBlank String userId, @NotBlank String id,
                                int pieceId)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
@@ -360,7 +360,7 @@ public class LobbyService {
         }
     }
 
-    public Lobby removePiece(@Email @NotBlank String userId, @NotBlank String id,
+    public Lobby removePiece(@NotBlank String userId, @NotBlank String id,
                              int pieceId)
             throws LobbyRegistrationException, UserRegistrationException, PieceRegistrationException, InvalidOperationException,
             IllegalStateException {
@@ -394,7 +394,7 @@ public class LobbyService {
         }
     }
 
-    public Lobby changeBoard(@Email @NotBlank String userId, @NotBlank String id,
+    public Lobby changeBoard(@NotBlank String userId, @NotBlank String id,
                              @NotBlank String boardId)
             throws LobbyRegistrationException, UserRegistrationException, BoardRegistrationException,
             IllegalStateException {
@@ -426,7 +426,7 @@ public class LobbyService {
         }
     }
 
-    public Lobby modifyBoardProperties(@Email @NotBlank String userId, @NotBlank String id,
+    public Lobby modifyBoardProperties(@NotBlank String userId, @NotBlank String id,
                                        @NotNull String imageId, int scale)
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
@@ -456,7 +456,7 @@ public class LobbyService {
         }
     }
 
-    public Lobby clearBoard(@Email @NotBlank String userId, @NotBlank String id)
+    public Lobby clearBoard(@NotBlank String userId, @NotBlank String id)
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + id);
@@ -486,11 +486,11 @@ public class LobbyService {
 
     /// Boards persistence logic -----------------------------------------------------------------------------------------------------------
 
-    public List<Board> getSavedBoards(@Email @NotBlank String userId) {
+    public List<Board> getSavedBoards(@NotBlank String userId) {
         return _boardsRep.findByUserId(userId);
     }
 
-    public Board addBoard(@Email @NotBlank String userId, @Valid @NotNull Board board)
+    public Board addBoard(@NotBlank String userId, @Valid @NotNull Board board)
             throws BoardRegistrationException,
             IllegalStateException {
         if (_boardsRep.findByUserId(userId).size() >= MAX_BOARDS_PER_USER)
@@ -502,7 +502,7 @@ public class LobbyService {
         return _boardsRep.insert(board);
     }
 
-    public Board saveBoard(@Email @NotBlank String userId, @NotBlank String id, @Valid @NotNull Board board)
+    public Board saveBoard(@NotBlank String userId, @NotBlank String id, @Valid @NotNull Board board)
             throws BoardRegistrationException, InvalidOperationException,
             IllegalStateException {
         Board savedBoard = _boardsRep.findById(id).orElseThrow(BoardRegistrationException::new);
@@ -517,7 +517,7 @@ public class LobbyService {
         return _boardsRep.save(board);
     }
 
-    public void removeBoard(@Email @NotBlank String userId, @NotBlank String id)
+    public void removeBoard(@NotBlank String userId, @NotBlank String id)
             throws BoardRegistrationException, InvalidOperationException,
             IllegalStateException {
         Board savedBoard = _boardsRep.findById(id).orElseThrow(BoardRegistrationException::new);

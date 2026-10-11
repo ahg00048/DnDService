@@ -6,6 +6,8 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,15 +37,15 @@ public class CharacterSheetController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CharacterSheetDTO>> getSheets(@RequestParam(value = "userId", required = true) String userId) {
-        return ResponseEntity.ok(_service.getCharSheets(userId).stream().map(CharacterSheetDTO::new).toList());
+    public ResponseEntity<List<CharacterSheetDTO>> getSheets(@AuthenticationPrincipal Jwt auth) {
+        return ResponseEntity.ok(_service.getCharSheets(auth.getSubject()).stream().map(CharacterSheetDTO::new).toList());
     }
 
     @PostMapping
-    public ResponseEntity<CharacterSheet> addSheet(@RequestParam(value = "userId", required = true) String userId,
+    public ResponseEntity<CharacterSheet> addSheet(@AuthenticationPrincipal Jwt auth,
                                                    @RequestBody CharacterSheetDTO characterSheetDTO) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(_service.addCharSheet(userId, _mapper.newEntity(characterSheetDTO)));
+            return ResponseEntity.status(HttpStatus.CREATED).body(_service.addCharSheet(auth.getSubject(), _mapper.newEntity(characterSheetDTO)));
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         } catch (RuntimeException e) {
@@ -52,11 +54,11 @@ public class CharacterSheetController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CharacterSheetDTO> modifySheet(@RequestParam(value = "userId", required = true) String userId,
+    public ResponseEntity<CharacterSheetDTO> modifySheet(@AuthenticationPrincipal Jwt auth,
                                                          @PathVariable(value = "id") String id,
                                                          @RequestBody CharacterSheetDTO characterSheetDTO) {
         try {
-            CharacterSheet characterSheet = _service.modifyCharSheet(userId, id, _mapper.entity(characterSheetDTO));
+            CharacterSheet characterSheet = _service.modifyCharSheet(auth.getSubject(), id, _mapper.entity(characterSheetDTO));
             return ResponseEntity.ok(_mapper.dto(characterSheet));
         } catch (CharacterSheetRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -68,10 +70,10 @@ public class CharacterSheetController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeSheet(@RequestParam(value = "userId", required = true) String userId,
+    public ResponseEntity<Void> removeSheet(@AuthenticationPrincipal Jwt auth,
                                             @PathVariable(value = "id") String id) {
         try {
-            _service.removeCharSheet(userId, id);
+            _service.removeCharSheet(auth.getSubject(), id);
             return ResponseEntity.ok().build();
         } catch (CharacterSheetRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

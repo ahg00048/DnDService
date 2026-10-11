@@ -8,9 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,44 +23,46 @@ public class Lobby implements Serializable {
     private String password;
 
     private Board board;
-    private final List<String> usersIds;
+    private List<PlayerInfo> playersInfo;
 
 
-    public Lobby(String lobbyCreator, boolean open, String password) {
+    public Lobby(String lobbyCreatorId, String lobbyCreatorName, boolean open, String password) {
         id = new ObjectId().toString();
 
         board = new Board();
-        usersIds = new ArrayList<>();
-        usersIds.add(lobbyCreator);
+        playersInfo = new ArrayList<>();
+        playersInfo.add(new PlayerInfo(lobbyCreatorId, lobbyCreatorName));
 
         this.open = open;
         this.password = password;
     }
 
 
-    public void addUser(String userId, String password)
+    public void addUser(String userId, String userName, String password)
             throws UserRegistrationException, InvalidOperationException {
-        if (usersIds.contains(userId) || usersIds.size() >= LobbyService.MAX_USERS_PER_LOBBY)
+        if (playersInfo.contains(userId) || playersInfo.size() >= LobbyService.MAX_USERS_PER_LOBBY)
             throw new UserRegistrationException();
         if (!password.equals(this.password) && !open)
             throw new InvalidOperationException();
 
-        usersIds.add(userId);
+        playersInfo.add(new PlayerInfo(userId, userName));
     }
 
     public void removeUser(String userId)
             throws UserRegistrationException {
-        if (!usersIds.contains(userId))
+        PlayerInfo playerInfo = new PlayerInfo(userId);
+
+        if (!playersInfo.contains(playerInfo))
             throw new UserRegistrationException();
 
-        usersIds.remove(userId);
+        playersInfo.remove(playerInfo);
     }
 
     public boolean isEmpty() {
-        return usersIds.isEmpty();
+        return playersInfo.isEmpty();
     }
 
     public boolean contains(String userId) {
-        return usersIds.contains(userId);
+        return playersInfo.contains(new PlayerInfo(userId));
     }
 }
