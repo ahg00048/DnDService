@@ -42,14 +42,10 @@ public class ImageController {
     @GetMapping
     public ResponseEntity<List<?>> getImageUrls(@AuthenticationPrincipal Jwt auth,
                                                 @RequestParam(value = "imagesIds", required = false) List<String> imagesIds) {
-        try {
-            if (imagesIds != null) {
-                return ResponseEntity.ok(_imageService.getImagesUrls(imagesIds));
-            } else {
-                return ResponseEntity.ok(_imageService.getUserImagesIds(auth.getSubject()));
-            }
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (imagesIds != null) {
+            return ResponseEntity.ok(_imageService.getImagesUrls(imagesIds));
+        } else {
+            return ResponseEntity.ok(_imageService.getUserImagesIds(auth.getSubject()));
         }
     }
 
@@ -64,8 +60,6 @@ public class ImageController {
             return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -75,8 +69,6 @@ public class ImageController {
             return ResponseEntity.ok(_imageService.getImageUrl(id));
         } catch (ImageRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -90,8 +82,6 @@ public class ImageController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

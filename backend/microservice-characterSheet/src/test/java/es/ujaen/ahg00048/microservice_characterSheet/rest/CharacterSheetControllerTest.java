@@ -6,31 +6,43 @@ import es.ujaen.ahg00048.microservice_characterSheet.rest.mapper.CharacterSheetM
 import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.client.RestTestClient;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-@SpringBootTest(classes = es.ujaen.ahg00048.microservice_characterSheet.app.MicroserviceCharacterSheetApplication.class,
-                webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureRestTestClient
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+
 @ActiveProfiles("test")
+@SpringBootTest(classes = es.ujaen.ahg00048.microservice_characterSheet.app.MicroserviceCharacterSheetApplication.class)
+@ContextConfiguration
+@WebAppConfiguration
 public class CharacterSheetControllerTest {
-    @LocalServerPort
-    private int serverPort;
+    @Autowired
+    private WebApplicationContext context;
+
+    private MockMvc _mvc;
 
     @Autowired
-    private RestTestClient _restClient;
+    private ObjectMapper _oMapper;
 
     @Autowired
     private MongoTemplate _mongoTemplate;
@@ -45,104 +57,118 @@ public class CharacterSheetControllerTest {
         _mongoTemplate.getDb().drop();
     }
 
+    @BeforeEach
+    public void setup() {
+        _mvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .build();
+    }
+
     @Test
     @DirtiesContext
-    public void getSheet() {
-        String randomEmail = "random@gmail.com"; // registered user
+    public void getSheet() throws Exception {
+        String randomUserId = "random-id"; // registered user
 
         CharacterSheet characterSheet = new CharacterSheet();
-        characterSheet.setUserId(randomEmail);
         characterSheet.setLevel(1);
         characterSheet.setName("some name");
         characterSheet.setClassname("someClass");
 
-        List<CharacterSheetDTO> sheets = _restClient.get() // empty list due to unregistered sheets
-                .uri("/api/v1/charSheets?userId=" + randomEmail)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(new ParameterizedTypeReference<List<CharacterSheetDTO>>() {
-                })
-                .returnResult().getResponseBody();
+        MvcResult result = _mvc.perform(
+                    get("/api/v1/charSheets")
+                    .with(jwt().jwt((jwt -> jwt.subject(randomUserId)))))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<CharacterSheetDTO> sheets = _oMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>(){});
 
         Assertions.assertEquals(0, sheets.size());
 
         for(int i = 0; i < 2; i++) { // add two sheets
-            _restClient.post()
-                    .uri("/api/v1/charSheets?userId=" + randomEmail)
-                    .body(_mapper.dto(characterSheet))
-                    .exchange()
-                    .expectStatus().isCreated();
+            _mvc.perform(
+                    post("/api/v1/charSheets")
+                        .with(jwt().jwt((jwt -> jwt.subject(randomUserId))))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(_oMapper.writeValueAsString(_mapper.dto(characterSheet))))
+                    .andExpect(status().isCreated());
         }
 
-        sheets = _restClient.get() // list of size 2
-                .uri("/api/v1/charSheets?userId=" + randomEmail)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(new ParameterizedTypeReference<List<CharacterSheetDTO>>() {})
-                .returnResult().getResponseBody();
+        result = _mvc.perform(
+                        get("/api/v1/charSheets")
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId)))))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        sheets = _oMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>(){});
+
 
         Assertions.assertEquals(2, sheets.size());
     }
 
     @Test
     @DirtiesContext
-    public void addSheets() {
-        String randomEmail = "random@gmail.com"; // registered user
+    public void addSheets() throws Exception {
+        String randomUserId = "random-id"; // registered user
 
         CharacterSheet characterSheet = new CharacterSheet();
-        characterSheet.setUserId(randomEmail);
         characterSheet.setLevel(1);
         characterSheet.setName("some name");
         characterSheet.setClassname("someClass");
 
-        Integer maxSheetsAllowed = _restClient.get()
-                .uri("/api/v1/charSheets/maxAllowed")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(Integer.class)
-                .returnResult().getResponseBody();
+        MvcResult result = _mvc.perform(
+                        get("/api/v1/charSheets/maxAllowed")
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId)))))
+                .andExpect(status().isOk())
+                .andReturn();
 
+        Integer maxSheetsAllowed = _oMapper.readValue(result.getResponse().getContentAsString(), Integer.class);
 
         for(int i = 0; i < maxSheetsAllowed; i++) {
-            _restClient.post() // add sheet
-                    .uri("/api/v1/charSheets?userId=" + randomEmail)
-                    .body(_mapper.dto(characterSheet))
-                    .exchange()
-                    .expectStatus().isCreated();
+            _mvc.perform(
+                            post("/api/v1/charSheets")
+                                    .with(jwt().jwt((jwt -> jwt.subject(randomUserId))))
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(_oMapper.writeValueAsString(_mapper.dto(characterSheet))))
+                    .andExpect(status().isCreated());
         }
 
-        _restClient.post() // add more than the limit
-                .uri("/api/v1/charSheets?userId=" + randomEmail)
-                .body(_mapper.dto(characterSheet))
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.CONFLICT);
+        _mvc.perform(
+                        post("/api/v1/charSheets")
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId))))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(_oMapper.writeValueAsString(_mapper.dto(characterSheet))))
+                .andExpect(status().isConflict());
     }
 
     @Test
     @DirtiesContext
-    public void modifySheet() {
-        String randomEmail = "random@gmail.com"; // registered user
+    public void modifySheet() throws Exception {
+        String randomUserId = "random-id"; // registered user
 
         CharacterSheet characterSheet = new CharacterSheet();
-        characterSheet.setUserId(randomEmail);
         characterSheet.setLevel(1);
         characterSheet.setName("some name");
         characterSheet.setClassname("someClass");
 
-        CharacterSheetDTO characterSheet1 = _restClient.post() // add sheet
-                .uri("/api/v1/charSheets?userId=" + randomEmail)
-                .body(_mapper.dto(characterSheet))
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody(CharacterSheetDTO.class)
-                .returnResult().getResponseBody();
 
-        List<CharacterSheetDTO> sheets = _restClient.get() // list of size 2
-                .uri("/api/v1/charSheets?userId=" + randomEmail)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(new ParameterizedTypeReference<List<CharacterSheetDTO>>() {})
-                .returnResult().getResponseBody();
+        MvcResult result = _mvc.perform(
+                        post("/api/v1/charSheets")
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId))))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(_oMapper.writeValueAsString(_mapper.dto(characterSheet))))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        CharacterSheetDTO characterSheet1 = _oMapper.readValue(result.getResponse().getContentAsString(), CharacterSheetDTO.class);
+
+        result = _mvc.perform(
+                        get("/api/v1/charSheets")
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId)))))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<CharacterSheetDTO> sheets = _oMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>(){});
 
         CharacterSheetDTO characterSheetDTO = sheets.getFirst();
 
@@ -152,64 +178,74 @@ public class CharacterSheetControllerTest {
         characterSheet.setLevel(2);
         characterSheetDTO = _mapper.dto(characterSheet);
 
-        _restClient.put()
-                .uri("/api/v1/charSheets/invalid_id?userId=" + randomEmail)
-                .body(characterSheetDTO)
-                .exchange()
-                .expectStatus().isNotFound();
+        _mvc.perform(
+                        put("/api/v1/charSheets/invalid_id")
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId))))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(_oMapper.writeValueAsString(characterSheetDTO)))
+                .andExpect(status().isNotFound());
 
-        characterSheetDTO = _restClient.put()
-                .uri("/api/v1/charSheets/" + sheets.getLast().id() + "?userId=" + randomEmail)
-                .body(characterSheetDTO)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(CharacterSheetDTO.class)
-                .returnResult().getResponseBody();
+        result = _mvc.perform(
+                        put("/api/v1/charSheets/" + characterSheet.getId())
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId))))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(_oMapper.writeValueAsString(characterSheetDTO)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        characterSheetDTO = _oMapper.readValue(result.getResponse().getContentAsString(), CharacterSheetDTO.class);
 
         Assertions.assertEquals(2, characterSheetDTO.level());
     }
 
     @Test
     @DirtiesContext
-    public void removeSheet() {
-        String randomEmail = "random@gmail.com"; // registered user
+    public void removeSheet() throws Exception {
+        String randomUserId = "random-id"; // registered user
 
         CharacterSheet characterSheet = new CharacterSheet();
-        characterSheet.setUserId(randomEmail);
         characterSheet.setLevel(1);
         characterSheet.setName("some name");
         characterSheet.setClassname("someClass");
 
-        _restClient.post() // add sheet
-                .uri("/api/v1/charSheets?userId=" + randomEmail)
-                .body(_mapper.dto(characterSheet))
-                .exchange()
-                .expectStatus().isCreated();
+        _mvc.perform(
+                        post("/api/v1/charSheets")
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId))))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(_oMapper.writeValueAsString(_mapper.dto(characterSheet))))
+                .andExpect(status().isCreated());
 
-        List<CharacterSheetDTO> sheets = _restClient.get() // list of size 1
-                .uri("/api/v1/charSheets?userId=" + randomEmail)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(new ParameterizedTypeReference<List<CharacterSheetDTO>>() {})
-                .returnResult().getResponseBody();
+        MvcResult result = _mvc.perform(
+                        get("/api/v1/charSheets")
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId)))))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<CharacterSheetDTO> sheets = _oMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>(){});
 
         CharacterSheetDTO characterSheetDTO = sheets.getFirst();
-        _restClient.delete() // Removing unregistered sheet
-                .uri("/api/v1/charSheets/invalid_id?userId=" + randomEmail)
-                .exchange().
-                expectStatus().isNotFound();
 
-        _restClient.delete() // Removing sheet
-                .uri("/api/v1/charSheets/" + characterSheetDTO.id() + "?userId=" + randomEmail)
-                .exchange().
-                expectStatus().isOk();
+        _mvc.perform( // Removing unregistered sheet
+                        delete("/api/v1/charSheets/invalid_id")
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId))))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(_oMapper.writeValueAsString(_mapper.dto(characterSheet))))
+                .andExpect(status().isNotFound());
 
-        sheets = _restClient.get() // list of size 0
-                .uri("/api/v1/charSheets?userId=" + randomEmail)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(new ParameterizedTypeReference<List<CharacterSheetDTO>>() {})
-                .returnResult().getResponseBody();
+        _mvc.perform( // Removing unregistered sheet
+                        delete("/api/v1/charSheets/" + characterSheetDTO.id())
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId))))
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(_oMapper.writeValueAsString(_mapper.dto(characterSheet))))
+                .andExpect(status().isOk());
+
+        result = _mvc.perform(
+                        get("/api/v1/charSheets")
+                                .with(jwt().jwt((jwt -> jwt.subject(randomUserId)))))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        sheets = _oMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>(){});
 
         Assertions.assertEquals(0, sheets.size());
     }

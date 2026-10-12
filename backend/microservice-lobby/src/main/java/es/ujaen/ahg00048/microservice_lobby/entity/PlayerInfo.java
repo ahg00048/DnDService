@@ -1,5 +1,6 @@
 package es.ujaen.ahg00048.microservice_lobby.entity;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +12,9 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 public class PlayerInfo implements Serializable {
+    @NotBlank
     private String id = "";
+    @NotBlank
     private String name = "";
 
 
@@ -23,4 +26,5 @@ public class PlayerInfo implements Serializable {
     public boolean equals(Object obj) {
         return id.equals(((PlayerInfo) obj).id);
     }
+
 }

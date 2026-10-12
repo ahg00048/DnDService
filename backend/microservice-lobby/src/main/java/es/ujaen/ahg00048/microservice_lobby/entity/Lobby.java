@@ -40,12 +40,14 @@ public class Lobby implements Serializable {
 
     public void addUser(String userId, String userName, String password)
             throws UserRegistrationException, InvalidOperationException {
-        if (playersInfo.contains(userId) || playersInfo.size() >= LobbyService.MAX_USERS_PER_LOBBY)
+        PlayerInfo playerInfo = new PlayerInfo(userId, userName);
+
+        if (playersInfo.contains(playerInfo) || playersInfo.size() >= LobbyService.MAX_USERS_PER_LOBBY)
             throw new UserRegistrationException();
         if (!password.equals(this.password) && !open)
             throw new InvalidOperationException();
 
-        playersInfo.add(new PlayerInfo(userId, userName));
+        playersInfo.add(playerInfo);
     }
 
     public void removeUser(String userId)

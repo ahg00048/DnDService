@@ -37,7 +37,7 @@ public class CharacterSheetServiceTest {
     @Test
     @DirtiesContext
     public void addingAndRemovingCharacterSheetTest() {
-        String userId = "random@email.com";
+        String userId = "random-id";
 
         CharacterSheet charSheet = new CharacterSheet();
 
@@ -57,7 +57,7 @@ public class CharacterSheetServiceTest {
     @Test
     @DirtiesContext
     public void modifyCharacterSheetTest() {
-        String userId = "random@email.com";
+        String userId = "random-id";
 
         CharacterSheet charSheet = new CharacterSheet();
 
@@ -89,7 +89,7 @@ public class CharacterSheetServiceTest {
     @Test
     @DirtiesContext
     public void getCharacterSheetTest() {
-        String userId = "random@email.com";
+        String userId = "random-id";
 
         List<CharacterSheet> charSheetsIds = _service.getCharSheets(userId);
 

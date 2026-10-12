@@ -20,9 +20,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/v1/lobbies")
@@ -36,8 +36,7 @@ public class LobbyRestController {
     @Autowired
     private SimpMessagingTemplate _simpTemplate;
 
-    // temporal
-    private static final String CLAIM_USER_NAME = "email";
+    public static final String CLAIM_USER_NAME = "email";
 
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -81,8 +80,6 @@ public class LobbyRestController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -97,8 +94,6 @@ public class LobbyRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (UserRegistrationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -126,8 +121,6 @@ public class LobbyRestController {
             return ResponseEntity.ok(_mapper.dto(_lobbyService.addBoard(auth.getSubject(), _mapper.entity(boardDTO))));
         } catch (BoardRegistrationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -141,8 +134,6 @@ public class LobbyRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -156,8 +147,6 @@ public class LobbyRestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
