@@ -17,12 +17,14 @@ import org.springframework.test.context.ActiveProfiles;
 import es.ujaen.ahg00048.microservice_lobby.entity.Lobby;
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Board;
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Piece;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.List;
 
 
-@SpringBootTest(classes = es.ujaen.ahg00048.microservice_lobby.app.MicroserviceLobbyApplication.class)
 @ActiveProfiles("test")
+@SpringBootTest(classes = es.ujaen.ahg00048.microservice_lobby.app.MicroserviceLobbyApplication.class)
+@WebAppConfiguration
 public class LobbyServiceTest {
     @Autowired
     private LobbyService _lobbyService;

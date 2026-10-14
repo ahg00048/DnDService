@@ -96,7 +96,7 @@ spring:
                     bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
                     bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
                     bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
-                - TokenRelay
+                - TokenRelay=
                 - SaveSession
               predicates:
               - Path=/api/v1/images/**

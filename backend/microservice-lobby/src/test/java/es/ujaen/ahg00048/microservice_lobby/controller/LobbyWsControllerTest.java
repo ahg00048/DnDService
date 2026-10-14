@@ -69,7 +69,7 @@ public class LobbyWsControllerTest {
 //        int oldScale = lobbyDTO.board().scale();
 //        int newScale = oldScale + 1;
 //
-//        var userSubSession = session.subscribe("/topic/lobbies-" + lobbyDTO.id(), new StompFrameHandler() {
+//        var userSubSession = session.subscribe("/topic/lobbies." + lobbyDTO.id(), new StompFrameHandler() {
 //            @Override
 //            public Type getPayloadType(StompHeaders headers) {
 //                return LobbyDTO.class;
@@ -85,7 +85,7 @@ public class LobbyWsControllerTest {
 //        ACommandDTO commandDTO = new UpdateBoard_Image_Scale_CommandDTO(
 //                validUserId2, CommandType.UPDATE_BOARD_IMAGE_SCALE,
 //                lobbyDTO.board().backgroundImage(), newScale);
-//        session.send("/publish/lobbies-" + lobbyDTO.id(), commandDTO);
+//        session.send("/publish/lobbies." + lobbyDTO.id(), commandDTO);
 //
 //        userSubSession.unsubscribe();
 

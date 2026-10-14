@@ -39,9 +39,9 @@ import java.util.List;
 
 @Slf4j
 @ActiveProfiles("test")
-@SpringBootTest(classes = es.ujaen.ahg00048.microservice_lobby.app.MicroserviceLobbyApplication.class)
 @ContextConfiguration
 @WebAppConfiguration
+@SpringBootTest(classes = es.ujaen.ahg00048.microservice_lobby.app.MicroserviceLobbyApplication.class)
 public class LobbyRestControllerTest {
 
     @Autowired
