@@ -1,5 +1,6 @@
 package es.ujaen.ahg00048.microservice_user.service;
 
+import jakarta.validation.constraints.NotBlank;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -27,7 +28,7 @@ public class UserService {
         return _keycloakService.getUsers();
     }
 
-    public void removeUser(String userId, boolean isAdmin, String userIdToRemove)
+    public void removeUser(@NotBlank String userId, boolean isAdmin, @NotBlank String userIdToRemove)
             throws UserRegistrationException, UserAuthorizationException {
         if (!isAdmin && !userId.equals(userIdToRemove))
             throw new UserAuthorizationException();
@@ -38,7 +39,7 @@ public class UserService {
     }
 
     @Profile("test")
-    public void createUser(String id, String username, String email) {
+    public void createUser(@NotBlank String id, @NotBlank String username, @NotBlank String email) {
         UserRepresentation user = new UserRepresentation();
         user.setId(id);
         user.setUsername(username);

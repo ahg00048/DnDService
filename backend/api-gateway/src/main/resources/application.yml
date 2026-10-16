@@ -62,9 +62,6 @@ spring:
 # USER rest service ====================================================================================
             - id: microservice-user
               uri: lb://MICROSERVICE-USER
-              predicates:
-              - Method=GET,POST,PUT,DELETE
-              - Path=/api/v1/users/**
               filters:
                 - name: RequestRateLimiter
                   args:
@@ -72,6 +69,10 @@ spring:
                     bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
                     bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
                     bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
+                - TokenRelay=
+                - SaveSession
+              predicates:
+              - Path=/api/v1/users/**
 # CHARACTER SHEET rest service ====================================================================================
             - id: microservice-characterSheet
               uri: lb://MICROSERVICE-CHARACTERSHEET
