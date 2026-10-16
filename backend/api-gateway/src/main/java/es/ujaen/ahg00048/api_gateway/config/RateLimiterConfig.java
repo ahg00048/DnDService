@@ -43,7 +43,7 @@ public class RateLimiterConfig {
 
         return LettuceBasedProxyManager.builderFor(redisConnection)
                 .withExpirationStrategy(ExpirationAfterWriteStrategy
-                    .basedOnTimeForRefillingBucketUpToMax(ofSeconds(10)))
+                        .basedOnTimeForRefillingBucketUpToMax(ofSeconds(10)))
                 .build().asAsync();
     }
 }

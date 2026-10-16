@@ -1,109 +1,49 @@
 package es.ujaen.ahg00048.microservice_user.service;
 
-import es.ujaen.ahg00048.microservice_user.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.NoArgsConstructor;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
-import java.util.Optional;
 
-import es.ujaen.ahg00048.microservice_user.entity.User;
 import es.ujaen.ahg00048.microservice_user.exception.*;
-import org.springframework.validation.annotation.Validated;
 
 
 @Service
 @Validated
 public class UserService {
     @Autowired
-    private Environment _env;
-
-    @Autowired
-    private UserRepository _usersRep;
+    private KeycloakService _keycloakService;
 
     @Autowired
     private RabbitTemplate _rabbitTemplate;
 
-    private User _admin;
 
-
-    @PostConstruct
-    public void initialize() {
-        _admin = new User(_env.getProperty("app.admin.email"), "adminnn", _env.getProperty("app.admin.cyptedPwd"));
+    public List<UserRepresentation> getUsers() {
+        return _keycloakService.getUsers();
     }
 
-
-    public User getUser(@NotBlank @Email String email) throws UserRegistrationException {
-        if (email.equals(_admin.getEmail()))
-            return _admin;
-
-        return _usersRep.findById(email).orElseThrow(UserRegistrationException::new); // User not registered;
-    }
-
-    public List<User> getUsers(@Valid User user) throws UserAuthorizationException {
-        if (!user.equals(_admin))
-            throw new UserAuthorizationException();
-
-        return _usersRep.findAll();
-    }
-
-    public void addUser(@Valid User newUser)
-            throws UserRegistrationException {
-        if (_usersRep.existsById(newUser.getEmail())) // User registered
-            throw new UserRegistrationException();
-
-        _usersRep.insert(newUser);
-    }
-
-    public void removeUser(@Valid User caller, @NotBlank @Email String email)
+    public void removeUser(String userId, boolean isAdmin, String userIdToRemove)
             throws UserRegistrationException, UserAuthorizationException {
-        Optional<User> user = _usersRep.findById(caller.getEmail());
-        if (user.isEmpty())
-            if (!caller.equals(_admin))
-                throw new UserRegistrationException();
-            else
-                user = Optional.of(_admin);
-
-        if (!_usersRep.existsById(email))
-            throw new UserRegistrationException();
-
-        if (!user.get().getEmail().equals(email) && !user.get().equals(_admin))
+        if (!isAdmin && !userId.equals(userIdToRemove))
             throw new UserAuthorizationException();
 
-        _usersRep.deleteById(email);
+        _keycloakService.deleteUser(userIdToRemove);
 
-        _rabbitTemplate.send(new Message(email.getBytes()));
-    }
-
-    public void changePassword(@Valid User caller, @NotBlank String newPassword)
-            throws UserRegistrationException, UserBadOperation {
-        User user = _usersRep.findById(caller.getEmail()).orElseThrow(UserRegistrationException::new);
-
-        user.setPassword(newPassword);
-
-        _usersRep.save(user);
+        _rabbitTemplate.send(new Message(userIdToRemove.getBytes()));
     }
 
     @Profile("test")
-    public User login(@NotBlank @Email String email, @NotBlank String password) throws UserAuthenticationException, UserRegistrationException {
-        User user = null;
-        if (email.equals(_admin.getEmail()) && password.equals(_admin.getPassword()))
-            user = _admin;
-        else
-            user = _usersRep.findById(email).orElseThrow(UserRegistrationException::new); // User not registered
+    public void createUser(String id, String username, String email) {
+        UserRepresentation user = new UserRepresentation();
+        user.setId(id);
+        user.setUsername(username);
+        user.setEmail(email);
 
-        if (!user.getPassword().equals(password)) // Wrong password
-            throw new UserAuthenticationException();
-
-        return user;
+        _keycloakService.createUser(user);
     }
 }
