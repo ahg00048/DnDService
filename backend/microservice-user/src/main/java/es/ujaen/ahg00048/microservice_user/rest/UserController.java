@@ -39,14 +39,8 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<List<UserDTO>> getUsers(@AuthenticationPrincipal Jwt auth) {
-        try {
-            List<UserRepresentation> users = _userService.getUsers();
-            return ResponseEntity.ok(users.stream().map(u -> _mapper.dto(u)).toList());
-        } catch (UserAuthorizationException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (UserRegistrationException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        List<UserRepresentation> users = _userService.getUsers();
+        return ResponseEntity.ok(users.stream().map(u -> _mapper.dto(u)).toList());
     }
 
     @DeleteMapping("/{id}")

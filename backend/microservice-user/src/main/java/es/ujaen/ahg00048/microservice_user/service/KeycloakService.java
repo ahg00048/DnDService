@@ -10,6 +10,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.representations.idm.UserSessionRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class KeycloakService {
 
     public void createUser(UserRepresentation user) {
         try (Response resp = _client.realm(_realm).users().create(user)) {
-            if (resp.getStatus() != 201)
+            if (resp.getStatus() != HttpStatus.CREATED.value())
                 throw new UserRegistrationException();
         }
     }
@@ -35,13 +36,12 @@ public class KeycloakService {
             throws UserRegistrationException {
         try {
             _client.realm(_realm).users().get(userId).logout();
-        } catch (UserRegistrationException e) {
+        } catch (NotFoundException e) {
             throw new UserRegistrationException();
         }
 
         try (Response resp = _client.realm(_realm).users().delete(userId)) {
-            int st = resp.getStatus();
-            if (resp.getStatus() != 204)
+            if (resp.getStatus() != HttpStatus.NO_CONTENT.value())
                 throw new UserRegistrationException();
         }
     }
