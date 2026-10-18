@@ -17,6 +17,7 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.socket.EnableWebSocketSecurity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.socket.client.standard.WebSocketContainerFactoryBean;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -67,27 +68,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setClientLogin(username)
                 .setClientPasscode(password);
     }
-//
-//    @Override
-//    public void configureClientInboundChannel(ChannelRegistration registration) {
-//        registration.interceptors(new ChannelInterceptor() {
-//            @Override
-//            public Message<?> preSend(Message<?> message, MessageChannel channel) {
-//                StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-//                StompCommand command = accessor.getCommand();
-//
-//                if (StompCommand.CONNECT.equals(command)
-////                        || StompCommand.MESSAGE.equals(command)
-//                ) {
-//                    Principal user = null;
-//
-//                    accessor.setUser(user);
-//                }
-//                return message;
-//            }
-//        });
-//    }
-
 
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registry) {
