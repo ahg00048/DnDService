@@ -37,6 +37,8 @@ public class LobbyService {
     public static int MAX_USERS_PER_LOBBY;
     public static int MAX_PIECES_PER_BOARDS;
 
+    private static int LOBBY_TIMEOUT_IN_HOURS;
+
     private final static String LOCK_LOBBY_KEY_BASE = "lobbies:";
     private final static int TIMEOUT_AMOUNT = 1;
     private final static TimeUnit TIMEOUT_UNIT = TimeUnit.SECONDS;
@@ -45,10 +47,12 @@ public class LobbyService {
     public LobbyService(
             @Value("${app.user.max.boards}") int max_boards_per_user,
             @Value("${app.lobby.max.users}") int max_users_per_lobby,
-            @Value("${app.lobby.board.max.pieces}") int max_pieces_per_boards) {
+            @Value("${app.lobby.board.max.pieces}") int max_pieces_per_boards,
+            @Value("${app.lobby.timeoutInHours}") int lobby_timeoutInHours) {
         MAX_BOARDS_PER_USER = max_boards_per_user;
         MAX_USERS_PER_LOBBY = max_users_per_lobby;
         MAX_PIECES_PER_BOARDS = max_pieces_per_boards;
+        LOBBY_TIMEOUT_IN_HOURS = lobby_timeoutInHours;
     }
 
     /// En el caso en el que una instancia no este inicializada
@@ -145,6 +149,27 @@ public class LobbyService {
             lobby.getBoard().deselectUserPiece(userId);
 
             return Optional.of(_lobbiesRep.save(lobby));
+            // Critical section - end
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } finally {
+            if (locked)
+                lock.unlock();
+        }
+    }
+
+    private void removeLobby(@NotBlank String id)
+            throws LobbyRegistrationException, UserRegistrationException,
+            IllegalStateException {
+        Lock lock = _lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + id);
+        boolean locked = false;
+        try {
+            if (!lock.tryLock(TIMEOUT_AMOUNT, TIMEOUT_UNIT))
+                throw new IllegalStateException(); // Lock could not be acquired
+            locked = true;
+            // Critical section - start
+            _lobbiesRep.deleteById(id);
             // Critical section - end
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

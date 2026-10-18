@@ -12,9 +12,13 @@ import es.ujaen.ahg00048.microservice_lobby.controller.mapper.LobbyMapper;
 import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -35,6 +39,9 @@ public class LobbyRestController {
 
     @Autowired
     private SimpMessagingTemplate _simpTemplate;
+
+    @Value("${app.lobby.message.unregistered}")
+    private String _message_lobbyUnregistered;
 
     public static final String CLAIM_USER_NAME = "email";
 
@@ -88,7 +95,12 @@ public class LobbyRestController {
                                            @PathVariable String id) {
         try {
             Optional<Lobby> lobbyOpt = _lobbyService.leaveLobby(auth.getSubject(), id);
-            lobbyOpt.ifPresent(lobby -> _simpTemplate.convertAndSend("/topic/lobbies." + lobby.getId(), _mapper.dto(lobby)));
+            if (lobbyOpt.isPresent()) {
+                Lobby lobby = lobbyOpt.get();
+                _simpTemplate.convertAndSend("/topic/lobbies." + id, _mapper.dto(lobby));
+            } else {
+                _simpTemplate.convertAndSend("/topic/lobbies." + id, _message_lobbyUnregistered);
+            }
             return ResponseEntity.ok().build();
         } catch (LobbyRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

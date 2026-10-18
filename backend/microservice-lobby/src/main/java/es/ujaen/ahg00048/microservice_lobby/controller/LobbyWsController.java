@@ -4,21 +4,21 @@ import es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.ACommandDTO;
 import es.ujaen.ahg00048.microservice_lobby.controller.DTO.lobby.LobbyDTO;
 import es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.impl.*;
 import es.ujaen.ahg00048.microservice_lobby.controller.mapper.LobbyMapper;
+import es.ujaen.ahg00048.microservice_lobby.exception.LobbyRegistrationException;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.MessageHeaders;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.*;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
 
 import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
+import org.springframework.validation.annotation.Validated;
 
 import java.security.Principal;
 
 
-@Slf4j
 @Controller
+@Validated
 public class LobbyWsController {
     @Autowired
     private LobbyService _lobbyService;
@@ -26,9 +26,17 @@ public class LobbyWsController {
     @Autowired
     private LobbyMapper _mapper;
 
+    @Value("${app.lobby.message.unregistered}")
+    private String _message_lobbyUnregistered;
+
 
     @MessageExceptionHandler(RuntimeException.class)
     public void genericMessageExceptionHandler() {}
+
+    @MessageExceptionHandler(LobbyRegistrationException.class)
+    public String lobbyRegistrationExceptionHandler() {
+        return _message_lobbyUnregistered;
+    }
 
     @MessageMapping("/lobbies.{id}")
     @SendTo("/topic/lobbies.{id}")
