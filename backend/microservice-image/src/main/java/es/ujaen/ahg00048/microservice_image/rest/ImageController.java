@@ -6,6 +6,9 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,34 +40,26 @@ public class ImageController {
     }
 
     @GetMapping
-    public ResponseEntity<List<?>> getImageUrls(@RequestParam(value = "userId", required = false) String userId,
+    public ResponseEntity<List<?>> getImageUrls(@AuthenticationPrincipal Jwt auth,
                                                 @RequestParam(value = "imagesIds", required = false) List<String> imagesIds) {
-        try {
-            if (userId != null) {
-                return ResponseEntity.ok(_imageService.getUserImagesIds(userId));
-            } else if (imagesIds != null) {
-                return ResponseEntity.ok(_imageService.getImagesUrls(imagesIds));
-            } else{
-                return ResponseEntity.badRequest().build();
-            }
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (imagesIds != null) {
+            return ResponseEntity.ok(_imageService.getImagesUrls(imagesIds));
+        } else {
+            return ResponseEntity.ok(_imageService.getUserImagesIds(auth.getSubject()));
         }
     }
 
     @PostMapping
-    public ResponseEntity<String> addImage(@RequestParam(value = "userId", required = true) String userId,
+    public ResponseEntity<String> addImage(@AuthenticationPrincipal Jwt auth,
                                            @RequestParam(value = "image", required = true) MultipartFile file) {
         try {
-            return ResponseEntity.ok(_imageService.saveImage(userId, file));
+            return ResponseEntity.ok(_imageService.saveImage(auth.getSubject(), file));
         } catch (ImageFormatException e) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
         } catch (ImageOverSizedException e) {
             return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -74,23 +69,19 @@ public class ImageController {
             return ResponseEntity.ok(_imageService.getImageUrl(id));
         } catch (ImageRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeImage(@RequestParam(value = "userId", required = true) String userId,
+    public ResponseEntity<Void> removeImage(@AuthenticationPrincipal Jwt auth,
                                             @PathVariable(value = "id") String id) {
         try {
-            _imageService.deleteImage(userId, id);
+            _imageService.deleteImage(auth.getSubject(), id);
             return ResponseEntity.ok().build();
         } catch (ImageRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

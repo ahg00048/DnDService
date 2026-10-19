@@ -1,11 +1,9 @@
 package es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.impl;
 
 import es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.CommandType;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import es.ujaen.ahg00048.microservice_lobby.controller.DTO.lobby.boardGame.PieceDTO;
 import es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.ACommandDTO;
 
 
@@ -15,8 +13,8 @@ public class Select_Deselect_Remove_Piece_CommandDTO extends ACommandDTO {
     private int pieceId;
 
 
-    public Select_Deselect_Remove_Piece_CommandDTO(String userId, CommandType type, int pieceId) {
-        super(userId, type);
+    public Select_Deselect_Remove_Piece_CommandDTO(CommandType type, int pieceId) {
+        super(type);
         this.pieceId = pieceId;
     }
 }

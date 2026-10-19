@@ -4,7 +4,6 @@ import es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.CommandType;
 import lombok.Getter;
 import lombok.Setter;
 
-import es.ujaen.ahg00048.microservice_lobby.controller.DTO.lobby.boardGame.PieceDTO;
 import es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.ACommandDTO;
 
 
@@ -16,8 +15,8 @@ public class UpdatePiece_Pos_CommandDTO extends ACommandDTO {
     private float y;
 
 
-    public UpdatePiece_Pos_CommandDTO(String userId, CommandType type, int pieceId, float x, float y) {
-        super(userId, type);
+    public UpdatePiece_Pos_CommandDTO(CommandType type, int pieceId, float x, float y) {
+        super(type);
         this.pieceId = pieceId;
         this.x = x;
         this.y = y;

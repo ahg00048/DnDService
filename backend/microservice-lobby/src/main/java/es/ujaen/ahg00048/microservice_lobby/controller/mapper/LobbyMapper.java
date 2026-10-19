@@ -19,10 +19,6 @@ public class LobbyMapper {
         return new BoardDTO(board);
     }
 
-    public Lobby entity(LobbyDTO lobbyDTO) {
-        return new Lobby(lobbyDTO.id(), lobbyDTO.open(), lobbyDTO.password(), entity(lobbyDTO.board()), lobbyDTO.users());
-    }
-
     public Board entity(BoardDTO boardDTO) {
         return new Board("", boardDTO.id(), boardDTO.backgroundImage(), boardDTO.scale(), boardDTO.pieces().stream().map(this::entity).toList());
     }

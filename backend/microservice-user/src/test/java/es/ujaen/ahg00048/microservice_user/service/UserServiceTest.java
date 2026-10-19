@@ -1,106 +1,57 @@
 package es.ujaen.ahg00048.microservice_user.service;
 
-import es.ujaen.ahg00048.microservice_user.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
 import org.junit.jupiter.api.*;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.env.Environment;
-import org.springframework.data.mongodb.core.MongoTemplate;
-
-import es.ujaen.ahg00048.microservice_user.entity.User;
 import es.ujaen.ahg00048.microservice_user.exception.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.List;
 
-@SpringBootTest(classes = es.ujaen.ahg00048.microservice_user.app.MicroserviceUserApplication.class)
+
 @ActiveProfiles("test")
+@SpringBootTest(classes = es.ujaen.ahg00048.microservice_user.app.MicroserviceUserApplication.class)
 public class UserServiceTest {
     @Autowired
     private UserService _service;
 
-    @Autowired
-    MongoTemplate _mongoTemplate;
-
-    @Autowired
-    Environment _env;
-    
-
-    @AfterEach
-    @PostConstruct
-    public void cleanUp() {
-        _mongoTemplate.getDb().drop();
-    }
-    
 
     @Test
     @DirtiesContext
-    public void registerTest() {
-        User user = new User("valid@gmail.com", "name1ee", "secretee");
+    public void serviceTest() {
+        String id1 = "id1";
+        String username1 = "randomusername1";
+        String email1 = "random1@gmail.com";
 
-        Assertions.assertDoesNotThrow(() -> _service.addUser(user)); // Register valid user
+        String id2 = "id2";
+        String username2 = "randomusername2";
+        String email2 = "random2@gmail.com";
 
-        Assertions.assertThrows(UserRegistrationException.class, () -> _service.addUser(user)); // Register same valid user
-    }
+        String id3 = "id3";
+        String username3 = "randomusername3";
+        String email3 = "random3@gmail.com";
 
-    @Test
-    @DirtiesContext
-    public void loginTest() {
-        User user = new User("valid@gmail.com", "name1ee", "secretee");
-        final String userEmail = user.getEmail();
-        final String userPassword = user.getPassword();
+        Assertions.assertThrows(UserRegistrationException.class, () -> _service.removeUser(id1, false, id1)); // User not registered
 
-        Assertions.assertThrows(UserRegistrationException.class, () -> _service.login(userEmail, userPassword)); // User not registered
+        _service.createUser(id1, username1, email1);
+        _service.createUser(id2, username2, email2);
+        _service.createUser(id3, username3, email3);
 
-        _service.addUser(user);
-        user = _service.login(user.getEmail(), user.getPassword());
+        List<UserRepresentation> users = _service.getUsers();
+        final String Cid1 = users.stream().filter(u -> u.getUsername().equals(username1)).toList().getFirst().getId();
+        final String Cid2 = users.stream().filter(u -> u.getUsername().equals(username2)).toList().getFirst().getId();
+        final String Cid3 = users.stream().filter(u -> u.getUsername().equals(username3)).toList().getFirst().getId();
 
-        Assertions.assertThrows(UserAuthenticationException.class, () -> _service.login(userEmail, "otherPassword")); // Wrong password
+        Assertions.assertThrows(UserAuthorizationException.class, () -> _service.removeUser(Cid1, false, Cid2)); // User trying deleting other account
 
-        Assertions.assertDoesNotThrow(() -> _service.login(userEmail, userPassword));
-    }
+        Assertions.assertDoesNotThrow(() -> _service.removeUser(Cid1, false, Cid1)); // User removing their account
 
-    @Test
-    @DirtiesContext
-    public void removalTest() {
-        final User user1 = new User("valid@gmail.com", "name1ee", "secretee");
-        final User user2 = new User("valid2@gmail.com", "name1ee", "secretee");
-        final User admin = _service.login(_env.getProperty("app.admin.email"), _env.getProperty("app.admin.cyptedPwd"));
+        Assertions.assertDoesNotThrow(() -> _service.removeUser(Cid2, true, Cid3)); // Admin user removing other account
 
-        final String user1Email = user1.getEmail();
-        final String user2Email = user2.getEmail();
+        Assertions.assertThrows(UserRegistrationException.class, () -> _service.removeUser(Cid2, true, Cid3)); // User not registered
 
-        Assertions.assertThrows(UserRegistrationException.class, () -> _service.removeUser(user1, user1Email)); // User not registered
-
-        _service.addUser(user1);
-        final User user_1f = _service.login(user1.getEmail(), user1.getPassword());
-        _service.addUser(user2);
-        final User user_2f = _service.login(user2.getEmail(), user2.getPassword());
-
-        Assertions.assertThrows(UserAuthorizationException.class, () -> _service.removeUser(user_1f, user2Email)); // User trying deleting other account
-
-        Assertions.assertDoesNotThrow(() -> _service.removeUser(user_1f, user1Email)); // User removing their account
-
-        Assertions.assertDoesNotThrow(() -> _service.removeUser(admin, user2Email)); // Admin removing other account
-
-        Assertions.assertThrows(UserRegistrationException.class, () -> _service.removeUser(admin, user1Email)); // User not registered
-    }
-
-    @Test
-    @DirtiesContext
-    public void obtainAllUsers() {
-        final User user1 = new User("valid@gmail.com", "name1ee", "secretee");
-        final User user2 = new User("valid2@gmail.com", "name1ee", "secretee");
-        final User admin = _service.login(_env.getProperty("app.admin.email"), _env.getProperty("app.admin.cyptedPwd"));
-
-        Assertions.assertEquals(0, _service.getUsers(admin).size()); // There are no users
-
-        Assertions.assertThrows(UserAuthorizationException.class, () -> _service.getUsers(user1)); // Only admin can obtain the rest of users
-
-        _service.addUser(user1);
-        _service.addUser(user2);
-
-        Assertions.assertEquals(2, _service.getUsers(admin).size()); // Obtain the two users
+        _service.removeUser(Cid2, false, Cid2);
     }
 }

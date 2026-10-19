@@ -33,17 +33,21 @@ spring:
   security:
     oauth2:
       client:
-        registration:
-          my-oidc-client:
-            provider: my-oidc-provider
-            client-id: my-client-id
-            client-secret: my-client-secret
-            authorization-grant-type: authorization_code
-            scope: openid,profile
         provider:
-          my-oidc-provider:
-            issuer-uri:
-            token-uri:
+          keycloak:
+            issuer-uri: http://127.0.0.1:9090/realms/dndservice-users-realm
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: dndservice-keycloak-id
+            client-secret: admin
+            authorization-grant-type: authorization_code
+            redirect-uri: http://127.0.0.1:8080/login/oauth2/code/keycloak
+            scope:
+              - openid
+              - profile
+              - email
+              - offline_access
   application:
     name:
       api-gateway
@@ -58,9 +62,6 @@ spring:
 # USER rest service ====================================================================================
             - id: microservice-user
               uri: lb://MICROSERVICE-USER
-              predicates:
-              - Method=GET,POST,PUT,DELETE
-              - Path=/api/v1/users/**
               filters:
                 - name: RequestRateLimiter
                   args:
@@ -68,6 +69,10 @@ spring:
                     bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
                     bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
                     bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
+                - TokenRelay=
+                - SaveSession
+              predicates:
+              - Path=/api/v1/users/**
 # CHARACTER SHEET rest service ====================================================================================
             - id: microservice-characterSheet
               uri: lb://MICROSERVICE-CHARACTERSHEET
@@ -80,8 +85,6 @@ spring:
                     bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
                 - TokenRelay=
                 - SaveSession
-
-
               predicates:
               - Path=/api/v1/charSheets/**
 # IMAGE rest service ====================================================================================
@@ -94,6 +97,8 @@ spring:
                     bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
                     bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
                     bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
+                - TokenRelay=
+                - SaveSession
               predicates:
               - Path=/api/v1/images/**
 # LOBBY rest service ====================================================================================
@@ -106,15 +111,35 @@ spring:
                     bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
                     bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
                     bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
+                - TokenRelay=
+                - SaveSession
               predicates:
               - Path=/api/v1/lobbies/**
 # LOBBY websocket service ====================================================================================
             - id: microservice-lobby-ws
               uri: lb:ws://MICROSERVICE-LOBBY
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    bucket4j-rate-limiter.capacity: ${rateLimit.bucket.capacity}
+                    bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
+                    bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
+                    bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
+                - TokenRelay=
+                - SaveSession
               predicates:
                 - Path=/websock/**
 # IMAGE sockJs service ====================================================================================
             - id: microservice-lobby-sockJs
               uri: lb://MICROSERVICE-LOBBY
+              filters:
+                - name: RequestRateLimiter
+                  args:
+                    bucket4j-rate-limiter.capacity: ${rateLimit.bucket.capacity}
+                    bucket4j-rate-limiter.refillTokens: ${rateLimit.bucket.refillTokens}
+                    bucket4j-rate-limiter.refillPeriod: ${rateLimit.bucket.refillPeriod}
+                    bucket4j-rate-limiter.requestedTokens: ${rateLimit.bucket.requestedTokens}
+                - TokenRelay=
+                - SaveSession
               predicates:
               - Path=/websock/info/**

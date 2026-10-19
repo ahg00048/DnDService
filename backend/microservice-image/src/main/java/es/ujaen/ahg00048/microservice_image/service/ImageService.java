@@ -71,7 +71,7 @@ public class ImageService {
      * @return the ids of the images belonging to the user
      */
     @Transactional
-    public List<String> getUserImagesIds(@Email @NotBlank String userId) {
+    public List<String> getUserImagesIds(@NotBlank String userId) {
         return _imagesMongoRep.findAllByUserId(userId).stream().map(Image::getId).toList();
     }
 
@@ -152,7 +152,7 @@ public class ImageService {
      * @return the id of the image
      */
     @Transactional
-    public String saveImage(@Email @NotBlank String userId, @Valid @NotNull MultipartFile file)
+    public String saveImage(@NotBlank String userId, @Valid @NotNull MultipartFile file)
             throws InvalidOperationException, ImageOverSizedException, ImageFormatException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_USER_KEY_BASE + userId);
@@ -194,7 +194,7 @@ public class ImageService {
     }
 
     @Transactional
-    public void deleteImage(@Email @NotBlank String userId, @NotNull String id)
+    public void deleteImage(@NotBlank String userId, @NotNull String id)
             throws ImageRegistrationException, InvalidOperationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_USER_KEY_BASE + userId);
@@ -275,7 +275,7 @@ public class ImageService {
 
     @Profile("test")
     @Transactional
-    public List<Image> getUserImagesTest(@Email @NotBlank String userId)
+    public List<Image> getUserImagesTest(@NotBlank String userId)
             throws ImageRegistrationException {
         return _imagesMongoRep.findAllByUserId(userId);
     }

@@ -2,26 +2,18 @@ package es.ujaen.ahg00048.microservice_characterSheet.service;
 
 import es.ujaen.ahg00048.microservice_characterSheet.exception.InvalidOperationException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
-import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 
 import es.ujaen.ahg00048.microservice_characterSheet.repository.CharacterSheetRepository;
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.CharacterSheet;
 import es.ujaen.ahg00048.microservice_characterSheet.exception.CharacterSheetRegistrationException;
+
 
 @Service
 @Validated
@@ -39,12 +31,12 @@ public class CharacterSheetService {
     }
 
 
-    public List<CharacterSheet> getCharSheets(@Email @NotBlank String userId) {
+    public List<CharacterSheet> getCharSheets(@NotBlank String userId) {
         return _charSheetsRep.findAllByUserId(userId);
     }
 
 
-    public CharacterSheet addCharSheet(@Email @NotBlank String userId, @Valid CharacterSheet charSheet)
+    public CharacterSheet addCharSheet(@NotBlank String userId, @Valid CharacterSheet charSheet)
             throws InvalidOperationException {
         charSheet.setUserId(userId);
 
@@ -54,7 +46,7 @@ public class CharacterSheetService {
         return _charSheetsRep.insert(charSheet);
     }
 
-    public CharacterSheet modifyCharSheet(@Email @NotBlank String userId, @NotBlank String id, @Valid CharacterSheet charSheet)
+    public CharacterSheet modifyCharSheet(@NotBlank String userId, @NotBlank String id, @Valid CharacterSheet charSheet)
             throws CharacterSheetRegistrationException, InvalidOperationException {
         CharacterSheet savedCharSheet = _charSheetsRep.findById(id).orElseThrow(CharacterSheetRegistrationException::new);
 
@@ -68,7 +60,7 @@ public class CharacterSheetService {
         return _charSheetsRep.save(charSheet);
     }
 
-    public void removeCharSheet(@Email @NotBlank String userId, @NotBlank String id)
+    public void removeCharSheet(@NotBlank String userId, @NotBlank String id)
             throws CharacterSheetRegistrationException, InvalidOperationException {
         CharacterSheet savedCharSheet = _charSheetsRep.findById(id).orElseThrow(CharacterSheetRegistrationException::new);
 

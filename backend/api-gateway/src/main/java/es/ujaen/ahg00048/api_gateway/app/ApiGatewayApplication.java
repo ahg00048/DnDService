@@ -6,9 +6,8 @@ import org.springframework.context.annotation.ComponentScan;
 
 
 @SpringBootApplication
-@ComponentScan({"es.ujaen.ahg00048.api_gateway.service",
-				"es.ujaen.ahg00048.api_gateway.config",
-				"es.ujaen.ahg00048.api_gateway.security"})
+@ComponentScan({"es.ujaen.ahg00048.api_gateway.controller",
+				"es.ujaen.ahg00048.api_gateway.config"})
 public class ApiGatewayApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ApiGatewayApplication.class, args);

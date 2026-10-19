@@ -32,6 +32,5 @@ import lombok.Setter;
         @JsonSubTypes.Type(value = AddPiece_ClearBoard_CommandDTO.class, name = "UPDATE_BOARD_CLEAR")
 })
 public abstract class ACommandDTO {
-    private String userId = "";
     private CommandType type = CommandType.ADD_PIECE;
 }

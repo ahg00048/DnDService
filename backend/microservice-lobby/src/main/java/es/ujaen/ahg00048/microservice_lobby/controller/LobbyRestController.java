@@ -12,13 +12,21 @@ import es.ujaen.ahg00048.microservice_lobby.controller.mapper.LobbyMapper;
 import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/v1/lobbies")
@@ -31,6 +39,11 @@ public class LobbyRestController {
 
     @Autowired
     private SimpMessagingTemplate _simpTemplate;
+
+    @Value("${app.lobby.message.unregistered}")
+    private String _message_lobbyUnregistered;
+
+    public static final String CLAIM_USER_NAME = "email";
 
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -51,22 +64,22 @@ public class LobbyRestController {
     }
 
     @PostMapping
-    public ResponseEntity<LobbyDTO> createLobby(@RequestParam(value = "userId", required = true) String userId,
+    public ResponseEntity<LobbyDTO> createLobby(@AuthenticationPrincipal Jwt auth,
                                                 @RequestBody LobbyReqBodyDTO reqBody) {
         try {
-            return ResponseEntity.ok(_mapper.dto(_lobbyService.createLobby(userId, reqBody.open(), reqBody.password())));
+            return ResponseEntity.ok(_mapper.dto(_lobbyService.createLobby(auth.getSubject(), auth.getClaimAsString(CLAIM_USER_NAME), reqBody.open(), reqBody.password())));
         } catch (LobbyRegistrationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LobbyDTO> joinLobby(@RequestParam(value = "userId", required = true) String userId,
+    public ResponseEntity<LobbyDTO> joinLobby(@AuthenticationPrincipal Jwt auth,
                                               @RequestParam(value = "password", required = true) String password,
                                               @PathVariable String id) {
         try {
-            LobbyDTO lobbyDTO = _mapper.dto(_lobbyService.joinLobby(userId, id, password));
-            _simpTemplate.convertAndSend("/topic/lobbies-" + lobbyDTO.id(), lobbyDTO);
+            LobbyDTO lobbyDTO = _mapper.dto(_lobbyService.joinLobby(auth.getSubject(), auth.getClaimAsString(CLAIM_USER_NAME), id, password));
+            _simpTemplate.convertAndSend("/topic/lobbies." + lobbyDTO.id(), lobbyDTO);
             return ResponseEntity.ok(lobbyDTO);
         } catch (LobbyRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -74,24 +87,25 @@ public class LobbyRestController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> leaveLobby(@RequestParam(value = "userId", required = true) String userId,
+    public ResponseEntity<Void> leaveLobby(@AuthenticationPrincipal Jwt auth,
                                            @PathVariable String id) {
         try {
-            Optional<Lobby> lobbyOpt = _lobbyService.leaveLobby(userId, id);
-            lobbyOpt.ifPresent(lobby -> _simpTemplate.convertAndSend("/topic/lobbies-" + lobby.getId(), _mapper.dto(lobby)));
+            Optional<Lobby> lobbyOpt = _lobbyService.leaveLobby(auth.getSubject(), id);
+            if (lobbyOpt.isPresent()) {
+                Lobby lobby = lobbyOpt.get();
+                _simpTemplate.convertAndSend("/topic/lobbies." + id, _mapper.dto(lobby));
+            } else {
+                _simpTemplate.convertAndSend("/topic/lobbies." + id, _message_lobbyUnregistered);
+            }
             return ResponseEntity.ok().build();
         } catch (LobbyRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (UserRegistrationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -108,49 +122,43 @@ public class LobbyRestController {
     }
 
     @GetMapping("/boards")
-    public ResponseEntity<List<BoardDTO>> getSavedBoards(@RequestParam(value = "userId", required = true) String userId) {
-        return ResponseEntity.ok(_lobbyService.getSavedBoards(userId).stream().map(b -> _mapper.dto(b)).toList());
+    public ResponseEntity<List<BoardDTO>> getSavedBoards(Authentication auth) {
+        return ResponseEntity.ok(_lobbyService.getSavedBoards(auth.getName()).stream().map(b -> _mapper.dto(b)).toList());
     }
 
     @PostMapping("/boards")
-    public ResponseEntity<BoardDTO> addBoard(@RequestParam(value = "userId", required = true) String userId,
+    public ResponseEntity<BoardDTO> addBoard(@AuthenticationPrincipal Jwt auth,
                                              @RequestBody BoardDTO boardDTO) {
         try {
-            return ResponseEntity.ok(_mapper.dto(_lobbyService.addBoard(userId, _mapper.entity(boardDTO))));
+            return ResponseEntity.ok(_mapper.dto(_lobbyService.addBoard(auth.getSubject(), _mapper.entity(boardDTO))));
         } catch (BoardRegistrationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PutMapping("/boards/{id}")
-    public ResponseEntity<BoardDTO> saveBoard(@RequestParam(value = "userId", required = true) String userId,
+    public ResponseEntity<BoardDTO> saveBoard(@AuthenticationPrincipal Jwt auth,
                                               @PathVariable String id,
                                               @RequestBody BoardDTO boardDTO) {
         try {
-            return ResponseEntity.ok(_mapper.dto(_lobbyService.saveBoard(userId, id, _mapper.entity(boardDTO))));
+            return ResponseEntity.ok(_mapper.dto(_lobbyService.saveBoard(auth.getSubject(), id, _mapper.entity(boardDTO))));
         } catch (BoardRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @DeleteMapping("/boards/{id}")
-    public ResponseEntity<Void> removeBoard(@RequestParam(value = "userId", required = true) String userId,
+    public ResponseEntity<Void> removeBoard(@AuthenticationPrincipal Jwt auth,
                                             @PathVariable String id) {
         try {
-            _lobbyService.removeBoard(userId, id);
+            _lobbyService.removeBoard(auth.getSubject(), id);
             return ResponseEntity.ok().build();
         } catch (BoardRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

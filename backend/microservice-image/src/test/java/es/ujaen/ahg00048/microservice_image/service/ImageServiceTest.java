@@ -48,8 +48,8 @@ public class ImageServiceTest {
     @Test
     @DirtiesContext
     public void imageStorageTest() {
-        String validUserId1 = "random1@gmail.com";
-        String validUserId2 = "random2@gmail.com";
+        String validUserId1 = "random1-id";
+        String validUserId2 = "random2-id";
 
 
         File file = new File(_sampleImagePath);

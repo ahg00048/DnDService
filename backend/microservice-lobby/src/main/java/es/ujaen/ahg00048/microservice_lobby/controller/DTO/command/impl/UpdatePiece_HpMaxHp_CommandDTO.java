@@ -17,8 +17,8 @@ public class UpdatePiece_HpMaxHp_CommandDTO extends ACommandDTO {
     private int maxHp;
 
 
-    public UpdatePiece_HpMaxHp_CommandDTO(String userId, CommandType type, int pieceId, int hp, int maxHp) {
-        super(userId, type);
+    public UpdatePiece_HpMaxHp_CommandDTO(CommandType type, int pieceId, int hp, int maxHp) {
+        super(type);
         this.pieceId = pieceId;
         this.hp = hp;
         this.maxHp = maxHp;
