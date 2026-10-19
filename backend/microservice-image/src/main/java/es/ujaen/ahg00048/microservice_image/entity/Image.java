@@ -1,12 +1,10 @@
 package es.ujaen.ahg00048.microservice_image.entity;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 
@@ -16,7 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document("images")
 public class Image {
     private String id;
-    @Email @NotBlank
+    @NotBlank
     private String userId;
     @NotBlank
     private String path;

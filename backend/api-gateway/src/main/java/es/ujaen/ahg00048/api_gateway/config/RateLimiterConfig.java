@@ -42,7 +42,7 @@ public class RateLimiterConfig {
         StatefulRedisConnection<String, byte[]> redisConnection = client.connect(RedisCodec.of(StringCodec.UTF8, ByteArrayCodec.INSTANCE));
 
         return LettuceBasedProxyManager.builderFor(redisConnection)
-                .withExpirationStrategy(ExpirationAfterWriteStrategy
+                    .withExpirationStrategy(ExpirationAfterWriteStrategy
                     .basedOnTimeForRefillingBucketUpToMax(ofSeconds(10)))
                 .build().asAsync();
     }

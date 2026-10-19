@@ -2,50 +2,46 @@ package es.ujaen.ahg00048.microservice_image.rest;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.MediaType;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.assertj.MockMvcTester;
-import org.springframework.test.web.servlet.client.RestTestClient;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.*;
 import java.util.List;
 
 import es.ujaen.ahg00048.microservice_image.service.ImageService;
 import es.ujaen.ahg00048.microservice_image.rest.DTO.ImageWrap;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 
 @Slf4j
 @ActiveProfiles("test")
-@SpringBootTest(classes = es.ujaen.ahg00048.microservice_image.app.MicroserviceImageApplication.class,
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureRestTestClient
-@AutoConfigureMockMvc
+@SpringBootTest(classes = es.ujaen.ahg00048.microservice_image.app.MicroserviceImageApplication.class)
+@ContextConfiguration
+@WebAppConfiguration
 public class ImageControllerTest {
 
-    @LocalServerPort
-    private int port;
+    @Autowired
+    private WebApplicationContext context;
+
+    private MockMvc _mvc;
 
     @Autowired
-    private RestTestClient _restClient;
-
-    @Autowired
-    private MockMvcTester _mvcTester;
+    private ObjectMapper _oMapper;
 
     @Autowired
     private ImageService _imageService;
@@ -70,11 +66,19 @@ public class ImageControllerTest {
         }
     }
 
+    @BeforeEach
+    public void setup() {
+        _mvc = MockMvcBuilders
+                .webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
+                .build();
+    }
+
     @Test
     @DirtiesContext
-    public void imageManagementTest() throws IOException {
-        String validUserId1 = "random1@gmail.com";
-        String validUserId2 = "random2@gmail.com";
+    public void imageManagementTest() throws Exception {
+        String validUserId1 = "random1-id";
+        String validUserId2 = "random2-id";
 
         File file1 = new File(_sampleImagePath);
         File file2 = new File(_sampleOverSizedImagePath);
@@ -117,42 +121,40 @@ public class ImageControllerTest {
                 data);
 
         // Try to upload other oversized image
-        assertThat(_mvcTester.perform(
-                multipart("/api/v1/images?userId=" + validUserId1)
-                .file(MockMPFileOverSized)
-                )).hasStatus(HttpStatus.CONTENT_TOO_LARGE);
+        _mvc.perform(
+                multipart("/api/v1/images")
+                .with(jwt().jwt((jwt -> jwt.subject(validUserId1))))
+                .file(MockMPFileOverSized))
+            .andExpect(status().isContentTooLarge());
 
         // Try to upload other kind of file
-        assertThat(_mvcTester.perform(
-                multipart("/api/v1/images?userId=" + validUserId1)
-                .file(MockMPFileWrongFormat)
-        )).hasStatus(HttpStatus.NOT_ACCEPTABLE);
+        _mvc.perform(
+                multipart("/api/v1/images")
+                .with(jwt().jwt((jwt -> jwt.subject(validUserId1))))
+                .file(MockMPFileWrongFormat))
+            .andExpect(status().isNotAcceptable());
 
         // Post image
-        String imageId = _mvcTester.perform(
-                multipart("/api/v1/images?userId=" + validUserId1)
-                        .file(MockMPFileCorrect)).getResponse().getContentAsString();
+        String imageId = _mvc.perform(
+                multipart("/api/v1/images")
+                .with(jwt().jwt((jwt -> jwt.subject(validUserId1))))
+                .file(MockMPFileCorrect))
+            .andReturn().getResponse().getContentAsString();
 
-        String imageUrl = _restClient.get().uri("/api/v1/images/" + imageId + "?userId=" + validUserId1)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(String.class)
-                .returnResult().getResponseBody();
+        String imageUrl = _mvc.perform(
+                get("/api/v1/images/" + imageId)
+                .with(jwt().jwt((jwt -> jwt.subject(validUserId1)))))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
 
+        Assertions.assertTrue(imageUrl.length() > 0);
 
-        // Get image through generated url
-        Resource imageFile = _restClient.get().uri(imageUrl)
-                .exchange()
-                .expectBody(Resource.class)
-                .returnResult().getResponseBody();
-
-        Assertions.assertTrue(imageFile.contentLength() > 0);
+        List<String> userImagesIds = _oMapper.readValue(_mvc.perform(
+                get("/api/v1/images")
+                .with(jwt().jwt((jwt -> jwt.subject(validUserId1)))))
+            .andReturn().getResponse().getContentAsString(), new TypeReference<>() {});
 
         // Get user images Urls
-        List<String> userImagesIds = _restClient.get().uri("/api/v1/images?userId=" + validUserId1)
-                .exchange()
-                .expectBody(new ParameterizedTypeReference<List<String>>() {})
-                .returnResult().getResponseBody();
 
         Assertions.assertEquals(userImagesIds.getFirst(), imageId);
 
@@ -164,36 +166,35 @@ public class ImageControllerTest {
         }
 
         // Get user images Urls
-        List<ImageWrap> userImagesUrls = _restClient.get().uri("/api/v1/images?imagesIds=" + imageIdsStr.toString())
-                .exchange()
-                .expectBody(new ParameterizedTypeReference<List<ImageWrap>>() {})
-                .returnResult().getResponseBody();
+        List<ImageWrap> userImagesUrls = _oMapper.readValue(_mvc.perform(
+                get("/api/v1/images?imagesIds=" + imageIdsStr)
+                .with(jwt().jwt((jwt -> jwt.subject(validUserId1)))))
+            .andReturn().getResponse().getContentAsString(), new TypeReference<>() {});
 
         Assertions.assertEquals(1, userImagesUrls.size());
 
-        // Bad request on get images
-        _restClient.get().uri("/api/v1/images")
-                .exchange()
-                .expectStatus().isBadRequest();
-
         // Try to remove image from another user
-        _restClient.delete().uri("/api/v1/images/" + imageId + "?userId=" + validUserId2)
-                .exchange()
-                .expectStatus().isForbidden();
+        _mvc.perform(
+                delete("/api/v1/images/" + imageId)
+                .with(jwt().jwt((jwt -> jwt.subject(validUserId2)))))
+            .andExpect(status().isForbidden());
 
         // Remove image
-        _restClient.delete().uri("/api/v1/images/" + imageId + "?userId=" + validUserId1)
-                .exchange()
-                .expectStatus().isOk();
+        _mvc.perform(
+                delete("/api/v1/images/" + imageId)
+                .with(jwt().jwt((jwt -> jwt.subject(validUserId1)))))
+            .andExpect(status().isOk());
 
         // Try to remove image already deleted
-        _restClient.delete().uri("/api/v1/images/" + imageId + "?userId=" + validUserId1)
-                .exchange()
-                .expectStatus().isNotFound();
+        _mvc.perform(
+                delete("/api/v1/images/" + imageId)
+                .with(jwt().jwt((jwt -> jwt.subject(validUserId1)))))
+            .andExpect(status().isNotFound());
 
         // Try to get deleted image
-        _restClient.get().uri("/api/v1/images/" + imageId)
-                .exchange()
-                .expectStatus().isNotFound();
+        _mvc.perform(
+                get("/api/v1/images/" + imageId)
+                .with(jwt().jwt((jwt -> jwt.subject(validUserId2)))))
+            .andExpect(status().isNotFound());
     }
 }

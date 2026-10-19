@@ -1,7 +1,6 @@
 package es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.impl;
 
 import es.ujaen.ahg00048.microservice_lobby.controller.DTO.command.CommandType;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,8 +14,8 @@ public class UpdateBoard_Image_Scale_CommandDTO extends ACommandDTO {
     private int scale;
 
 
-    public UpdateBoard_Image_Scale_CommandDTO(String userId, CommandType type, String imageId, int scale) {
-        super(userId, type);
+    public UpdateBoard_Image_Scale_CommandDTO(CommandType type, String imageId, int scale) {
+        super(type);
         this.imageId = imageId;
         this.scale = scale;
     }

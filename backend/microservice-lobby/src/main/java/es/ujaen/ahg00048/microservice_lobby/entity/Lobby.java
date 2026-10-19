@@ -8,11 +8,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
-import org.springframework.data.redis.core.index.Indexed;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,44 +25,52 @@ public class Lobby implements Serializable {
     private String password;
 
     private Board board;
-    private final List<String> usersIds;
+    private List<PlayerInfo> playersInfo;
 
+    private Instant timeout;
 
-    public Lobby(String lobbyCreator, boolean open, String password) {
+    
+    public Lobby(String lobbyCreatorId, String lobbyCreatorName, boolean open, String password, Instant timeout) {
         id = new ObjectId().toString();
 
         board = new Board();
-        usersIds = new ArrayList<>();
-        usersIds.add(lobbyCreator);
+        playersInfo = new ArrayList<>();
+        playersInfo.add(new PlayerInfo(lobbyCreatorId, lobbyCreatorName));
 
         this.open = open;
         this.password = password;
+
+        this.timeout = timeout;
     }
 
 
-    public void addUser(String userId, String password)
+    public void addUser(String userId, String userName, String password)
             throws UserRegistrationException, InvalidOperationException {
-        if (usersIds.contains(userId) || usersIds.size() >= LobbyService.MAX_USERS_PER_LOBBY)
+        PlayerInfo playerInfo = new PlayerInfo(userId, userName);
+
+        if (playersInfo.contains(playerInfo) || playersInfo.size() >= LobbyService.MAX_USERS_PER_LOBBY)
             throw new UserRegistrationException();
         if (!password.equals(this.password) && !open)
             throw new InvalidOperationException();
 
-        usersIds.add(userId);
+        playersInfo.add(playerInfo);
     }
 
     public void removeUser(String userId)
             throws UserRegistrationException {
-        if (!usersIds.contains(userId))
+        PlayerInfo playerInfo = new PlayerInfo(userId);
+
+        if (!playersInfo.contains(playerInfo))
             throw new UserRegistrationException();
 
-        usersIds.remove(userId);
+        playersInfo.remove(playerInfo);
     }
 
     public boolean isEmpty() {
-        return usersIds.isEmpty();
+        return playersInfo.isEmpty();
     }
 
     public boolean contains(String userId) {
-        return usersIds.contains(userId);
+        return playersInfo.contains(new PlayerInfo(userId));
     }
 }
