@@ -10,6 +10,8 @@ import lombok.Setter;
 import org.bson.types.ObjectId;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +27,10 @@ public class Lobby implements Serializable {
     private Board board;
     private List<PlayerInfo> playersInfo;
 
+    private Instant timeout;
 
-    public Lobby(String lobbyCreatorId, String lobbyCreatorName, boolean open, String password) {
+    
+    public Lobby(String lobbyCreatorId, String lobbyCreatorName, boolean open, String password, Instant timeout) {
         id = new ObjectId().toString();
 
         board = new Board();
@@ -35,6 +39,8 @@ public class Lobby implements Serializable {
 
         this.open = open;
         this.password = password;
+
+        this.timeout = timeout;
     }
 
 

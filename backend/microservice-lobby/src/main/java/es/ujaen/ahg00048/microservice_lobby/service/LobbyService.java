@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -63,6 +64,8 @@ public class LobbyService {
 
     /// Lobbies logic -----------------------------------------------------------------------------------------------------------
 
+    public List<Lobby> getLobbies() { return _lobbiesRep.findAll(); }
+
     public List<Lobby> getPublicLobbies() {
         return _lobbiesRep.findAllOpen();
     }
@@ -72,7 +75,7 @@ public class LobbyService {
         if (_lobbiesRep.existByUserIdsContaining(userId))
             throw new LobbyRegistrationException();
 
-        Lobby lobby = new Lobby(userId, userName, open, password);
+        Lobby lobby = new Lobby(userId, userName, open, password, Instant.now().plusSeconds(3600L * LOBBY_TIMEOUT_IN_HOURS));
 
         lobby = _lobbiesRep.insert(lobby);
 
@@ -159,7 +162,7 @@ public class LobbyService {
         }
     }
 
-    private void removeLobby(@NotBlank String id)
+    public void removeLobby(@NotBlank String id)
             throws LobbyRegistrationException, UserRegistrationException,
             IllegalStateException {
         Lock lock = _lockRegistry.obtain(LOCK_LOBBY_KEY_BASE + id);
