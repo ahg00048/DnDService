@@ -19,7 +19,6 @@ import es.ujaen.ahg00048.microservice_characterSheet.rest.mapper.CharacterSheetM
 import es.ujaen.ahg00048.microservice_characterSheet.service.CharacterSheetService;
 
 
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/charSheets")
 public class CharacterSheetController {
@@ -41,8 +40,6 @@ public class CharacterSheetController {
 
     @GetMapping
     public ResponseEntity<List<CharacterSheetDTO>> getSheets(@AuthenticationPrincipal Jwt auth) {
-        log.info(auth.getSubject());
-
         return ResponseEntity.ok(_service.getCharSheets(auth.getSubject()).stream().map(CharacterSheetDTO::new).toList());
     }
 
@@ -50,7 +47,6 @@ public class CharacterSheetController {
     public ResponseEntity<CharacterSheet> addSheet(@AuthenticationPrincipal Jwt auth,
                                                    @RequestBody CharacterSheetDTO characterSheetDTO) {
         try {
-            log.info(auth.getSubject());
             return ResponseEntity.status(HttpStatus.CREATED).body(_service.addCharSheet(auth.getSubject(), _mapper.newEntity(characterSheetDTO)));
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();

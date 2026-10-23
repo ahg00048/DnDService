@@ -11,7 +11,6 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +36,7 @@ public class UserController {
     public void validationConstraintViolationException() {}
 
     @GetMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<List<UserDTO>> getUsers(@AuthenticationPrincipal Jwt auth) {
+    public ResponseEntity<List<UserDTO>> getUsers() {
         List<UserRepresentation> users = _userService.getUsers();
         return ResponseEntity.ok(users.stream().map(u -> _mapper.dto(u)).toList());
     }
@@ -47,7 +45,7 @@ public class UserController {
     public ResponseEntity<Void> removeUser(@AuthenticationPrincipal Jwt auth,
                                            @PathVariable String id) {
         try {
-            _userService.removeUser(auth.getSubject(), _jwtService.hasRole(auth, "ADMIN"), id);
+            _userService.removeUser(auth.getSubject(), _jwtService.hasRole(auth, "ROLE_ADMIN"), id);
             return ResponseEntity.ok().build();
         } catch (UserAuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

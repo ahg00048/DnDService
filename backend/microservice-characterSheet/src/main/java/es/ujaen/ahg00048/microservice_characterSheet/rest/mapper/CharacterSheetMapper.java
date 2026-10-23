@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+
 @Service
 public class CharacterSheetMapper {
     private Skills entitySkills(CharacterSheetDTO characterSheetDTO) {

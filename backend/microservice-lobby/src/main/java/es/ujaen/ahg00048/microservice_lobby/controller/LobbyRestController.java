@@ -43,7 +43,7 @@ public class LobbyRestController {
     @Value("${app.lobby.message.unregistered}")
     private String _message_lobbyUnregistered;
 
-    public static final String CLAIM_USER_NAME = "email";
+    public static final String CLAIM_USER_NAME = "preferred_username";
 
 
     @ExceptionHandler(ConstraintViolationException.class)

@@ -5,7 +5,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 
 @Service
@@ -14,10 +13,9 @@ public class JwtService {
     private String _clientId;
 
 
-    public Boolean hasRole(Jwt jwt, String role) {
-        Map<String, Object> map = ((Map<String, Object>) jwt.getClaimAsMap("resource_access").get(_clientId));
-        List<String> roles = (List<String>) map.get("roles");
+    public Boolean hasRole(Jwt jwt, String auth) {
+        List<String> auths = jwt.getClaimAsStringList("authorities");
 
-        return roles.stream().anyMatch(r -> r.equals(role));
+        return auths.stream().anyMatch(r -> r.equals(auth));
     }
 }
