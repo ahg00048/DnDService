@@ -1,0 +1,46 @@
+{ 
+    "users": [
+        {
+            "name": "guest",
+            "password_hash": "BMfxN8drrYcIqXZMr+pWTpDT0nMcOagMduLX0bjr4jwud/pN",
+            "hashing_algorithm": "rabbit_password_hashing_sha256",
+            "tags": "administrator"
+        }
+    ],
+    "vhosts":[
+        {"name" : "/"},
+        {"name" : "vTest"},
+        {"name" : "vMicroservicesMQ"},
+        {"name" : "vLobbiesStomp"}
+    ],
+    "permissions": [
+        {
+        "user": "guest",
+        "vhost": "/",
+        "configure": ".*",
+        "write": ".*",
+        "read": ".*"
+        },
+        {
+        "user": "guest",
+        "vhost": "vTest",
+        "configure": ".*",
+        "write": ".*",
+        "read": ".*"
+        },
+        {
+        "user": "guest",
+        "vhost": "vMicroservicesMQ",
+        "configure": ".*",
+        "write": ".*",
+        "read": ".*"
+        },
+        {
+        "user": "guest",
+        "vhost": "vLobbiesStomp",
+        "configure": ".*",
+        "write": ".*",
+        "read": ".*"
+        }
+    ]
+}

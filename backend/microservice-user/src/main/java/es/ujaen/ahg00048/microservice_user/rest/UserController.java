@@ -4,7 +4,7 @@ import es.ujaen.ahg00048.microservice_user.exception.UserAuthorizationException;
 import es.ujaen.ahg00048.microservice_user.exception.UserRegistrationException;
 import es.ujaen.ahg00048.microservice_user.rest.DTO.UserDTO;
 import es.ujaen.ahg00048.microservice_user.rest.mapper.UserMapper;
-import es.ujaen.ahg00048.microservice_user.service.JwtService;
+import es.ujaen.ahg00048.microservice_user.utils.JwtUtils;
 import es.ujaen.ahg00048.microservice_user.service.UserService;
 import jakarta.validation.ConstraintViolationException;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -25,15 +25,13 @@ public class UserController {
     private UserService _userService;
 
     @Autowired
-    private JwtService _jwtService;
-
-    @Autowired
     private UserMapper _mapper;
 
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
     public void validationConstraintViolationException() {}
+
 
     @GetMapping
     public ResponseEntity<List<UserDTO>> getUsers() {
@@ -45,7 +43,7 @@ public class UserController {
     public ResponseEntity<Void> removeUser(@AuthenticationPrincipal Jwt auth,
                                            @PathVariable String id) {
         try {
-            _userService.removeUser(auth.getSubject(), _jwtService.hasRole(auth, "ROLE_ADMIN"), id);
+            _userService.removeUser(auth.getSubject(), JwtUtils.hasRole(auth, "ROLE_ADMIN"), id);
             return ResponseEntity.ok().build();
         } catch (UserAuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

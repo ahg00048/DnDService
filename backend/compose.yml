@@ -1,0 +1,55 @@
+services:
+  redis_container: 
+    image: redis:latest
+    container_name: redis_container
+    restart: always
+    ports:
+    - "6379:6379"
+
+  # mongodb_container:
+  #   image: mongo:latest
+  #   container_name: mongo_container
+  #   ports:
+  #   - "27017:27017"
+
+  rabbitmq_container: 
+    image: rabbitmq:management
+    container_name: rabbitmq_container
+    volumes:
+    - ./imageConfig-rabbit/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    - ./imageConfig-rabbit/definitions.json:/etc/rabbitmq/definitions.json:ro
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    post_start:
+      - command: "rabbitmq-plugins enable rabbitmq_stomp"
+    ports:
+    - "61613:61613"     # STOMP
+    - "5672:5672"       # Message Broker
+    - "15672:15672"
+
+  keycloak_container:
+    image: keycloak/keycloak:latest
+    container_name: keycloak_container
+    volumes:
+      - ./imageConfig-keycloak/import:/opt/keycloak/data/import
+    restart: always
+    environment:       
+      KEYCLOAK_IMPORT: /opt/keycloak/data/import/realm-export.json
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    command: start-dev --import-realm --http-port=9090
+    ports:
+    - "9090:9090"
+
+  minio_container:
+    image: quay.io/minio/aistor/minio:latest
+    container_name: minio_container
+    restart: always
+    volumes:
+        - ./imageConfig-minio/minio.license:/minio.license:ro
+    command: server /data --license /minio.license
+    ports:
+    - "9000:9000"
+    - "9001:9001"
