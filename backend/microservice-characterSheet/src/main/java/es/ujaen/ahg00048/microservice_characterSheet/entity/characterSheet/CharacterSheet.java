@@ -1,10 +1,8 @@
 package es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
@@ -74,13 +72,12 @@ public class CharacterSheet {
         id = new ObjectId().toString();
     }
 
-    public CharacterSheet(String imageId, String userId, String name, String classname, int level, int defense, int initiative, int proficiency,
+    public CharacterSheet(String imageId, String name, String classname, int level, int defense, int initiative, int proficiency,
                           int speed, int healthPoints, int maxHealthPoints, int hitRolls, int maxHitRolls, Attributes attributes, Saves saves,
                           Skills skills, Inventory inventory, Conditions conditions, List<Spell> spells, List<PassiveEffect> passiveEffects, List<Feature> features, String biography) {
-        id = new ObjectId().toString();
+        id = ObjectId.get().toString();
 
         this.imageId = imageId;
-        this.userId = userId;
         this.name = name;
         this.classname = classname;
         this.level = level;
@@ -107,13 +104,12 @@ public class CharacterSheet {
         this.biography = biography;
     }
 
-    public CharacterSheet(String id, String imageId, String userId, String name, String classname, int level, int defense, int initiative, int proficiency,
+    public CharacterSheet(String id, String imageId, String name, String classname, int level, int defense, int initiative, int proficiency,
                           int speed, int healthPoints, int maxHealthPoints, int hitRolls, int maxHitRolls, Attributes attributes, Saves saves,
                           Skills skills, Inventory inventory, Conditions conditions, List<Spell> spells, List<PassiveEffect> passiveEffects, List<Feature> features, String biography) {
         this.id = id;
 
         this.imageId = imageId;
-        this.userId = userId;
         this.name = name;
         this.classname = classname;
         this.level = level;

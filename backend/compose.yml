@@ -68,3 +68,39 @@ services:
     ports:
     - "9000:9000"
     - "9001:9001"
+
+# =============================================================================== 
+
+  # registry_service_container:
+  #   build: ./registry-service
+  #   container_name: registry_service_container
+  #   restart: always
+  #   ports:
+  #   - "8756:8756"
+
+  # api_gateway_container:
+  #   build: ./api-gateway
+  #   container_name: api_gateway_container
+  #   restart: always
+  #   ports:
+  #   - "8080:8080"
+
+  # microservice_charactersheet_container:
+  #   build: ./microservice-characterSheet
+  #   container_name: microservice_charactersheet_container
+  #   restart: always
+    
+  # microservice_image_container:
+  #   build: ./microservice-image
+  #   container_name: microservice_image_container
+  #   restart: always
+    
+  # microservice_user_container:
+  #   build: ./microservice-user
+  #   container_name: microservice_user_container
+  #   restart: always
+    
+  # microservice_lobby_container:
+  #   build: ./microservice-lobby
+  #   container_name: microservice_lobby_container
+  #   restart: always

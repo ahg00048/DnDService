@@ -50,6 +50,14 @@ public class KeycloakService {
         return _client.realm(_realm).users().list();
     }
 
+    public UserRepresentation getUser(String userId) {
+        try {
+            return _client.realm(_realm).users().get(userId).toRepresentation();
+        } catch (NotFoundException e) {
+            throw new UserRegistrationException();
+        }
+    }
+
     @PreDestroy
     private void freeResources() {
         _client.close();

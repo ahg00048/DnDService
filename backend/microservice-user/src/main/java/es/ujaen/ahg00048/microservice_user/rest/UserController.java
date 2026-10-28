@@ -3,6 +3,7 @@ package es.ujaen.ahg00048.microservice_user.rest;
 import es.ujaen.ahg00048.microservice_user.exception.UserAuthorizationException;
 import es.ujaen.ahg00048.microservice_user.exception.UserRegistrationException;
 import es.ujaen.ahg00048.microservice_user.rest.DTO.UserDTO;
+import es.ujaen.ahg00048.microservice_user.rest.DTO.UserProfileDTO;
 import es.ujaen.ahg00048.microservice_user.rest.mapper.UserMapper;
 import es.ujaen.ahg00048.microservice_user.utils.JwtUtils;
 import es.ujaen.ahg00048.microservice_user.service.UserService;
@@ -27,6 +28,8 @@ public class UserController {
     @Autowired
     private UserMapper _mapper;
 
+    private static final String admin_role = "ROLE_ADMIN";
+
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
@@ -39,11 +42,16 @@ public class UserController {
         return ResponseEntity.ok(users.stream().map(u -> _mapper.dto(u)).toList());
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<UserProfileDTO> getUserInfo(@AuthenticationPrincipal Jwt auth) {
+        return ResponseEntity.ok(_mapper.dto(_userService.getUserInfo(auth.getSubject()), JwtUtils.hasRole(auth, admin_role)));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeUser(@AuthenticationPrincipal Jwt auth,
                                            @PathVariable String id) {
         try {
-            _userService.removeUser(auth.getSubject(), JwtUtils.hasRole(auth, "ROLE_ADMIN"), id);
+            _userService.removeUser(auth.getSubject(), JwtUtils.hasRole(auth, admin_role), id);
             return ResponseEntity.ok().build();
         } catch (UserAuthorizationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

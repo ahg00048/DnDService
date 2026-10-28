@@ -38,6 +38,10 @@ public class UserService {
         _rabbitTemplate.send(new Message(userIdToRemove.getBytes()));
     }
 
+    public UserRepresentation getUserInfo(@NotBlank String userId) {
+        return _keycloakService.getUser(userId);
+    }
+
     @Profile("test")
     public void createUser(@NotBlank String id, @NotBlank String username, @NotBlank String email) {
         UserRepresentation user = new UserRepresentation();

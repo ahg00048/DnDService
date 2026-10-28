@@ -44,10 +44,10 @@ public class CharacterSheetController {
     }
 
     @PostMapping
-    public ResponseEntity<CharacterSheet> addSheet(@AuthenticationPrincipal Jwt auth,
+    public ResponseEntity<CharacterSheetDTO> addSheet(@AuthenticationPrincipal Jwt auth,
                                                    @RequestBody CharacterSheetDTO characterSheetDTO) {
         try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(_service.addCharSheet(auth.getSubject(), _mapper.newEntity(characterSheetDTO)));
+            return ResponseEntity.status(HttpStatus.CREATED).body(_mapper.dto(_service.addCharSheet(auth.getSubject(), _mapper.newEntity(characterSheetDTO))));
         } catch (InvalidOperationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }

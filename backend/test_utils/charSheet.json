@@ -1,0 +1,193 @@
+{
+  "_id": {
+    "$oid": "6ae2216f96be058c89b0f4f6"
+  },
+  "version": {
+    "$numberLong": "0"
+  },
+  "imageId": "",
+  "userId": "random-id",
+  "name": "some char name",
+  "classname": "a classname",
+  "level": 2,
+  "defense": 0,
+  "initiative": 0,
+  "proficiency": 0,
+  "speed": 0,
+  "healthPoints": 0,
+  "maxHealthPoints": 0,
+  "hitRolls": 0,
+  "maxHitRolls": 0,
+  "attributes": {
+    "strength": {
+      "value": 10,
+      "modifier": 0
+    },
+    "dexterity": {
+      "value": 10,
+      "modifier": 0
+    },
+    "constitution": {
+      "value": 10,
+      "modifier": 0
+    },
+    "intelligence": {
+      "value": 10,
+      "modifier": 0
+    },
+    "wisdom": {
+      "value": 10,
+      "modifier": 0
+    },
+    "charisma": {
+      "value": 10,
+      "modifier": 0
+    }
+  },
+  "saves": {
+    "strength": {
+      "proficient": false,
+      "modifier": 0
+    },
+    "dexterity": {
+      "proficient": false,
+      "modifier": 0
+    },
+    "constitution": {
+      "proficient": false,
+      "modifier": 0
+    },
+    "intelligence": {
+      "proficient": false,
+      "modifier": 0
+    },
+    "wisdom": {
+      "proficient": false,
+      "modifier": 0
+    },
+    "charisma": {
+      "proficient": false,
+      "modifier": 0
+    }
+  },
+  "skills": {
+    "acrobatics": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "sleight_of_hand": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "stealth": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "athletics": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "arcana": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "history": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "investigation": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "nature": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "religion": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "animal_handling": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "perception": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "insight": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "survival": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "medicine": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "performance": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "deception": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "intimidation": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    },
+    "persuasion": {
+      "proficient": false,
+      "value": 5,
+      "modifier": 0
+    }
+  },
+  "inventory": {
+    "weapons": [],
+    "equipment": [],
+    "gold": 0,
+    "weight": 0,
+    "maxWeight": 50
+  },
+  "conditions": {
+    "grappled": false,
+    "restrained": false,
+    "frightened": false,
+    "stunned": false,
+    "exhaustion": false,
+    "blinded": false,
+    "prone": false,
+    "deafened": false,
+    "poisoned": false,
+    "charmed": false,
+    "incapacitated": false,
+    "unconscious": false,
+    "invisible": false,
+    "petrified": false,
+    "paralyzed": false
+  },
+  "spells": [],
+  "passiveEffects": [],
+  "features": [],
+  "biography": ""
+}

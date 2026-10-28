@@ -112,7 +112,7 @@ public class CharacterSheetMapper {
         List<Feature> features = characterSheetDTO.features()
                 .stream().map(fDTO -> new Feature(fDTO.name(), fDTO.description())).toList();
 
-        return new CharacterSheet(characterSheetDTO.id(), characterSheetDTO.imageId(), characterSheetDTO.userId(), characterSheetDTO.name(), characterSheetDTO.classname(), characterSheetDTO.level(),
+        return new CharacterSheet(characterSheetDTO.id(), characterSheetDTO.imageId(), characterSheetDTO.name(), characterSheetDTO.classname(), characterSheetDTO.level(),
                 characterSheetDTO.defense(), characterSheetDTO.initiative(), characterSheetDTO.proficiency(), characterSheetDTO.speed(), characterSheetDTO.healthPoints(),
                 characterSheetDTO.maxHealthPoints(), characterSheetDTO.hitRolls(), characterSheetDTO.maxHitRolls(), attributes, saves, skills, inventory, conditions,
                 spells, passiveEffects, features, characterSheetDTO.biography());
@@ -140,7 +140,7 @@ public class CharacterSheetMapper {
         List<Feature> features = characterSheetDTO.features()
                 .stream().map(fDTO -> new Feature(fDTO.name(), fDTO.description())).toList();
 
-        return new CharacterSheet(characterSheetDTO.imageId(), characterSheetDTO.userId(), characterSheetDTO.name(), characterSheetDTO.classname(), characterSheetDTO.level(),
+        return new CharacterSheet(characterSheetDTO.imageId(), characterSheetDTO.name(), characterSheetDTO.classname(), characterSheetDTO.level(),
                 characterSheetDTO.defense(), characterSheetDTO.initiative(), characterSheetDTO.proficiency(), characterSheetDTO.speed(), characterSheetDTO.healthPoints(),
                 characterSheetDTO.maxHealthPoints(), characterSheetDTO.hitRolls(), characterSheetDTO.maxHitRolls(), attributes, saves, skills, inventory, conditions,
                 spells, passiveEffects, features, characterSheetDTO.biography());
