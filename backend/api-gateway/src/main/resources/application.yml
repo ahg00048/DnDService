@@ -1,6 +1,8 @@
 # Eureka config
-eureka.instance.instance-id: ${spring.application.name}:${random.uuid}
-
+eureka:
+  instance.instance-id: ${spring.application.name}:${random.uuid}
+  client.service-url:
+      defaultZone: "http://${REGISTRY_HOST:127.0.0.1}:8761/eureka/"
 # Redis properties
 spring.data.redis.host: ${REDIS_HOST:127.0.0.1}
 spring.data.redis.port: ${REDIS_PORT:6379}
@@ -35,7 +37,7 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: http://127.0.0.1:9090/realms/dndservice-users-realm
+            issuer-uri: http://${KEYCLOAK_HOST:127.0.0.1}:9090/realms/dndservice-users-realm
         registration:
           keycloak:
             provider: keycloak

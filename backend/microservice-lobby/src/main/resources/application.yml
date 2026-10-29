@@ -6,4 +6,7 @@ rabbitmq:
     ws: "vLobbiesStomp"
     mb: "vMicroservicesMQ"
 # Eureka config
-eureka.instance.instance-id: "${spring.application.name}:${random.uuid}"
+eureka:
+  instance.instance-id: "${spring.application.name}:${random.uuid}"
+  client.service-url:
+    defaultZone: "http://${REGISTRY_HOST:127.0.0.1}:8761/eureka/"
