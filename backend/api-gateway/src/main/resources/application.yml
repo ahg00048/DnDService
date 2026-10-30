@@ -2,9 +2,9 @@
 eureka:
   instance.instance-id: ${spring.application.name}:${random.uuid}
   client.service-url:
-      defaultZone: "http://${REGISTRY_HOST:127.0.0.1}:8761/eureka/"
+      defaultZone: "http://${REGISTRY_HOST:localhost}:8761/eureka/"
 # Redis properties
-spring.data.redis.host: ${REDIS_HOST:127.0.0.1}
+spring.data.redis.host: ${REDIS_HOST:localhost}
 spring.data.redis.port: ${REDIS_PORT:6379}
 
 # App Custom Config
@@ -37,14 +37,15 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: http://${KEYCLOAK_HOST:127.0.0.1}:9090/realms/dndservice-users-realm
+            user-name-attribute: preferred_username
+            issuer-uri: http://${KEYCLOAK_HOST:localhost}:9090/realms/dndservice-users-realm
         registration:
           keycloak:
             provider: keycloak
             client-id: dndservice-keycloak-id
             client-secret: admin
             authorization-grant-type: authorization_code
-            redirect-uri: http://127.0.0.1:8080/login/oauth2/code/keycloak
+            redirect-uri: http://${API_GATEWAY_CONTAINER:localhost}:8080/login/oauth2/code/keycloak
             scope:
               - openid
               - profile

@@ -1,12 +1,6 @@
 {
-  "_id": {
-    "$oid": "6ae2216f96be058c89b0f4f6"
-  },
-  "version": {
-    "$numberLong": "0"
-  },
+  "id": "6ae2216f96be058c89b0f4f6",
   "imageId": "",
-  "userId": "random-id",
   "name": "some char name",
   "classname": "a classname",
   "level": 2,

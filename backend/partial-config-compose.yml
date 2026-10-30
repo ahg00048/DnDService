@@ -1,0 +1,74 @@
+services:
+  redis_container: 
+    image: redis:latest
+    container_name: redis-container
+    restart: always
+    ports:
+      - "6379:6379"
+
+
+  mongodb_container:
+    image: mongo:latest
+    container_name: mongo-container
+    volumes:
+      - ./imageConfigs/mongo/init.sh:/etc/mongo/custom_init.sh
+      - ./imageConfigs/mongo/createUser.js:/createUser.js
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    entrypoint: /etc/mongo/custom_init.sh
+    healthcheck:
+      test: echo "try { rs.status() } catch (err) { rs.initiate({_id:'rs0', members:[{_id:0,host:'localhost:27017'}]}) }" | mongosh --port 27017 --quiet
+      interval: 5s
+      timeout: 30s
+      start_period: 0s
+      start_interval: 1s
+      retries: 30
+    ports:
+      - "27017:27017"
+
+
+  rabbitmq_container: 
+    image: rabbitmq:management
+    container_name: rabbitmq-container
+    volumes:
+    - ./imageConfigs/rabbitMQ/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    - ./imageConfigs/rabbitMQ/definitions.json:/etc/rabbitmq/definitions.json:ro
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    post_start:
+      - command: "rabbitmq-plugins enable rabbitmq_stomp"
+    ports:
+      - "61613:61613"     
+      - "5672:5672"       
+      - "15672:15672"
+
+
+  keycloak_container:
+    image: keycloak/keycloak:latest
+    container_name: keycloak-container
+    volumes:
+      - ./imageConfigs/keycloak/import:/opt/keycloak/data/import
+    restart: always
+    environment:       
+      KEYCLOAK_IMPORT: /opt/keycloak/data/import/realm-export.json
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    command: start-dev --import-realm --http-port=9090
+    ports:
+      - "9090:9090" 
+
+
+  minio_container:
+    image: quay.io/minio/aistor/minio:latest
+    container_name: minio-container
+    restart: always
+    volumes:
+        - ./imageConfigs/minIO/minio.license:/minio.license:ro
+    command: server /data --license /minio.license
+    ports:
+      - "9000:9000"
+      - "9001:9001"
