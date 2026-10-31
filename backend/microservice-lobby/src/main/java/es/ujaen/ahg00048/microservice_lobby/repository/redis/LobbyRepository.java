@@ -2,17 +2,13 @@ package es.ujaen.ahg00048.microservice_lobby.repository.redis;
 
 import es.ujaen.ahg00048.microservice_lobby.entity.Lobby;
 import es.ujaen.ahg00048.microservice_lobby.entity.boardGame.Board;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @Repository
 public class LobbyRepository {
@@ -20,7 +16,6 @@ public class LobbyRepository {
     private RedisTemplate<String, Lobby> _template;
 
     private final static String _redisHashKey = "lobbies";
-
 
     public Optional<Lobby> findById(String id) {
         return Optional.ofNullable((Lobby) _template.opsForHash().get(_redisHashKey, id));
@@ -39,10 +34,10 @@ public class LobbyRepository {
                 .stream()
                 .map(o -> (Lobby) o)
                 .filter(l -> {
-            Board board = l.getBoard();
-            return !(board.getBackgroundImage().equals(imageId) ||
-                    board.getPieces().stream().anyMatch(p -> p.getImageId().equals(imageId)));
-        }).toList();
+                    Board board = l.getBoard();
+                    return !(board.getBackgroundImage().equals(imageId) ||
+                            board.getPieces().stream().anyMatch(p -> p.getImageId().equals(imageId)));
+                }).toList();
     }
 
     public Optional<Lobby> findByUserId(String userId) {

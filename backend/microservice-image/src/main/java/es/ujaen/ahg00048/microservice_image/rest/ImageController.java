@@ -1,12 +1,9 @@
 package es.ujaen.ahg00048.microservice_image.rest;
 
-
-import es.ujaen.ahg00048.microservice_image.rest.DTO.ImageWrap;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +17,6 @@ import es.ujaen.ahg00048.microservice_image.exception.ImageRegistrationException
 import es.ujaen.ahg00048.microservice_image.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_image.service.ImageService;
 
-
 @RestController
 @RequestMapping("/api/v1/images")
 public class ImageController {
@@ -28,11 +24,10 @@ public class ImageController {
     @Autowired
     private ImageService _imageService;
 
-
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
-    public void constraintValidationViolationException() {}
-
+    public void constraintValidationViolationException() {
+    }
 
     @GetMapping("/MaxAllowedPerUser")
     public ResponseEntity<Integer> getMaxImagesPerUserAllowed() {
@@ -41,7 +36,7 @@ public class ImageController {
 
     @GetMapping
     public ResponseEntity<List<?>> getImageUrls(@AuthenticationPrincipal Jwt auth,
-                                                @RequestParam(value = "imagesIds", required = false) List<String> imagesIds) {
+            @RequestParam(value = "imagesIds", required = false) List<String> imagesIds) {
         if (imagesIds != null) {
             return ResponseEntity.ok(_imageService.getImagesUrls(imagesIds));
         } else {
@@ -51,7 +46,7 @@ public class ImageController {
 
     @PostMapping
     public ResponseEntity<String> addImage(@AuthenticationPrincipal Jwt auth,
-                                           @RequestParam(value = "image", required = true) MultipartFile file) {
+            @RequestParam(value = "image", required = true) MultipartFile file) {
         try {
             return ResponseEntity.ok(_imageService.saveImage(auth.getSubject(), file));
         } catch (ImageFormatException e) {
@@ -74,7 +69,7 @@ public class ImageController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeImage(@AuthenticationPrincipal Jwt auth,
-                                            @PathVariable(value = "id") String id) {
+            @PathVariable(value = "id") String id) {
         try {
             _imageService.deleteImage(auth.getSubject(), id);
             return ResponseEntity.ok().build();

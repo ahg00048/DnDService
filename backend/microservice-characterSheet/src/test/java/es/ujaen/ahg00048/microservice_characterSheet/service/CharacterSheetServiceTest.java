@@ -2,7 +2,6 @@ package es.ujaen.ahg00048.microservice_characterSheet.service;
 
 import es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.CharacterSheet;
 import es.ujaen.ahg00048.microservice_characterSheet.exception.CharacterSheetRegistrationException;
-import es.ujaen.ahg00048.microservice_characterSheet.repository.CharacterSheetRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.AfterEach;
@@ -16,8 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
-@SpringBootTest(classes = es.ujaen.ahg00048.microservice_characterSheet.app.MicroserviceCharacterSheetApplication.class,
-                webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = es.ujaen.ahg00048.microservice_characterSheet.app.MicroserviceCharacterSheetApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class CharacterSheetServiceTest {
     @Autowired
@@ -26,14 +24,12 @@ public class CharacterSheetServiceTest {
     @Autowired
     private MongoTemplate _mongoTemplate;
 
-
     @PostConstruct
     @AfterEach
     public void cleanUp() {
         _mongoTemplate.getDb().drop();
     }
 
-    
     @Test
     @DirtiesContext
     public void addingAndRemovingCharacterSheetTest() {
@@ -41,7 +37,10 @@ public class CharacterSheetServiceTest {
 
         CharacterSheet charSheet = new CharacterSheet();
 
-        Assertions.assertThrows(ConstraintViolationException.class, () -> _service.addCharSheet(userId, charSheet)); // Add invalid character sheet
+        Assertions.assertThrows(ConstraintViolationException.class, () -> _service.addCharSheet(userId, charSheet)); // Add
+                                                                                                                     // invalid
+                                                                                                                     // character
+                                                                                                                     // sheet
 
         charSheet.setName("some char name");
         charSheet.setClassname("a classname");
@@ -49,9 +48,11 @@ public class CharacterSheetServiceTest {
 
         Assertions.assertDoesNotThrow(() -> _service.addCharSheet(userId, charSheet)); // Add valid Character sheet
 
-        Assertions.assertDoesNotThrow(() -> _service.removeCharSheet(userId, charSheet.getId())); // Remove character sheet
+        Assertions.assertDoesNotThrow(() -> _service.removeCharSheet(userId, charSheet.getId())); // Remove character
+                                                                                                  // sheet
 
-        Assertions.assertThrows(CharacterSheetRegistrationException.class, () -> _service.removeCharSheet(userId, charSheet.getId())); // Remove unregistered character sheet
+        Assertions.assertThrows(CharacterSheetRegistrationException.class,
+                () -> _service.removeCharSheet(userId, charSheet.getId())); // Remove unregistered character sheet
     }
 
     @Test
@@ -61,29 +62,38 @@ public class CharacterSheetServiceTest {
 
         CharacterSheet charSheet = new CharacterSheet();
 
-        Assertions.assertThrows(ConstraintViolationException.class, () -> _service.modifyCharSheet("", "", charSheet)); // modify invalid character sheet
+        Assertions.assertThrows(ConstraintViolationException.class, () -> _service.modifyCharSheet("", "", charSheet)); // modify
+                                                                                                                        // invalid
+                                                                                                                        // character
+                                                                                                                        // sheet
 
         charSheet.setName("some char name");
         charSheet.setClassname("a classname");
         charSheet.setLevel(2);
 
-        Assertions.assertThrows(CharacterSheetRegistrationException.class, () -> _service.modifyCharSheet(userId, charSheet.getId(), charSheet)); // modify unregistered character sheet
+        Assertions.assertThrows(CharacterSheetRegistrationException.class,
+                () -> _service.modifyCharSheet(userId, charSheet.getId(), charSheet)); // modify unregistered character
+                                                                                       // sheet
 
         Assertions.assertDoesNotThrow(() -> _service.addCharSheet(userId, charSheet)); // add valid Character sheet
 
         CharacterSheet respCharSheet = _service.getCharSheets(userId).getLast(); // get character sheet
 
-        Assertions.assertEquals(charSheet.getLevel(), respCharSheet.getLevel()); // the one saved is the same as the one delivered
+        Assertions.assertEquals(charSheet.getLevel(), respCharSheet.getLevel()); // the one saved is the same as the one
+                                                                                 // delivered
 
         respCharSheet.setLevel(3); // Modify level
 
         final CharacterSheet inmutCharSheet = respCharSheet;
 
-        Assertions.assertDoesNotThrow(() -> _service.modifyCharSheet(userId, inmutCharSheet.getId(), inmutCharSheet)); // modify character sheet
+        Assertions.assertDoesNotThrow(() -> _service.modifyCharSheet(userId, inmutCharSheet.getId(), inmutCharSheet)); // modify
+                                                                                                                       // character
+                                                                                                                       // sheet
 
         respCharSheet = _service.getCharSheets(userId).getLast();
 
-        Assertions.assertNotEquals(charSheet.getLevel(), respCharSheet.getLevel()); // the one saved is not the same as the one delivered
+        Assertions.assertNotEquals(charSheet.getLevel(), respCharSheet.getLevel()); // the one saved is not the same as
+                                                                                    // the one delivered
     }
 
     @Test
@@ -111,11 +121,13 @@ public class CharacterSheetServiceTest {
         Assertions.assertEquals(nCharSheets, charSheetsIds.size()); // 3 character sheets saved
 
         for (int i = 0; i < nCharSheets - 1; i++) {
-            CharacterSheet charSheet = charSheetsIds.get(i);         // user gets character sheet
+            CharacterSheet charSheet = charSheetsIds.get(i); // user gets character sheet
             CharacterSheet nextCharSheet = charSheetsIds.get(i + 1); // user gets character sheet
 
-            Assertions.assertNotEquals(nextCharSheet.getLevel(), charSheet.getLevel());     // check they are different in level
-            Assertions.assertNotEquals(nextCharSheet.getName(), charSheet.getName());       // check they are different in name
+            Assertions.assertNotEquals(nextCharSheet.getLevel(), charSheet.getLevel()); // check they are different in
+                                                                                        // level
+            Assertions.assertNotEquals(nextCharSheet.getName(), charSheet.getName()); // check they are different in
+                                                                                      // name
         }
     }
 }

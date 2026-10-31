@@ -5,15 +5,10 @@ import es.ujaen.ahg00048.microservice_image.exception.ImageOverSizedException;
 import es.ujaen.ahg00048.microservice_image.rest.DTO.ImageWrap;
 import es.ujaen.ahg00048.microservice_image.utils.ImageUtils;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -34,7 +28,6 @@ import es.ujaen.ahg00048.microservice_image.exception.ImageRegistrationException
 import es.ujaen.ahg00048.microservice_image.exception.InvalidOperationException;
 import es.ujaen.ahg00048.microservice_image.repository.mongo.ImageMongoRepository;
 import es.ujaen.ahg00048.microservice_image.repository.minIO.ImageMinIORepository;
-
 
 @Service
 @Validated
@@ -48,11 +41,9 @@ public class ImageService {
     @Autowired
     private RabbitTemplate _rabbitTemplate;
 
-
     @Getter
     @Value("${app.user.max.images}")
     private int MAX_IMAGES_PER_USER;
-
 
     @Autowired
     private RedisLockRegistry _lockRegistry;
@@ -61,11 +52,9 @@ public class ImageService {
     private final static int TIMEOUT_AMOUNT = 1;
     private final static TimeUnit TIMEOUT_UNIT = TimeUnit.SECONDS;
 
-
-    private final static String[] MIME_TYPES_ALLOWED = {"image/jpeg","image/png"};
+    private final static String[] MIME_TYPES_ALLOWED = { "image/jpeg", "image/png" };
     @Value("${app.image.max.sizeInKB}")
     private int MAX_IMAGE_SIZE_IN_KB;
-
 
     /**
      * @return the ids of the images belonging to the user
@@ -134,7 +123,8 @@ public class ImageService {
             List<ImageWrap> imageWraps = new ArrayList<>(images.size());
 
             for (Image img : images) {
-                imageWraps.add(new ImageWrap(img.getId(), _imagesMinIORep.getPreSignedUrl(img.getPath(), img.getType())));
+                imageWraps
+                        .add(new ImageWrap(img.getId(), _imagesMinIORep.getPreSignedUrl(img.getPath(), img.getType())));
             }
 
             return imageWraps;
@@ -175,7 +165,8 @@ public class ImageService {
             if (userImages.size() >= MAX_IMAGES_PER_USER)
                 throw new InvalidOperationException();
 
-            Image image = new Image(userId, ImageUtils.parseFileName(file.getOriginalFilename()), file.getContentType());
+            Image image = new Image(userId, ImageUtils.parseFileName(file.getOriginalFilename()),
+                    file.getContentType());
 
             _imagesMongoRep.insert(image);
 
@@ -226,7 +217,8 @@ public class ImageService {
         }
     }
 
-    /// used by RabbitMQ only -----------------------------------------------------------------------------------------------------------
+    /// used by RabbitMQ
+    /// only -----------------------------------------------------------------------------------------------------------
 
     @Transactional
     public void removeUser_admin(String userId)
@@ -258,7 +250,8 @@ public class ImageService {
         }
     }
 
-    /// Test only -----------------------------------------------------------------------------------------------------------
+    /// Test
+    /// only -----------------------------------------------------------------------------------------------------------
 
     @Profile("test")
     @Transactional

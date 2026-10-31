@@ -9,7 +9,6 @@ import io.minio.messages.DeleteObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -18,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 
 @Slf4j
 @Repository
@@ -31,7 +29,6 @@ public class ImageMinIORepository {
 
     private static final int PRESIGNED_URL_EXPIRE_TIME = 2;
     private static final TimeUnit PRESIGNED_URL_EXPIRE_UNIT = TimeUnit.MINUTES;
-
 
     public void save(String path, byte[] data, String contentType) throws ImageRegistrationException {
         try (InputStream stream = new ByteArrayInputStream(data)) {
@@ -48,7 +45,7 @@ public class ImageMinIORepository {
         }
     }
 
-    public byte[] findByPath(String path) throws ImageRegistrationException  {
+    public byte[] findByPath(String path) throws ImageRegistrationException {
         try (InputStream stream = _minioClient.getObject(GetObjectArgs.builder()
                 .bucket(_minioConfig.getBucketName())
                 .object(path)
@@ -86,7 +83,8 @@ public class ImageMinIORepository {
 
                 persistentPaths.add(error.objectName());
 
-                log.error("[MinIO]: Error at deleting object with id %s in bucket with name %s.".formatted(error.objectName(), error.bucketName()));
+                log.error("[MinIO]: Error at deleting object with id %s in bucket with name %s."
+                        .formatted(error.objectName(), error.bucketName()));
             }
 
             return persistentPaths;

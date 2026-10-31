@@ -1,6 +1,5 @@
 package es.ujaen.ahg00048.microservice_characterSheet.entity.characterSheet.inventory;
 
-import es.ujaen.ahg00048.microservice_characterSheet.qualifier.DiceRoll;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

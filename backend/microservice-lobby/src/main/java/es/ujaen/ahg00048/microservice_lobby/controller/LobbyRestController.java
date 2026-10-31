@@ -12,13 +12,10 @@ import es.ujaen.ahg00048.microservice_lobby.controller.mapper.LobbyMapper;
 import es.ujaen.ahg00048.microservice_lobby.service.LobbyService;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -26,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-
 
 @RestController
 @RequestMapping("/api/v1/lobbies")
@@ -45,13 +41,13 @@ public class LobbyRestController {
 
     public static final String CLAIM_USER_NAME = "preferred_username";
 
-
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
-    public void validationConstraintViolationException() {}
+    public void validationConstraintViolationException() {
+    }
 
-
-    /// Lobbies logic -----------------------------------------------------------------------------------------------------------
+    /// Lobbies
+    /// logic -----------------------------------------------------------------------------------------------------------
 
     @GetMapping("/MaxUsersPerLobby")
     public ResponseEntity<Integer> getMaxUsersPerLobby() {
@@ -65,9 +61,10 @@ public class LobbyRestController {
 
     @PostMapping
     public ResponseEntity<LobbyDTO> createLobby(@AuthenticationPrincipal Jwt auth,
-                                                @RequestBody LobbyReqBodyDTO reqBody) {
+            @RequestBody LobbyReqBodyDTO reqBody) {
         try {
-            return ResponseEntity.ok(_mapper.dto(_lobbyService.createLobby(auth.getSubject(), auth.getClaimAsString(CLAIM_USER_NAME), reqBody.open(), reqBody.password())));
+            return ResponseEntity.ok(_mapper.dto(_lobbyService.createLobby(auth.getSubject(),
+                    auth.getClaimAsString(CLAIM_USER_NAME), reqBody.open(), reqBody.password())));
         } catch (LobbyRegistrationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
@@ -75,10 +72,11 @@ public class LobbyRestController {
 
     @GetMapping("/{id}")
     public ResponseEntity<LobbyDTO> joinLobby(@AuthenticationPrincipal Jwt auth,
-                                              @RequestParam(value = "password", required = true) String password,
-                                              @PathVariable String id) {
+            @RequestParam(value = "password", required = true) String password,
+            @PathVariable String id) {
         try {
-            LobbyDTO lobbyDTO = _mapper.dto(_lobbyService.joinLobby(auth.getSubject(), auth.getClaimAsString(CLAIM_USER_NAME), id, password));
+            LobbyDTO lobbyDTO = _mapper.dto(
+                    _lobbyService.joinLobby(auth.getSubject(), auth.getClaimAsString(CLAIM_USER_NAME), id, password));
             _simpTemplate.convertAndSend("/topic/lobbies." + lobbyDTO.id(), lobbyDTO);
             return ResponseEntity.ok(lobbyDTO);
         } catch (LobbyRegistrationException e) {
@@ -92,7 +90,7 @@ public class LobbyRestController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> leaveLobby(@AuthenticationPrincipal Jwt auth,
-                                           @PathVariable String id) {
+            @PathVariable String id) {
         try {
             Optional<Lobby> lobbyOpt = _lobbyService.leaveLobby(auth.getSubject(), id);
             if (lobbyOpt.isPresent()) {
@@ -109,7 +107,8 @@ public class LobbyRestController {
         }
     }
 
-    /// Boards persistence logic -----------------------------------------------------------------------------------------------------------
+    /// Boards persistence
+    /// logic -----------------------------------------------------------------------------------------------------------
 
     @GetMapping("/boards/pieces/MaxAllowed")
     public ResponseEntity<Integer> getMaxPiecesPerBoard() {
@@ -123,12 +122,13 @@ public class LobbyRestController {
 
     @GetMapping("/boards")
     public ResponseEntity<List<BoardDTO>> getSavedBoards(Authentication auth) {
-        return ResponseEntity.ok(_lobbyService.getSavedBoards(auth.getName()).stream().map(b -> _mapper.dto(b)).toList());
+        return ResponseEntity
+                .ok(_lobbyService.getSavedBoards(auth.getName()).stream().map(b -> _mapper.dto(b)).toList());
     }
 
     @PostMapping("/boards")
     public ResponseEntity<BoardDTO> addBoard(@AuthenticationPrincipal Jwt auth,
-                                             @RequestBody BoardDTO boardDTO) {
+            @RequestBody BoardDTO boardDTO) {
         try {
             return ResponseEntity.ok(_mapper.dto(_lobbyService.addBoard(auth.getSubject(), _mapper.entity(boardDTO))));
         } catch (BoardRegistrationException e) {
@@ -138,10 +138,11 @@ public class LobbyRestController {
 
     @PutMapping("/boards/{id}")
     public ResponseEntity<BoardDTO> saveBoard(@AuthenticationPrincipal Jwt auth,
-                                              @PathVariable String id,
-                                              @RequestBody BoardDTO boardDTO) {
+            @PathVariable String id,
+            @RequestBody BoardDTO boardDTO) {
         try {
-            return ResponseEntity.ok(_mapper.dto(_lobbyService.saveBoard(auth.getSubject(), id, _mapper.entity(boardDTO))));
+            return ResponseEntity
+                    .ok(_mapper.dto(_lobbyService.saveBoard(auth.getSubject(), id, _mapper.entity(boardDTO))));
         } catch (BoardRegistrationException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (InvalidOperationException e) {
@@ -151,7 +152,7 @@ public class LobbyRestController {
 
     @DeleteMapping("/boards/{id}")
     public ResponseEntity<Void> removeBoard(@AuthenticationPrincipal Jwt auth,
-                                            @PathVariable String id) {
+            @PathVariable String id) {
         try {
             _lobbyService.removeBoard(auth.getSubject(), id);
             return ResponseEntity.ok().build();

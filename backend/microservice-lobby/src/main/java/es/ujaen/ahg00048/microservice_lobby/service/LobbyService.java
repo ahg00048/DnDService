@@ -66,9 +66,7 @@ public class LobbyService {
 
     public List<Lobby> getLobbies() { return _lobbiesRep.findAll(); }
 
-    public List<Lobby> getPublicLobbies() {
-        return _lobbiesRep.findAllOpen();
-    }
+    public List<Lobby> getPublicLobbies() { return _lobbiesRep.findAllOpen(); }
 
     public Lobby createLobby(@NotBlank String userId, @NotBlank String userName, boolean open, @NotNull String password)
             throws LobbyRegistrationException {

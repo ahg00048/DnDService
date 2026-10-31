@@ -11,17 +11,15 @@ import org.bson.types.ObjectId;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class Lobby implements Serializable {
     private String id;
-    private boolean open;       // public/private lobby
+    private boolean open; // public/private lobby
     private String password;
 
     private Board board;
@@ -29,7 +27,6 @@ public class Lobby implements Serializable {
 
     private Instant timeout;
 
-    
     public Lobby(String lobbyCreatorId, String lobbyCreatorName, boolean open, String password, Instant timeout) {
         id = new ObjectId().toString();
 
@@ -42,7 +39,6 @@ public class Lobby implements Serializable {
 
         this.timeout = timeout;
     }
-
 
     public void addUser(String userId, String userName, String password)
             throws UserRegistrationException, InvalidOperationException {

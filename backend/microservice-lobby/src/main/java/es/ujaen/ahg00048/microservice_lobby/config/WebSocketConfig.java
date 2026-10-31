@@ -1,11 +1,9 @@
 package es.ujaen.ahg00048.microservice_lobby.config;
 
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.support.MutableMessage;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -18,7 +16,6 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 import org.springframework.web.socket.server.standard.ServletServerContainerFactoryBean;
-
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -40,13 +37,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private static final int MAX_MESSAGE_SIZE = 8192;
 
-
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/websock")
                 .setAllowedOriginPatterns("*")
-//                .withSockJS()
-//                .setHeartbeatTime(30000)
+        // .withSockJS()
+        // .setHeartbeatTime(30000)
         ;
     }
 
